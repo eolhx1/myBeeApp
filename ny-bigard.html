@@ -1,3 +1,4 @@
+<!-- Filnamn: ny-bigard.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -136,7 +137,6 @@
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
-;
 
         document.getElementById('datum').valueAsDate = new Date();
 
@@ -147,10 +147,11 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const bigardsID = "B" + Date.now().toString().slice(-4);
+            // Generera unikt ID direkt vid klick
+            const autoID = "B" + Date.now().toString().slice(-4);
 
             const formData = {
-                BigardsID: bigardsID,
+                BigardsID: autoID,
                 Namn: document.getElementById('namn').value,
                 Typ: document.getElementById('typ').value,
                 AntalSamhällen: document.getElementById('antal').value,
