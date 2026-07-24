@@ -38,7 +38,7 @@
             height: 100%;
             width: 0;
             position: fixed;
-            z-index: 9999; /* Högt värde gör att den hamnar över kartan och alla knappar */
+            z-index: 9999;
             top: 0;
             left: 0;
             background-color: #2c3e50;
@@ -46,9 +46,8 @@
             transition: 0.3s;
             padding-top: 60px;
             color: white;
-            box-shadow: 5px 0px 15px rgba(0,0,0,0.5); /* Snygg skugga mot resten av sidan */
+            box-shadow: 5px 0px 15px rgba(0,0,0,0.5);
         }
-
         .sidebar a {
             padding: 12px 20px;
             text-decoration: none;
@@ -106,7 +105,7 @@
     <header>
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <span>🐝 MyBeeApp</span>
-        <div style="width: 24px;"></div> <!-- För att balansera titeln centrerat -->
+        <div style="width: 24px;"></div>
     </header>
 
     <!-- Sidomeny -->
@@ -114,7 +113,6 @@
         <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
         <a href="index.html">🏠 Hem / Karta</a>
         <a href="ny-bigard.html">➕ Lägg till bigård</a>
-        <!-- Här kan vi lägga till fler moduler i framtiden: Skötselkort, Skörd, Ekonomi etc. -->
     </div>
 
     <div class="container">
@@ -155,23 +153,21 @@
 
         async function hämtaBigårdar() {
             try {
-let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar", {
-    method: 'GET',
-    mode: 'cors',
-    redirect: 'follow'
-});
-
+                let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar");
                 let bigårdar = await response.json();
                 
                 let listaDiv = document.getElementById('bigard-lista');
                 listaDiv.innerHTML = "";
 
-                if (bigårdar.length === 0) {
+                if (!bigårdar || bigårdar.length === 0) {
                     listaDiv.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
                     return;
                 }
 
                 bigårdar.forEach(b => {
+                    // Hoppa över rader som saknar namn
+                    if (!b.Namn) return;
+
                     let card = document.createElement('div');
                     card.className = 'bee-yard-card';
                     card.innerHTML = `
