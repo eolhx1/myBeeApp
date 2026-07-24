@@ -135,10 +135,8 @@
     </div>
 
     <script>
-        // Byt ut mot samma webbapp-URL som tidigare!
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0QMssXbhNDMjc8nkux8Xb6yvWdpCrNL-iXm4F0A4AyWrkN60YIkP0oXo3T7-sGSuS/exec";
 
-        // Sätt dags datum som standard på etableringsdatum
         document.getElementById('datum').valueAsDate = new Date();
 
         document.getElementById('bigard-form').addEventListener('submit', async function(e) {
@@ -148,7 +146,6 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            // Skapa ett unikt ID för bigården baserat på tidpunkt
             const bigardsID = "B" + Date.now().toString().slice(-4);
 
             const formData = {
@@ -165,6 +162,8 @@
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar", {
                     method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
                     body: JSON.stringify(formData)
                 });
                 
@@ -172,7 +171,7 @@
                 
                 if (result.status === "success") {
                     alert("Bigården har sparats!");
-                    window.location.href = "index.html"; // Gå tillbaka till startsidan
+                    window.location.href = "index.html";
                 } else {
                     alert("Ett fel uppstod vid sparandet.");
                     submitBtn.disabled = false;
