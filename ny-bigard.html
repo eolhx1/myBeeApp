@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Lägg till bigård</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #f39c12;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 600px;
+            margin: auto;
+        }
+        form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background-color: #219653;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        🐝 Lägg till ny bigård
+    </header>
+
+    <div class="container">
+        <form id="bigard-form">
+            <div class="form-group">
+                <label for="namn">Bigårdens namn:</label>
+                <input type="text" id="namn" name="Namn" required placeholder="T.ex. Hemmabigården">
+            </div>
+
+            <div class="form-group">
+                <label for="typ">Typ av bigård:</label>
+                <select id="typ" name="Typ">
+                    <option value="Produktionsbigård">Produktionsbigård</option>
+                    <option value="Avelsbigård">Avelsbigård</option>
+                    <option value="Inflyttningsbi / Avläggare">Inflyttningsbi / Avläggare</option>
+                    <option value="Drönarstation">Drönarstation</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="antal">Antal samhällen:</label>
+                <input type="number" id="antal" name="AntalSamhällen" value="1" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="datum">Etableringsdatum:</label>
+                <input type="date" id="datum" name="Etableringsdatum">
+            </div>
+
+            <div class="form-group">
+                <label for="lat">Latitud (för karta):</label>
+                <input type="text" id="lat" name="Latitud" placeholder="T.ex. 59.3293">
+            </div>
+
+            <div class="form-group">
+                <label for="lon">Longitud (för karta):</label>
+                <input type="text" id="lon" name="Longitud" placeholder="T.ex. 18.0686">
+            </div>
+
+            <div class="form-group">
+                <label for="anteckningar">Anteckningar:</label>
+                <textarea id="anteckningar" name="Anteckningar" placeholder="Kort beskrivning av platsen..."></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Spara bigård</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+    </div>
+
+    <script>
+        // Byt ut mot samma webbapp-URL som tidigare!
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0QMssXbhNDMjc8nkux8Xb6yvWdpCrNL-iXm4F0A4AyWrkN60YIkP0oXo3T7-sGSuS/exec";
+
+        // Sätt dags datum som standard på etableringsdatum
+        document.getElementById('datum').valueAsDate = new Date();
+
+        document.getElementById('bigard-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
+            // Skapa ett unikt ID för bigården baserat på tidpunkt
+            const bigardsID = "B" + Date.now().toString().slice(-4);
+
+            const formData = {
+                BigardsID: bigardsID,
+                Namn: document.getElementById('namn').value,
+                Typ: document.getElementById('typ').value,
+                AntalSamhällen: document.getElementById('antal').value,
+                Etableringsdatum: document.getElementById('datum').value,
+                Latitud: document.getElementById('lat').value,
+                Longitud: document.getElementById('lon').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar", {
+                    method: "POST",
+                    body: JSON.stringify(formData)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Bigården har sparats!");
+                    window.location.href = "index.html"; // Gå tillbaka till startsidan
+                } else {
+                    alert("Ett fel uppstod vid sparandet.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara bigård";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara bigård";
+            }
+        });
+    </script>
+</body>
+</html>
