@@ -1,0 +1,272 @@
+<!-- Filnamn: skotsel.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Skötselkort</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #f39c12;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .container {
+            padding: 1rem;
+            max-width: 600px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #219653;
+        }
+        .log-item {
+            background: #f9f9f9;
+            border-left: 4px solid #f39c12;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .log-item p {
+            margin: 0 0 0.3rem 0;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        📝 Skötselkort
+    </header>
+
+    <div class="container">
+        <h2 id="bigard-titel">Laddar bigård...</h2>
+
+        <!-- Formulär för att lägga till ny anteckning -->
+        <div class="card">
+            <h3>Ny besökslogg</h3>
+            <form id="skotsel-form">
+                <div class="form-group">
+                    <label for="datum">Besöksdatum:</label>
+                    <input type="date" id="datum" name="Datum" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="drottning">Drottning observerad?</label>
+                    <select id="drottning" name="Drottningsett">
+                        <option value="Ja - Sett drottningen">Ja - Sett drottningen</option>
+                        <option value="Ej sett, men färska ägg finns">Ej sett, men färska ägg finns</option>
+                        <option value="Ej sett / Osäker status">Ej sett / Osäker status</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="svarmlystnad">Svärmlystnad:</label>
+                    <select id="svarmlystnad" name="Svarmlystnad">
+                        <option value="Inga svärmceller">Inga svärmceller</option>
+                        <option value="Drönarbyggda svärmceller / bygger">Drönarbyggda svärmceller</option>
+                        <option value="Fulla svärmceller (åtgärd krävs!)">Fulla svärmceller (åtgärd krävs!)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperament">Temperament / Humör:</label>
+                    <select id="temperament" name="Temperament">
+                        <option value="Lugna och snälla">Lugna och snälla</option>
+                        <option value="Normala">Normala</option>
+                        <option value="Aggressiva / Stickiga">Aggressiva / Stickiga</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="anteckningar">Anteckningar från besöket:</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Gav en skattlåda till, foderstatus OK..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="submit-btn">Spara besök</button>
+            </form>
+        </div>
+
+        <!-- Historik över tidigare besök -->
+        <div class="card">
+            <h3>Tidigare besök</h3>
+            <div id="historik-lista">
+                <p>Laddar historik...</p>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+    </div>
+
+    <script>
+        document.getElementById('datum').valueAsDate = new Date();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bigardsId = urlParams.get('id');
+
+        if (!bigardsId) {
+            alert("Ingen bigård vald.");
+            window.location.href = "index.html";
+        }
+
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+
+        async function laddaData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                let resBigard = await fetch(WEB_APP_URL + "?sheet=Bigardar");
+                let bigårdar = await resBigard.json();
+                let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
+                
+                if (aktuell) {
+                    document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
+                }
+
+                let resSkotsel = await fetch(WEB_APP_URL + "?sheet=Skotsel");
+                let skotselLoggar = await resSkotsel.json();
+                
+                let historikDiv = document.getElementById('historik-lista');
+                historikDiv.innerHTML = "";
+
+                let minaLoggar = skotselLoggar.filter(s => s.BigardsID === bigardsId);
+
+                if (minaLoggar.length === 0) {
+                    historikDiv.innerHTML = "<p>Inga sparade besök för denna bigård ännu.</p>";
+                    return;
+                }
+
+                minaLoggar.reverse().forEach(logg => {
+                    let item = document.createElement('div');
+                    item.className = 'log-item';
+                    item.innerHTML = `
+                        <p><strong>📅 ${logg.Datum}</strong></p>
+                        <p>👑 ${logg.Drottningssett}</p>
+                        <p>🐝 Svärmlystnad: ${logg.Svarmlystnad} | Humör: ${logg.Temperament}</p>
+                        ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
+                    `;
+                    historikDiv.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error("Fel vid laddning:", error);
+                document.getElementById('historik-lista').innerHTML = "<p>Kunde inte ladda historik.</p>";
+            }
+        }
+
+        document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
+            const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
+
+            const formData = {
+                SkotselID: autoID,
+                BigardsID: bigardsId,
+                Datum: document.getElementById('datum').value,
+                Drottningssett: document.getElementById('drottning').value,
+                Svarmlystnad: document.getElementById('svarmlystnad').value,
+                Temperament: document.getElementById('temperament').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formData)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Besöket har sparats!");
+                    document.getElementById('anteckningar').value = "";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                    laddaData();
+                } else {
+                    alert("Ett fel uppstod.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara besök";
+            }
+        });
+
+        laddaData();
+    </script>
+</body>
+</html>

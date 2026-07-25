@@ -237,7 +237,7 @@
             initApp();
         }
 
-        async function hämtaBigårdar(WEB_APP_URL) {
+                async function hämtaBigårdar(WEB_APP_URL) {
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar");
                 let bigårdar = await response.json();
@@ -260,6 +260,7 @@
                         <p><strong>Typ:</strong> ${b.Typ}</p>
                         <p><strong>Antal samhällen:</strong> ${b.AntalSamhallen}</p>
                         <p><strong>Etablerad:</strong> ${b.Etableringsdatum}</p>
+                        <a href="skotsel.html?id=${b.BigardsID}" style="display:inline-block; margin-top:0.6rem; background:#3498db; color:white; padding:0.4rem 0.8rem; text-decoration:none; border-radius:4px; font-size:0.85rem;">📝 Visa skötselkort</a>
                     `;
                     listaDiv.appendChild(card);
 
@@ -268,12 +269,14 @@
                         marker.bindPopup(`<b>${b.Namn}</b><br>Samhällen: ${b.AntalSamhallen}`);
                     }
                 });
+                // ----------------------------------
 
             } catch (error) {
                 console.error("Kunde inte hämta data:", error);
                 document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera din anslutningslänk.</p>";
             }
         }
+
 
         initApp();
     </script>
