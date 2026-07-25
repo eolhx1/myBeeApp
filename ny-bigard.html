@@ -65,6 +65,7 @@
             border: none;
             cursor: pointer;
             margin-top: 1rem;
+            font-weight: bold;
         }
         .btn:hover {
             background-color: #219653;
@@ -84,25 +85,43 @@
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 2rem;
-            text-align: center;
+            margin-top: 1rem;
+        }
+        #setup-screen h2 {
+            color: #d35400;
+            margin-top: 0;
+        }
+        .instruction-box {
+            background: #f9f9f9;
+            border-left: 4px solid #f39c12;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .instruction-box ol {
+            margin: 0.5rem 0 0 1.2rem;
+            padding: 0;
         }
         #setup-screen input {
             width: 100%;
             padding: 0.7rem;
-            margin: 1rem 0;
+            margin: 0.8rem 0;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
         }
         #setup-screen button {
+            width: 100%;
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem;
             font-size: 1rem;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -113,15 +132,25 @@
     </header>
 
     <div class="container">
-        <!-- Om ingen URL finns -->
+        <!-- Setup-skärm om URL saknas -->
         <div id="setup-screen" style="display: none;">
             <h2>Anslut din app</h2>
-            <p>Du saknar anslutningslänk. Klistra in din Web App URL från Google-kalkylarket:</p>
-            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <p>Du behöver ansluta appen till ditt Google-ark innan du kan lägga till bigårdar.</p>
+            
+            <div class="instruction-box">
+                <strong>Snabbinstruktion:</strong>
+                <ol>
+                    <li>Skapa ett Google-ark med kolumnerna: <code>BigardsID</code>, <code>Namn</code>, <code>Typ</code>, <code>AntalSamhallen</code>, <code>Etableringsdatum</code>, <code>Latitud</code>, <code>Longitud</code>, <code>Anteckningar</code>.</li>
+                    <li>Gå till <em>Tillägg > Apps Script</em>, klistra in skriptet från vår README och <strong>Implementera</strong> som Webbapp (tillgång: <em>Alla</em>).</li>
+                    <li>Kopiera webbapp-url:en och klistra in nedan.</li>
+                </ol>
+            </div>
+
+            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här...">
             <button onclick="sparaUrl()">Spara länk</button>
         </div>
 
-        <!-- Formuläret -->
+        <!-- Formulär -->
         <form id="bigard-form" style="display: none;">
             <div class="form-group">
                 <label for="namn">Bigårdens namn:</label>

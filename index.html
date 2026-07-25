@@ -97,31 +97,48 @@
             font-size: 0.9rem;
             color: #555;
         }
-        /* Stil för inställningsrutan om URL saknas */
         #setup-screen {
             background: white;
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 2rem;
-            text-align: center;
+            margin-top: 1rem;
+        }
+        #setup-screen h2 {
+            color: #d35400;
+            margin-top: 0;
+        }
+        .instruction-box {
+            background: #f9f9f9;
+            border-left: 4px solid #f39c12;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .instruction-box ol {
+            margin: 0.5rem 0 0 1.2rem;
+            padding: 0;
         }
         #setup-screen input {
             width: 100%;
             padding: 0.7rem;
-            margin: 1rem 0;
+            margin: 0.8rem 0;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
         }
         #setup-screen button {
+            width: 100%;
             background-color: #27ae60;
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem;
             font-size: 1rem;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -141,12 +158,24 @@
     </div>
 
     <div class="container">
-        <!-- Om ingen URL finns visas detta formulär först -->
+        <!-- Första rutan med inbyggd instruktion -->
         <div id="setup-screen" style="display: none;">
             <h2>Välkommen till MyBeeApp!</h2>
-            <p>För att komma igång behöver du klistra in länk-adressen (Web App URL) från ditt eget Google-kalkylark.</p>
-            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
-            <button onclick="sparaUrl()">Spara och starta</button>
+            <p>För att använda appen behöver du koppla den till ett eget Google-kalkylark där din data sparas säkert.</p>
+            
+            <div class="instruction-box">
+                <strong>Så här gör du (görs endast en gång):</strong>
+                <ol>
+                    <li>Skapa ett eget Google-ark med kolumnrubrikerna: <code>BigardsID</code>, <code>Namn</code>, <code>Typ</code>, <code>AntalSamhallen</code>, <code>Etableringsdatum</code>, <code>Latitud</code>, <code>Longitud</code>, <code>Anteckningar</code>.</li>
+                    <li>Klicka på <strong>Tillägg</strong> > <strong>Apps Script</strong> i kalkylarket.</li>
+                    <li>Klistra in koden (finns i vår README) och klicka på <strong>Implementera</strong> > <strong>Ny implementering</strong>.</li>
+                    <li>Välj typ <strong>Webbapp</strong>, kör som <em>Jag</em>, tillgång <em>Alla</em>, och klicka på Implementera.</li>
+                    <li>Kopiera din genererade <strong>Webbapp-url</strong> och klistra in den här nedanför!</li>
+                </ol>
+            </div>
+
+            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här (https://script.google.com/.../exec)">
+            <button onclick="sparaUrl()">Spara och starta appen</button>
         </div>
 
         <!-- Appens vanliga innehåll -->
@@ -181,7 +210,6 @@
                 document.getElementById("setup-screen").style.display = "none";
                 document.getElementById("app-content").style.display = "block";
                 
-                // Initiera karta om den inte redan är skapad
                 if (!map) {
                     map = L.map('map').setView([62.1957, 14.9436], 5);
                     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -199,7 +227,7 @@
                 localStorage.setItem("myBeeApp_url", url);
                 initApp();
             } else {
-                alert("Vänligen ange en giltig Google Apps Script-URL.");
+                alert("Vänligen ange en giltig Google Apps Script-URL som börjar med https://script.google.com");
             }
         }
 
@@ -247,7 +275,6 @@
             }
         }
 
-        // Starta appen vid laddning
         initApp();
     </script>
 </body>
