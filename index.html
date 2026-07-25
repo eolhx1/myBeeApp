@@ -1,3 +1,4 @@
+<!-- Filnamn: index.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -5,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Mina Bigårdar</title>
     
-    <!-- Länk till Leaflet CSS (för kartan) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -33,7 +33,6 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        /* Sidomeny (Drawer) */
         .sidebar {
             height: 100%;
             width: 0;
@@ -98,6 +97,32 @@
             font-size: 0.9rem;
             color: #555;
         }
+        /* Stil för inställningsrutan om URL saknas */
+        #setup-screen {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            text-align: center;
+        }
+        #setup-screen input {
+            width: 100%;
+            padding: 0.7rem;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #setup-screen button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -108,51 +133,83 @@
         <div style="width: 24px;"></div>
     </header>
 
-    <!-- Sidomeny -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
         <a href="index.html">🏠 Hem / Karta</a>
         <a href="ny-bigard.html">➕ Lägg till bigård</a>
+        <a href="#" onclick="bytUrl()">⚙️ Byt anslutningslänk</a>
     </div>
 
     <div class="container">
-        <!-- Kartan -->
-        <div class="section-title">Karta över bigårdar</div>
-        <div id="map"></div>
+        <!-- Om ingen URL finns visas detta formulär först -->
+        <div id="setup-screen" style="display: none;">
+            <h2>Välkommen till MyBeeApp!</h2>
+            <p>För att komma igång behöver du klistra in länk-adressen (Web App URL) från ditt eget Google-kalkylark.</p>
+            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button onclick="sparaUrl()">Spara och starta</button>
+        </div>
 
-        <!-- Listform -->
-        <div class="section-title">Mina bigårdar (Lista)</div>
-        <div id="bigard-lista">
-            <p>Laddar bigårdar...</p>
+        <!-- Appens vanliga innehåll -->
+        <div id="app-content" style="display: none;">
+            <div class="section-title">Karta över bigårdar</div>
+            <div id="map"></div>
+
+            <div class="section-title">Mina bigårdar (Lista)</div>
+            <div id="bigard-lista">
+                <p>Laddar bigårdar...</p>
+            </div>
         </div>
     </div>
 
-    <!-- Länk till Leaflet JS (för kartan) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
-;
-
-        // Funktion för att öppna/stänga sidomenyn
         function toggleMenu() {
             const sidebar = document.getElementById("mySidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+
+        let map;
+
+        function initApp() {
+            const savedUrl = localStorage.getItem("myBeeApp_url");
+            
+            if (!savedUrl) {
+                document.getElementById("setup-screen").style.display = "block";
+                document.getElementById("app-content").style.display = "none";
             } else {
-                sidebar.style.width = "250px";
+                document.getElementById("setup-screen").style.display = "none";
+                document.getElementById("app-content").style.display = "block";
+                
+                // Initiera karta om den inte redan är skapad
+                if (!map) {
+                    map = L.map('map').setView([62.1957, 14.9436], 5);
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap'
+                    }).addTo(map);
+                }
+                hämtaBigårdar(savedUrl);
             }
         }
 
-        // Initiera kartan
-        var map = L.map('map').setView([62.1957, 14.9436], 5);
+        function sparaUrl() {
+            const url = document.getElementById("url-input").value.trim();
+            if (url.startsWith("https://script.google.com")) {
+                localStorage.setItem("myBeeApp_url", url);
+                initApp();
+            } else {
+                alert("Vänligen ange en giltig Google Apps Script-URL.");
+            }
+        }
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+        function bytUrl() {
+            localStorage.removeItem("myBeeApp_url");
+            toggleMenu();
+            initApp();
+        }
 
-        async function hämtaBigårdar() {
+        async function hämtaBigårdar(WEB_APP_URL) {
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar");
                 let bigårdar = await response.json();
@@ -166,7 +223,6 @@
                 }
 
                 bigårdar.forEach(b => {
-                    // Hoppa över rader som saknar namn
                     if (!b.Namn) return;
 
                     let card = document.createElement('div');
@@ -174,24 +230,25 @@
                     card.innerHTML = `
                         <h3>${b.Namn}</h3>
                         <p><strong>Typ:</strong> ${b.Typ}</p>
-                        <p><strong>Antal samhällen:</strong> ${b.AntalSamhällen}</p>
+                        <p><strong>Antal samhällen:</strong> ${b.AntalSamhallen}</p>
                         <p><strong>Etablerad:</strong> ${b.Etableringsdatum}</p>
                     `;
                     listaDiv.appendChild(card);
 
                     if (b.Latitud && b.Longitud) {
                         let marker = L.marker([b.Latitud, b.Longitud]).addTo(map);
-                        marker.bindPopup(`<b>${b.Namn}</b><br>Samhällen: ${b.AntalSamhällen}`);
+                        marker.bindPopup(`<b>${b.Namn}</b><br>Samhällen: ${b.AntalSamhallen}`);
                     }
                 });
 
             } catch (error) {
                 console.error("Kunde inte hämta data:", error);
-                document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar från kalkylarket.</p>";
+                document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera din anslutningslänk.</p>";
             }
         }
 
-        hämtaBigårdar();
+        // Starta appen vid laddning
+        initApp();
     </script>
 </body>
 </html>
