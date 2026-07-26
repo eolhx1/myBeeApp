@@ -147,6 +147,32 @@
                 <button type="submit" class="btn" id="submit-btn">Spara besök</button>
             </form>
         </div>
+        
+                <!-- Sektion för Samhällen / Kupor -->
+        <div class="card">
+            <h3>Samhällen / Kupor i denna bigård</h3>
+            <div id="samhalle-lista">
+                <p>Laddar samhällen...</p>
+            </div>
+
+            <form id="samhalle-form" style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Lägg till nytt samhälle</h4>
+                <div class="form-group">
+                    <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
+                    <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="drottning-ar">Drottningens årgång / märkning:</label>
+                    <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
+                </div>
+                <div class="form-group">
+                    <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
+                    <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
+                </div>
+                <button type="submit" class="btn" id="samhalle-btn" style="background-color: #3498db;">Lägg till samhälle</button>
+            </form>
+        </div>
+
 
         <!-- Historik över tidigare besök -->
         <div class="card">
@@ -186,6 +212,31 @@
                 if (aktuell) {
                     document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
                 }
+
+                // Hämta och visa samhällen
+                let resSamhallen = await fetch(WEB_APP_URL + "?sheet=Samhallen");
+                let allaSamhällen = await resSamhallen.json();
+                
+                let samhalleListaDiv = document.getElementById('samhalle-lista');
+                samhalleListaDiv.innerHTML = "";
+
+                let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === bigardsId);
+
+                if (minaSamhällen.length === 0) {
+                    samhalleListaDiv.innerHTML = "<p>Inga samhällen tillagda i denna bigård ännu.</p>";
+                } else {
+                    minaSamhällen.forEach(s => {
+                        let sItem = document.createElement('div');
+                        sItem.className = 'log-item';
+                        sItem.style.borderLeftColor = '#3498db';
+                        sItem.innerHTML = `
+                            <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}</p>
+                            ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
+                        `;
+                        samhalleListaDiv.appendChild(sItem);
+                    });
+                }
+
 
                 let resSkotsel = await fetch(WEB_APP_URL + "?sheet=Skotsel");
                 let skotselLoggar = await resSkotsel.json();
@@ -265,6 +316,55 @@
                 submitBtn.textContent = "Spara besök";
             }
         });
+        
+                document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const samhalleBtn = document.getElementById('samhalle-btn');
+            samhalleBtn.disabled = true;
+            samhalleBtn.textContent = "Sparar samhälle...";
+
+            const autoSamhallsID = "SH" + Math.floor(1000 + Math.random() * 9000);
+
+            const formDataSamhalle = {
+                SamhallsID: autoSamhallsID,
+                BigardsID: bigardsId,
+                Kupbenamning: document.getElementById('kupnamn').value,
+                DrottningAr: document.getElementById('drottning-ar').value,
+                Anteckningar: document.getElementById('samhalle-anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Samhallen", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formDataSamhalle)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Samhället har sparats!");
+                    document.getElementById('kupnamn').value = "";
+                    document.getElementById('drottning-ar').value = "";
+                    document.getElementById('samhalle-anteckningar').value = "";
+                    samhalleBtn.disabled = false;
+                    samhalleBtn.textContent = "Lägg till samhälle";
+                    laddaData();
+                } else {
+                    alert("Ett fel uppstod när samhället skulle sparas.");
+                    samhalleBtn.disabled = false;
+                    samhalleBtn.textContent = "Lägg till samhälle";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                samhalleBtn.disabled = false;
+                samhalleBtn.textContent = "Lägg till samhälle";
+            }
+        });
+
 
         laddaData();
     </script>
