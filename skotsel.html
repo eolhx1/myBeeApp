@@ -103,10 +103,42 @@
     <div class="container">
         <h2 id="bigard-titel">Laddar bigård...</h2>
 
-        <!-- Formulär för att lägga till ny anteckning -->
+        <!-- Sektion för Samhällen / Kupor -->
         <div class="card">
-            <h3>Ny besökslogg</h3>
+            <h3>Samhällen / Kupor i denna bigård</h3>
+            <div id="samhalle-lista">
+                <p>Laddar samhällen...</p>
+            </div>
+
+            <form id="samhalle-form" style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Lägg till nytt samhälle</h4>
+                <div class="form-group">
+                    <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
+                    <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="drottning-ar">Drottningens årgång / märkning:</label>
+                    <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
+                </div>
+                <div class="form-group">
+                    <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
+                    <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
+                </div>
+                <button type="submit" class="btn" id="samhalle-btn" style="background-color: #3498db;">Lägg till samhälle</button>
+            </form>
+        </div>
+
+        <!-- Formulär för att lägga till ny anteckning / skötselkontroll -->
+        <div class="card">
+            <h3>Ny besökslogg / skötsel</h3>
             <form id="skotsel-form">
+                <div class="form-group">
+                    <label for="valt-samhalle">Välj samhälle / kupa:</label>
+                    <select id="valt-samhalle" name="SamhallsID" required>
+                        <option value="">Laddar samhällen...</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="datum">Besöksdatum:</label>
                     <input type="date" id="datum" name="Datum" required>
@@ -147,32 +179,6 @@
                 <button type="submit" class="btn" id="submit-btn">Spara besök</button>
             </form>
         </div>
-        
-                <!-- Sektion för Samhällen / Kupor -->
-        <div class="card">
-            <h3>Samhällen / Kupor i denna bigård</h3>
-            <div id="samhalle-lista">
-                <p>Laddar samhällen...</p>
-            </div>
-
-            <form id="samhalle-form" style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Lägg till nytt samhälle</h4>
-                <div class="form-group">
-                    <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
-                    <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1" required>
-                </div>
-                <div class="form-group">
-                    <label for="drottning-ar">Drottningens årgång / märkning:</label>
-                    <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
-                </div>
-                <div class="form-group">
-                    <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
-                    <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
-                </div>
-                <button type="submit" class="btn" id="samhalle-btn" style="background-color: #3498db;">Lägg till samhälle</button>
-            </form>
-        </div>
-
 
         <!-- Historik över tidigare besök -->
         <div class="card">
@@ -205,6 +211,7 @@
             }
 
             try {
+                // 1. Hämta bigårdens namn
                 let resBigard = await fetch(WEB_APP_URL + "?sheet=Bigardar");
                 let bigårdar = await resBigard.json();
                 let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
@@ -213,19 +220,24 @@
                     document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
                 }
 
-                // Hämta och visa samhällen
+                // 2. Hämta och visa samhällen (samt fyll i rullgardinsmenyn)
                 let resSamhallen = await fetch(WEB_APP_URL + "?sheet=Samhallen");
                 let allaSamhällen = await resSamhallen.json();
                 
                 let samhalleListaDiv = document.getElementById('samhalle-lista');
                 samhalleListaDiv.innerHTML = "";
 
+                let samhalleSelect = document.getElementById('valt-samhalle');
+                samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
                 let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === bigardsId);
 
                 if (minaSamhällen.length === 0) {
                     samhalleListaDiv.innerHTML = "<p>Inga samhällen tillagda i denna bigård ännu.</p>";
+                    samhalleSelect.innerHTML = '<option value="">Inga samhällen inlagda ännu</option>';
                 } else {
                     minaSamhällen.forEach(s => {
+                        // Skriv ut i listan över samhällen
                         let sItem = document.createElement('div');
                         sItem.className = 'log-item';
                         sItem.style.borderLeftColor = '#3498db';
@@ -234,10 +246,16 @@
                             ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
                         `;
                         samhalleListaDiv.appendChild(sItem);
+
+                        // Lägg till i rullgardinsmenyn för skötsel
+                        let opt = document.createElement('option');
+                        opt.value = s.SamhallsID;
+                        opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
+                        samhalleSelect.appendChild(opt);
                     });
                 }
 
-
+                // 3. Hämta och visa tidigare besöksloggar
                 let resSkotsel = await fetch(WEB_APP_URL + "?sheet=Skotsel");
                 let skotselLoggar = await resSkotsel.json();
                 
@@ -252,10 +270,14 @@
                 }
 
                 minaLoggar.reverse().forEach(logg => {
+                    // Hitta namnet på kupan om det finns ett SamhallsID sparat
+                    let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
+                    let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+
                     let item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
-                        <p><strong>📅 ${logg.Datum}</strong></p>
+                        <p><strong>📅 ${logg.Datum}</strong> &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
                         <p>👑 ${logg.Drottningssett}</p>
                         <p>🐝 Svärmlystnad: ${logg.Svarmlystnad} | Humör: ${logg.Temperament}</p>
                         ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
@@ -269,55 +291,8 @@
             }
         }
 
-        document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Sparar...";
-
-            const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
-
-            const formData = {
-                SkotselID: autoID,
-                BigardsID: bigardsId,
-                Datum: document.getElementById('datum').value,
-                Drottningssett: document.getElementById('drottning').value,
-                Svarmlystnad: document.getElementById('svarmlystnad').value,
-                Temperament: document.getElementById('temperament').value,
-                Anteckningar: document.getElementById('anteckningar').value
-            };
-
-            try {
-                let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
-                    method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
-                    body: JSON.stringify(formData)
-                });
-                
-                let result = await response.json();
-                
-                if (result.status === "success") {
-                    alert("Besöket har sparats!");
-                    document.getElementById('anteckningar').value = "";
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara besök";
-                    laddaData();
-                } else {
-                    alert("Ett fel uppstod.");
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara besök";
-                }
-            } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Spara besök";
-            }
-        });
-        
-                document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
+        // Spara nytt samhälle
+        document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const samhalleBtn = document.getElementById('samhalle-btn');
@@ -365,6 +340,55 @@
             }
         });
 
+        // Spara skötselbesök
+        document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
+            const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
+
+            const formData = {
+                SkotselID: autoID,
+                BigardsID: bigardsId,
+                SamhallsID: document.getElementById('valt-samhalle').value,
+                Datum: document.getElementById('datum').value,
+                Drottningssett: document.getElementById('drottning').value,
+                Svarmlystnad: document.getElementById('svarmlystnad').value,
+                Temperament: document.getElementById('temperament').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formData)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Besöket har sparats!");
+                    document.getElementById('anteckningar').value = "";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                    laddaData();
+                } else {
+                    alert("Ett fel uppstod.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara besök";
+            }
+        });
 
         laddaData();
     </script>
