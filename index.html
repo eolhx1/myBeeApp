@@ -239,7 +239,7 @@
 
                 async function hämtaBigårdar(WEB_APP_URL) {
             try {
-                let response = await fetch(WEB_APP_URL + "?sheet=Bigårdar");
+                let response = await fetch(WEB_APP_URL + "?sheet=Bigardar");
                 let bigårdar = await response.json();
                 
                 let listaDiv = document.getElementById('bigard-lista');
