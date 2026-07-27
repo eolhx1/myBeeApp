@@ -33,6 +33,39 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
+        /* Enhetlig sidomeny (precis som på index.html) */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            background-color: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            color: white;
+            box-shadow: 5px 0px 15px rgba(0,0,0,0.5);
+        }
+        .sidebar a {
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            color: #ecf0f1;
+            display: block;
+            transition: 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #34495e;
+            color: #f39c12;
+        }
+        .sidebar .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1.8rem;
+        }
         /* Brödsmulor & navigation */
         .nav-bar {
             background-color: #e67e22;
@@ -50,25 +83,6 @@
         }
         .nav-bar a:hover {
             text-decoration: underline;
-        }
-        /* Utfällbar hamburgermeny */
-        .dropdown-menu {
-            display: none;
-            background: white;
-            border-bottom: 1px solid #ddd;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 1rem;
-        }
-        .dropdown-menu button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
         }
         .container {
             padding: 1rem;
@@ -136,42 +150,51 @@
 <body>
 
     <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <h1>📝 Skötselkort</h1>
-        <button class="menu-btn" onclick="toggleMenu()" title="Meny">☰</button>
+        <div style="width: 24px;"></div> <!-- För att balansera rubriken i mitten -->
     </header>
+
+    <!-- Sidomeny -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
+        <a href="index.html">🏠 Hem / Karta</a>
+        <a href="ny-bigard.html">➕ Lägg till bigård</a>
+        <a href="javascript:void(0)" onclick="toggleSamhalleFormModal()">➕ Lägg till nytt samhälle</a>
+        <a href="#" onclick="bytUrl()">⚙️ Byt anslutningslänk</a>
+    </div>
 
     <!-- Brödsmulor och snabb hem-länk -->
     <div class="nav-bar">
         <span><a href="index.html">🏠 Hem</a> &gt; <span id="bread-bigard">Bigård</span></span>
     </div>
 
-    <!-- Dold hamburgermeny med mer sällan använda funktioner -->
-    <div id="hamburger-dropdown" class="dropdown-menu">
-        <button onclick="toggleSamhalleForm()">➕ Lägg till nytt samhälle i bigården</button>
-        
-        <!-- Dolt formulär som fälls ut via menyn -->
-        <form id="samhalle-form" style="display: none; margin-top: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
-            <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Nytt samhälle</h4>
-            <div class="form-group">
-                <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
-                <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1">
-            </div>
-            <div class="form-group">
-                <label for="drottning-ar">Drottningens årgång / märkning:</label>
-                <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
-            </div>
-            <div class="form-group">
-                <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
-                <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
-            </div>
-            <button type="submit" class="btn" style="background-color: #3498db; margin-top: 0.5rem;" id="samhalle-btn">Spara samhälle</button>
-        </form>
+    <!-- Dolt formulär för att lägga till samhälle (öppnas via sidomenyn) -->
+    <div class="container" id="samhalle-form-container" style="display: none; margin-top: 1rem;">
+        <div class="card" style="border: 2px solid #3498db;">
+            <h3 style="margin-top: 0; color: #2c3e50;">➕ Lägg till nytt samhälle i bigården</h3>
+            <form id="samhalle-form">
+                <div class="form-group">
+                    <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
+                    <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="drottning-ar">Drottningens årgång / märkning:</label>
+                    <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
+                </div>
+                <div class="form-group">
+                    <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
+                    <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
+                </div>
+                <button type="submit" class="btn" style="background-color: #3498db;" id="samhalle-btn">Spara samhälle</button>
+            </form>
+        </div>
     </div>
 
     <div class="container">
         <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
 
-        <!-- Sektion för att visa samhällen i denna bigård (ren översikt) -->
+        <!-- Sektion för att visa samhällen i denna bigård -->
         <div class="card">
             <h3>Samhällen / Kupor</h3>
             <div id="samhalle-lista">
@@ -208,7 +231,7 @@
                     <label for="svarmlystnad">Svärmlystnad:</label>
                     <select id="svarmlystnad" name="Svarmlystnad">
                         <option value="Inga svärmceller">Inga svärmceller</option>
-                        <option value="Drönarbyggda svärmceller / bygger">Drönarbyggda svärmceller</option>
+                        <option value="Drönarbyggda svärmceller">Drönarbyggda svärmceller</option>
                         <option value="Fulla svärmceller (åtgärd krävs!)">Fulla svärmceller (åtgärd krävs!)</option>
                     </select>
                 </div>
@@ -253,16 +276,28 @@
 
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        // Funktion för att öppna/stänga hamburgermenyn
+        // Styr sidomenyn (exakt samma som på index.html)
         function toggleMenu() {
-            const menu = document.getElementById('hamburger-dropdown');
-            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
         }
 
-        // Funktion för att dölja/visa formuläret inuti menyn
-        function toggleSamhalleForm() {
-            const form = document.getElementById('samhalle-form');
-            form.style.display = (form.style.display === "block") ? "none" : "block";
+        // Byt URL-funktion (samma som på index)
+        function bytUrl() {
+            localStorage.removeItem("myBeeApp_url");
+            window.location.href = "index.html";
+        }
+
+        // Öppna/stäng formuläret för att lägga till samhälle via menyn
+        function toggleSamhalleFormModal() {
+            toggleMenu(); // Stäng menyn först
+            const container = document.getElementById('samhalle-form-container');
+            if (container.style.display === "none") {
+                container.style.display = "block";
+                container.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                container.style.display = "none";
+            }
         }
 
         async function laddaData() {
@@ -282,7 +317,7 @@
                     document.getElementById('bread-bigard').textContent = aktuell.Namn;
                 }
 
-                // 2. Hämta och visa samhällen (samt fyll i rullgardinsmenyn)
+                // 2. Hämta och visa samhällen
                 let resSamhallen = await fetch(WEB_APP_URL + "?sheet=Samhallen");
                 let allaSamhällen = await resSamhallen.json();
                 
@@ -383,10 +418,9 @@
                     document.getElementById('kupnamn').value = "";
                     document.getElementById('drottning-ar').value = "";
                     document.getElementById('samhalle-anteckningar').value = "";
+                    document.getElementById('samhalle-form-container').style.display = "none";
                     samhalleBtn.disabled = false;
                     samhalleBtn.textContent = "Spara samhälle";
-                    toggleMenu(); // Stäng menyn
-                    toggleSamhalleForm(); // Stäng formuläret
                     laddaData();
                 } else {
                     alert("Ett fel uppstod när samhället skulle sparas.");
