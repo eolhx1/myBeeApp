@@ -33,7 +33,7 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        /* Enhetlig sidomeny */
+        /* Sidomeny */
         .sidebar {
             height: 100%;
             width: 0;
@@ -283,6 +283,7 @@
 
         function bytUrl() {
             localStorage.removeItem("myBeeApp_url");
+            sessionStorage.clear();
             window.location.href = "index.html";
         }
 
@@ -303,88 +304,110 @@
                 return;
             }
 
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    bearbetaOchVisaData(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('historik-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            }
+
             try {
-                // 1. Hämta bigårdens namn
-                let resBigard = await fetch(WEB_APP_URL + "?sheet=Bigardar");
-                let bigårdar = await resBigard.json();
-                let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
+                // Hämta färsk data i ett enda anrop
+                let response = await fetch(WEB_APP_URL);
+                allData = await response.json();
                 
-                if (aktuell) {
-                    document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
-                    document.getElementById('bread-bigard').textContent = aktuell.Namn;
-                }
-
-                // 2. Hämta samhällen
-                let resSamhallen = await fetch(WEB_APP_URL + "?sheet=Samhallen");
-                let allaSamhällen = await resSamhallen.json();
+                // Spara i cache
+                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
                 
-                let samhalleListaDiv = document.getElementById('samhalle-lista');
-                samhalleListaDiv.innerHTML = "";
-
-                let samhalleSelect = document.getElementById('valt-samhalle');
-                samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
-
-                let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === bigardsId);
-
-                if (minaSamhällen.length === 0) {
-                    samhalleListaDiv.innerHTML = "<p>Inga samhällen tillagda i denna bigård ännu.</p>";
-                    samhalleSelect.innerHTML = '<option value="">Inga samhällen inlagda ännu</option>';
-                } else {
-                    minaSamhällen.forEach(s => {
-                        let sItem = document.createElement('div');
-                        sItem.className = 'log-item';
-                        sItem.style.borderLeftColor = '#3498db';
-                        sItem.innerHTML = `
-                            <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}</p>
-                            ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
-                        `;
-                        samhalleListaDiv.appendChild(sItem);
-
-                        let opt = document.createElement('option');
-                        opt.value = s.SamhallsID;
-                        opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
-                        samhalleSelect.appendChild(opt);
-                    });
-                }
-
-                // 3. Hämta besöksloggar
-                let resSkotsel = await fetch(WEB_APP_URL + "?sheet=Skotsel");
-                let skotselLoggar = await resSkotsel.json();
-                
-                let historikDiv = document.getElementById('historik-lista');
-                historikDiv.innerHTML = "";
-
-                let minaLoggar = skotselLoggar.filter(s => s.BigardsID === bigardsId);
-
-                if (minaLoggar.length === 0) {
-                    historikDiv.innerHTML = "<p>Inga sparade besök för denna bigård ännu.</p>";
-                    return;
-                }
-
-                minaLoggar.reverse().forEach(logg => {
-                    let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
-                    let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
-
-                    // Säkerhetskoll så vi inte skriver "undefined" om egenskapen heter något annat i Apps Script
-                    let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
-                    let svarmText = logg.Svarmlystnad || "Ej angivet";
-                    let tempText = logg.Temperament || "Ej angivet";
-
-                    let item = document.createElement('div');
-                    item.className = 'log-item';
-                    item.innerHTML = `
-                        <p><strong>📅 ${logg.Datum}</strong> &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
-                        <p>👑 ${drottningText}</p>
-                        <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
-                        ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
-                    `;
-                    historikDiv.appendChild(item);
-                });
+                bearbetaOchVisaData(allData);
 
             } catch (error) {
                 console.error("Fel vid laddning:", error);
-                document.getElementById('historik-lista').innerHTML = "<p>Kunde inte ladda historik.</p>";
+                if (!cachedData) {
+                    document.getElementById('historik-lista').innerHTML = "<p>Kunde inte ladda historik.</p>";
+                }
             }
+        }
+
+        function bearbetaOchVisaData(data) {
+            let bigårdar = data.bigardar || [];
+            let allaSamhällen = data.samhallen || [];
+            let skotselLoggar = data.skotsel || [];
+
+            // 1. Hämta bigårdens namn
+            let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
+            if (aktuell) {
+                document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
+                document.getElementById('bread-bigard').textContent = aktuell.Namn;
+            }
+
+            // 2. Visa samhällen och fyll rullgardin
+            let samhalleListaDiv = document.getElementById('samhalle-lista');
+            samhalleListaDiv.innerHTML = "";
+
+            let samhalleSelect = document.getElementById('valt-samhalle');
+            samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
+            let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === bigardsId);
+
+            if (minaSamhällen.length === 0) {
+                samhalleListaDiv.innerHTML = "<p>Inga samhällen tillagda i denna bigård ännu.</p>";
+                samhalleSelect.innerHTML = '<option value="">Inga samhällen inlagda ännu</option>';
+            } else {
+                minaSamhällen.forEach(s => {
+                    let sItem = document.createElement('div');
+                    sItem.className = 'log-item';
+                    sItem.style.borderLeftColor = '#3498db';
+                    sItem.innerHTML = `
+                        <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}</p>
+                        ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
+                    `;
+                    samhalleListaDiv.appendChild(sItem);
+
+                    let opt = document.createElement('option');
+                    opt.value = s.SamhallsID;
+                    opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
+                    samhalleSelect.appendChild(opt);
+                });
+            }
+
+            // 3. Visa historik
+            let historikDiv = document.getElementById('historik-lista');
+            historikDiv.innerHTML = "";
+
+            let minaLoggar = skotselLoggar.filter(s => s.BigardsID === bigardsId);
+
+            if (minaLoggar.length === 0) {
+                historikDiv.innerHTML = "<p>Inga sparade besök för denna bigård ännu.</p>";
+                return;
+            }
+
+            minaLoggar.reverse().forEach(logg => {
+                let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
+                let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+
+                // Säkerhetskoll mot undefined om fältnamn skiljer sig
+                let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
+                let svarmText = logg.Svarmlystnad || "Ej angivet";
+                let tempText = logg.Temperament || "Ej angivet";
+
+                let item = document.createElement('div');
+                item.className = 'log-item';
+                item.innerHTML = `
+                    <p><strong>📅 ${logg.Datum}</strong> &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
+                    <p>👑 ${drottningText}</p>
+                    <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
+                    ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
+                `;
+                historikDiv.appendChild(item);
+            });
         }
 
         // Spara nytt samhälle
@@ -421,6 +444,10 @@
                     document.getElementById('drottning-ar').value = "";
                     document.getElementById('samhalle-anteckningar').value = "";
                     document.getElementById('samhalle-form-container').style.display = "none";
+                    
+                    // Nollställ cachen så nya datan hämtas
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    
                     samhalleBtn.disabled = false;
                     samhalleBtn.textContent = "Spara samhälle";
                     laddaData();
@@ -466,7 +493,33 @@
                     body: JSON.stringify(formData)
                 });
                 
-                let result =<div>let result = await response.json();</div>; // (Korrigerad rad)
+                let result = await response.json();
                 
-                // Fortsättning i koden nedan:
-            // ... (resten av koden hanterar svar och återställning)
+                if (result.status === "success") {
+                    alert("Besöket har sparats!");
+                    document.getElementById('anteckningar').value = "";
+                    
+                    // Nollställ cachen så nya besöket syns direkt
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                    laddaData();
+                } else {
+                    alert("Ett fel uppstod när besöket skulle sparas.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara besök";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara besök";
+            }
+        });
+
+        // Starta inladdningen när sidan öppnas
+        laddaData();
+    </script>
+</body>
+</html>

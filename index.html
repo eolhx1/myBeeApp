@@ -158,27 +158,15 @@
     </div>
 
     <div class="container">
-        <!-- Första rutan med inbyggd instruktion -->
+        <!-- Setup-skärm -->
         <div id="setup-screen" style="display: none;">
             <h2>Välkommen till MyBeeApp!</h2>
-            <p>För att använda appen behöver du koppla den till ett eget Google-kalkylark där din data sparas säkert.</p>
-            
-            <div class="instruction-box">
-                <strong>Så här gör du (görs endast en gång):</strong>
-                <ol>
-                    <li>Skapa ett eget Google-ark med kolumnrubrikerna: <code>BigardsID</code>, <code>Namn</code>, <code>Typ</code>, <code>AntalSamhallen</code>, <code>Etableringsdatum</code>, <code>Latitud</code>, <code>Longitud</code>, <code>Anteckningar</code>.</li>
-                    <li>Klicka på <strong>Tillägg</strong> > <strong>Apps Script</strong> i kalkylarket.</li>
-                    <li>Klistra in koden (finns i vår README) och klicka på <strong>Implementera</strong> > <strong>Ny implementering</strong>.</li>
-                    <li>Välj typ <strong>Webbapp</strong>, kör som <em>Jag</em>, tillgång <em>Alla</em>, och klicka på Implementera.</li>
-                    <li>Kopiera din genererade <strong>Webbapp-url</strong> och klistra in den här nedanför!</li>
-                </ol>
-            </div>
-
-            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här (https://script.google.com/.../exec)">
+            <p>För att använda appen behöver du koppla den till ett eget Google-kalkylark.</p>
+            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här...">
             <button onclick="sparaUrl()">Spara och starta appen</button>
         </div>
 
-        <!-- Appens vanliga innehåll -->
+        <!-- Appens innehåll -->
         <div id="app-content" style="display: none;">
             <div class="section-title">Karta över bigårdar</div>
             <div id="map"></div>
@@ -217,7 +205,7 @@
                         attribution: '&copy; OpenStreetMap'
                     }).addTo(map);
                 }
-                hämtaBigårdar(savedUrl);
+                hämtaDataOchVisa(savedUrl);
             }
         }
 
@@ -227,56 +215,78 @@
                 localStorage.setItem("myBeeApp_url", url);
                 initApp();
             } else {
-                alert("Vänligen ange en giltig Google Apps Script-URL som börjar med https://script.google.com");
+                alert("Vänligen ange en giltig Google Apps Script-URL.");
             }
         }
 
         function bytUrl() {
             localStorage.removeItem("myBeeApp_url");
+            sessionStorage.clear(); // Rensa cache vid byte
             toggleMenu();
             initApp();
         }
 
-                async function hämtaBigårdar(WEB_APP_URL) {
+        async function hämtaDataOchVisa(WEB_APP_URL) {
+            let bigårdar = [];
+
+            // Kolla om vi har sparad data i webbläsaren sedan tidigare (cache)
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            
+            if (cachedData) {
+                let parsed = JSON.parse(cachedData);
+                bigårdar = parsed.bigardar;
+                visaBigårdar(bigårdar); // Visa direkt utan väntetid!
+            } else {
+                document.getElementById('bigard-lista').innerHTML = "<p>Hämtar data från molnet...</p>";
+            }
+
             try {
-                let response = await fetch(WEB_APP_URL + "?sheet=Bigardar");
-                let bigårdar = await response.json();
+                // Gör ett enda anrop för att hämta allt (och uppdatera cachen i bakgrunden)
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
                 
-                let listaDiv = document.getElementById('bigard-lista');
-                listaDiv.innerHTML = "";
-
-                if (!bigårdar || bigårdar.length === 0) {
-                    listaDiv.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
-                    return;
-                }
-
-                bigårdar.forEach(b => {
-                    if (!b.Namn) return;
-
-                    let card = document.createElement('div');
-                    card.className = 'bee-yard-card';
-                    card.innerHTML = `
-                        <h3>${b.Namn}</h3>
-                        <p><strong>Typ:</strong> ${b.Typ}</p>
-                        <p><strong>Antal samhällen:</strong> ${b.AntalSamhallen}</p>
-                        <p><strong>Etablerad:</strong> ${b.Etableringsdatum}</p>
-                        <a href="skotsel.html?id=${b.BigardsID}" style="display:inline-block; margin-top:0.6rem; background:#3498db; color:white; padding:0.4rem 0.8rem; text-decoration:none; border-radius:4px; font-size:0.85rem;">📝 Visa skötselkort</a>
-                    `;
-                    listaDiv.appendChild(card);
-
-                    if (b.Latitud && b.Longitud) {
-                        let marker = L.marker([b.Latitud, b.Longitud]).addTo(map);
-                        marker.bindPopup(`<b>${b.Namn}</b><br>Samhällen: ${b.AntalSamhallen}`);
-                    }
-                });
-                // ----------------------------------
+                // Spara ner i sessionstryggt minne
+                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(data));
+                
+                bigårdar = data.bigardar;
+                visaBigårdar(bigårdar);
 
             } catch (error) {
                 console.error("Kunde inte hämta data:", error);
-                document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera din anslutningslänk.</p>";
+                if (!cachedData) {
+                    document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera anslutningen.</p>";
+                }
             }
         }
 
+        function visaBigårdar(bigårdar) {
+            let listaDiv = document.getElementById('bigard-lista');
+            listaDiv.innerHTML = "";
+
+            if (!bigårdar || bigårdar.length === 0) {
+                listaDiv.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
+                return;
+            }
+
+            bigårdar.forEach(b => {
+                if (!b.Namn) return;
+
+                let card = document.createElement('div');
+                card.className = 'bee-yard-card';
+                card.innerHTML = `
+                    <h3>${b.Namn}</h3>
+                    <p><strong>Typ:</strong> ${b.Typ}</p>
+                    <p><strong>Antal samhällen:</strong> ${b.AntalSamhallen}</p>
+                    <p><strong>Etablerad:</strong> ${b.Etableringsdatum}</p>
+                    <a href="skotsel.html?id=${b.BigardsID}" style="display:inline-block; margin-top:0.6rem; background:#3498db; color:white; padding:0.4rem 0.8rem; text-decoration:none; border-radius:4px; font-size:0.85rem;">📝 Visa skötselkort</a>
+                `;
+                listaDiv.appendChild(card);
+
+                if (b.Latitud && b.Longitud && map) {
+                    L.marker([b.Latitud, b.Longitud]).addTo(map).bindPopup(`<b>${b.Namn}</b><br>Samhällen: ${b.AntalSamhallen}`);
+                }
+            });
+        }
 
         initApp();
     </script>
