@@ -17,8 +17,57 @@
             background-color: #f39c12;
             color: white;
             padding: 1rem;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
             font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        /* Brödsmulor & navigation */
+        .nav-bar {
+            background-color: #e67e22;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .nav-bar a:hover {
+            text-decoration: underline;
+        }
+        /* Utfällbar hamburgermeny */
+        .dropdown-menu {
+            display: none;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
+        .dropdown-menu button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
             font-weight: bold;
         }
         .container {
@@ -71,12 +120,6 @@
         .btn:hover {
             background-color: #219653;
         }
-        .btn-secondary {
-            background-color: #3498db;
-        }
-        .btn-secondary:hover {
-            background-color: #2980b9;
-        }
         .log-item {
             background: #f9f9f9;
             border-left: 4px solid #f39c12;
@@ -88,57 +131,55 @@
         .log-item p {
             margin: 0 0 0.3rem 0;
         }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 1rem;
-            color: #3498db;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        📝 Skötselkort
+        <h1>📝 Skötselkort</h1>
+        <button class="menu-btn" onclick="toggleMenu()" title="Meny">☰</button>
     </header>
 
-    <div class="container">
-        <h2 id="bigard-titel">Laddar bigård...</h2>
+    <!-- Brödsmulor och snabb hem-länk -->
+    <div class="nav-bar">
+        <span><a href="index.html">🏠 Hem</a> &gt; <span id="bread-bigard">Bigård</span></span>
+    </div>
 
-        <!-- Sektion för Samhällen / Kupor -->
+    <!-- Dold hamburgermeny med mer sällan använda funktioner -->
+    <div id="hamburger-dropdown" class="dropdown-menu">
+        <button onclick="toggleSamhalleForm()">➕ Lägg till nytt samhälle i bigården</button>
+        
+        <!-- Dolt formulär som fälls ut via menyn -->
+        <form id="samhalle-form" style="display: none; margin-top: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
+            <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Nytt samhälle</h4>
+            <div class="form-group">
+                <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
+                <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1">
+            </div>
+            <div class="form-group">
+                <label for="drottning-ar">Drottningens årgång / märkning:</label>
+                <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
+            </div>
+            <div class="form-group">
+                <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
+                <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
+            </div>
+            <button type="submit" class="btn" style="background-color: #3498db; margin-top: 0.5rem;" id="samhalle-btn">Spara samhälle</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
+
+        <!-- Sektion för att visa samhällen i denna bigård (ren översikt) -->
         <div class="card">
-            <h3>Samhällen / Kupor i denna bigård</h3>
+            <h3>Samhällen / Kupor</h3>
             <div id="samhalle-lista">
                 <p>Laddar samhällen...</p>
             </div>
-
-            <!-- Knapp som fäller ut formuläret för att lägga till samhälle -->
-            <button type="button" class="btn btn-secondary" onclick="toggleSamhalleForm()" id="toggle-form-btn" style="margin-top: 1rem;">➕ Lägg till nytt samhälle</button>
-
-            <!-- Dolt formulär som fälls ut vid klick -->
-            <form id="samhalle-form" style="display: none; margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">Nytt samhälle</h4>
-                <div class="form-group">
-                    <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
-                    <input type="text" id="kupnamn" name="Kupbenamning" placeholder="Kupa 1">
-                </div>
-                <div class="form-group">
-                    <label for="drottning-ar">Drottningens årgång / märkning:</label>
-                    <input type="text" id="drottning-ar" name="DrottningAr" placeholder="T.ex. 2024 (eller Grön)">
-                </div>
-                <div class="form-group">
-                    <label for="samhalle-anteckningar">Anteckningar om samhället:</label>
-                    <textarea id="samhalle-anteckningar" name="Anteckningar" placeholder="T.ex. Lugn buckfast-drottning..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-secondary" id="samhalle-btn">Spara samhälle</button>
-            </form>
         </div>
 
-        <!-- Formulär för att lägga till ny anteckning / skötselkontroll -->
+        <!-- Formulär för att lägga till ny besökslogg / skötsel -->
         <div class="card">
             <h3>Ny besökslogg / skötsel</h3>
             <form id="skotsel-form">
@@ -156,7 +197,7 @@
 
                 <div class="form-group">
                     <label for="drottning">Drottning observerad?</label>
-                    <select id="drottning" name="Drottningssett">
+                    <select id="drottning" name="Drottningsett">
                         <option value="Ja - Sett drottningen">Ja - Sett drottningen</option>
                         <option value="Ej sett, men färska ägg finns">Ej sett, men färska ägg finns</option>
                         <option value="Ej sett / Osäker status">Ej sett / Osäker status</option>
@@ -197,8 +238,6 @@
                 <p>Laddar historik...</p>
             </div>
         </div>
-
-        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
     </div>
 
     <script>
@@ -214,17 +253,16 @@
 
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        // Funktion för att dölja/visa formuläret för att lägga till samhälle
+        // Funktion för att öppna/stänga hamburgermenyn
+        function toggleMenu() {
+            const menu = document.getElementById('hamburger-dropdown');
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        // Funktion för att dölja/visa formuläret inuti menyn
         function toggleSamhalleForm() {
             const form = document.getElementById('samhalle-form');
-            const btn = document.getElementById('toggle-form-btn');
-            if (form.style.display === "none") {
-                form.style.display = "block";
-                btn.textContent = "Dölj formulär";
-            } else {
-                form.style.display = "none";
-                btn.textContent = "➕ Lägg till nytt samhälle";
-            }
+            form.style.display = (form.style.display === "block") ? "none" : "block";
         }
 
         async function laddaData() {
@@ -241,6 +279,7 @@
                 
                 if (aktuell) {
                     document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
+                    document.getElementById('bread-bigard').textContent = aktuell.Namn;
                 }
 
                 // 2. Hämta och visa samhällen (samt fyll i rullgardinsmenyn)
@@ -260,7 +299,6 @@
                     samhalleSelect.innerHTML = '<option value="">Inga samhällen inlagda ännu</option>';
                 } else {
                     minaSamhällen.forEach(s => {
-                        // Skriv ut i listan över samhällen
                         let sItem = document.createElement('div');
                         sItem.className = 'log-item';
                         sItem.style.borderLeftColor = '#3498db';
@@ -270,7 +308,6 @@
                         `;
                         samhalleListaDiv.appendChild(sItem);
 
-                        // Lägg till i rullgardinsmenyn för skötsel
                         let opt = document.createElement('option');
                         opt.value = s.SamhallsID;
                         opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
@@ -348,7 +385,8 @@
                     document.getElementById('samhalle-anteckningar').value = "";
                     samhalleBtn.disabled = false;
                     samhalleBtn.textContent = "Spara samhälle";
-                    toggleSamhalleForm(); // Dölj formuläret igen efter sparande
+                    toggleMenu(); // Stäng menyn
+                    toggleSamhalleForm(); // Stäng formuläret
                     laddaData();
                 } else {
                     alert("Ett fel uppstod när samhället skulle sparas.");
