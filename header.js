@@ -1,12 +1,12 @@
 // Filnamn: header.js
 
 function laddaHeader(titelTekst, breadcrumbHTML = '') {
-    // Skapa HTML-strukturen för header, sidomeny och inställningsknapp (kugghjul)
+    // Skapa HTML-strukturen för header, sidomeny och inställningsmeny
     const headerHTML = `
         <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
             <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
             <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
-            <button onclick="bytUrlSide()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar / Byt anslutningslänk" aria-label="Inställningar">⚙️</button>
+            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
         </header>
 
         <!-- Sidomeny (Sidebar) -->
@@ -16,24 +16,45 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
         </div>
 
+        <!-- Inställningsmodal / Meny som fälls ut eller dyker upp -->
+        <div id="settingsModal" style="display: none; position: fixed; z-index: 3000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
+                    <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Framtida mörkt läge-knapp/switch kan ligga här -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <span>🌙 Mörkt läge (kommer)</span>
+                        <input type="checkbox" disabled title="Kommer snart" style="cursor: not-allowed;">
+                    </div>
+
+                    <button onclick="bytUrlSide()" style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Byt anslutningslänk</button>
+                </div>
+            </div>
+        </div>
+
         ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">${breadcrumbHTML}</div>` : ''}
     `;
 
-    // Infoga headern i början av body
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
 
-// Funktion för att öppna/stänga sidebaren
+// Funktion för sidomenyn
 function toggleSidebar() {
     const sidebar = document.getElementById("mySidebar");
-    if (sidebar.style.width === "250px") {
-        sidebar.style.width = "0";
-    } else {
-        sidebar.style.width = "250px";
-    }
+    sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
 }
 
-// Global hjälpfunktion för att nollställa URL när man klickar på kugghjulet
+// Funktion för inställningsmenyn
+function toggleSettingsMenu() {
+    const modal = document.getElementById("settingsModal");
+    modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+
+// Nollställningsfunktion
 function bytUrlSide() {
     if (confirm("Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.")) {
         localStorage.removeItem("myBeeApp_url");
