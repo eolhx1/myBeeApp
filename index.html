@@ -24,6 +24,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
         .menu-btn {
             background: none;
@@ -36,6 +37,35 @@
         .header-title {
             flex-grow: 1;
             text-align: center;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 220px;
+            z-index: 1000;
+            text-align: left;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-menu li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        .dropdown-menu li a:hover {
+            background-color: #f4f4f9;
+            color: #f39c12;
         }
         .container {
             padding: 1rem;
@@ -135,10 +165,15 @@
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <div class="header-title">🐝 MyBeeApp - Bigårdar</div>
         <div style="width: 24px;"></div>
+
+        <ul id="dropdownMenu" class="dropdown-menu">
+            <li><a href="#" onclick="visaInstallningar()">Ändra anslutningslänk</a></li>
+            <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
+        </ul>
     </header>
 
     <div class="container">
-        <!-- Setup om URL saknas / HÄR ÄR RUTA FÖR ATT LÄGGA IN ANSLUTNINGSLÄNK -->
+        <!-- Setup om URL saknas -->
         <div id="setup-screen" style="display: none;">
             <h2>Anslut din app</h2>
             <p>Klistra in din Google Apps Script Web App URL nedan:</p>
@@ -166,11 +201,25 @@
         let map;
 
         function toggleMenu() {
-            // Om man vill nollställa eller byta länk kan man t.ex. rensa länk eller visa inställningar
-            if (confirm("Vill du byta anslutningslänk?")) {
-                localStorage.removeItem("myBeeApp_url");
-                location.reload();
+            const menu = document.getElementById("dropdownMenu");
+            menu.classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-btn')) {
+                const dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
             }
+        }
+
+        function visaInstallningar() {
+            localStorage.removeItem("myBeeApp_url");
+            initApp();
         }
 
         function initApp() {
