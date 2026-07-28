@@ -5,37 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Skötselkort</title>
-    
     <link rel="stylesheet" href="style.css">
-
-
 </head>
 <body>
 
-    <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <h1>📝 Skötselkort</h1>
-        <div style="width: 24px;"></div>
-    </header>
-
-    <!-- Sidomeny -->
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
-        <a href="index.html">🏠 Hem / Karta</a>
-        <a href="ny-bigard.html">➕ Lägg till bigård</a>
-        <a href="javascript:void(0)" onclick="toggleSamhalleFormModal()">➕ Lägg till nytt samhälle</a>
-        <a href="#" onclick="bytUrl()">⚙️ Byt anslutningslänk</a>
-    </div>
-
-    <!-- Brödsmulor -->
-    <div class="nav-bar">
-        <span><a href="index.html">🏠 Hem</a> &gt; <span id="bread-bigard">Bigård</span></span>
-    </div>
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("📝 Skötselkort", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span id="bread-bigard">Bigård</span>');
+    </script>
 
     <!-- Dolt formulär för att lägga till samhälle -->
     <div class="container" id="samhalle-form-container" style="display: none; margin-top: 1rem;">
         <div class="card" style="border: 2px solid #3498db;">
-            <h3 style="margin-top: 0; color: #2c3e50;">➕ Lägg till nytt samhälle i bigården</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin-top: 0; color: #2c3e50;">➕ Lägg till nytt samhälle i bigården</h3>
+                <button onclick="toggleSamhalleFormModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
+            </div>
             <form id="samhalle-form">
                 <div class="form-group">
                     <label for="kupnamn">Kupbenämning (t.ex. Kupa 1):</label>
@@ -55,6 +41,11 @@
     </div>
 
     <div class="container">
+        <!-- Snabbknapp för att öppna formuläret för att lägga till samhälle direkt på sidan -->
+        <div style="margin-bottom: 1rem;">
+            <button onclick="toggleSamhalleFormModal()" class="btn" style="background-color: #27ae60;">➕ Lägg till nytt samhälle</button>
+        </div>
+
         <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
 
         <!-- Samhällen -->
@@ -139,19 +130,7 @@
 
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        function toggleMenu() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
-        }
-
-        function bytUrl() {
-            localStorage.removeItem("myBeeApp_url");
-            sessionStorage.clear();
-            window.location.href = "index.html";
-        }
-
         function toggleSamhalleFormModal() {
-            toggleMenu();
             const container = document.getElementById('samhalle-form-container');
             if (container.style.display === "none") {
                 container.style.display = "block";
@@ -182,11 +161,9 @@
             }
 
             try {
-                // Hämta färsk data i ett enda anrop
                 let response = await fetch(WEB_APP_URL);
                 allData = await response.json();
                 
-                // Spara i cache
                 sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
                 
                 bearbetaOchVisaData(allData);
@@ -204,14 +181,12 @@
             let allaSamhällen = data.samhallen || [];
             let skotselLoggar = data.skotsel || [];
 
-            // 1. Hämta bigårdens namn
             let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
             if (aktuell) {
                 document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
                 document.getElementById('bread-bigard').textContent = aktuell.Namn;
             }
 
-            // 2. Visa samhällen och fyll rullgardin
             let samhalleListaDiv = document.getElementById('samhalle-lista');
             samhalleListaDiv.innerHTML = "";
 
@@ -241,7 +216,6 @@
                 });
             }
 
-            // 3. Visa historik
             let historikDiv = document.getElementById('historik-lista');
             historikDiv.innerHTML = "";
 
@@ -256,7 +230,6 @@
                 let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
                 let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
 
-                // Säkerhetskoll mot undefined om fältnamn skiljer sig
                 let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
                 let svarmText = logg.Svarmlystnad || "Ej angivet";
                 let tempText = logg.Temperament || "Ej angivet";
@@ -273,7 +246,6 @@
             });
         }
 
-        // Spara nytt samhälle
         document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -308,7 +280,6 @@
                     document.getElementById('samhalle-anteckningar').value = "";
                     document.getElementById('samhalle-form-container').style.display = "none";
                     
-                    // Nollställ cachen så nya datan hämtas
                     sessionStorage.removeItem("myBeeApp_allData");
                     
                     samhalleBtn.disabled = false;
@@ -327,7 +298,6 @@
             }
         });
 
-        // Spara skötselbesök
         document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -362,7 +332,6 @@
                     alert("Besöket har sparats!");
                     document.getElementById('anteckningar').value = "";
                     
-                    // Nollställ cachen så nya besöket syns direkt
                     sessionStorage.removeItem("myBeeApp_allData");
                     
                     submitBtn.disabled = false;
@@ -381,7 +350,6 @@
             }
         });
 
-        // Starta inladdningen när sidan öppnas
         laddaData();
     </script>
 </body>
