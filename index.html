@@ -1,297 +1,117 @@
-<!-- Filnamn: index.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp - Mina Bigårdar</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        header {
-            background-color: #f39c12;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .menu-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .sidebar {
-            height: 100%;
-            width: 0;
-            position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            background-color: #2c3e50;
-            overflow-x: hidden;
-            transition: 0.3s;
-            padding-top: 60px;
-            color: white;
-            box-shadow: 5px 0px 15px rgba(0,0,0,0.5);
-        }
-        .sidebar a {
-            padding: 12px 20px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            color: #ecf0f1;
-            display: block;
-            transition: 0.2s;
-        }
-        .sidebar a:hover {
-            background-color: #34495e;
-            color: #f39c12;
-        }
-        .sidebar .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 1.8rem;
-        }
-        .container {
-            padding: 1rem;
-            max-width: 600px;
-            margin: auto;
-        }
-        #map {
-            height: 300px;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .section-title {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-        .bee-yard-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .bee-yard-card h3 {
-            margin: 0 0 0.4rem 0;
-            color: #d35400;
-        }
-        .bee-yard-card p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        #setup-screen {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 1rem;
-        }
-        #setup-screen h2 {
-            color: #d35400;
-            margin-top: 0;
-        }
-        .instruction-box {
-            background: #f9f9f9;
-            border-left: 4px solid #f39c12;
-            padding: 0.8rem 1rem;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            text-align: left;
-        }
-        .instruction-box ol {
-            margin: 0.5rem 0 0 1.2rem;
-            padding: 0;
-        }
-        #setup-screen input {
-            width: 100%;
-            padding: 0.7rem;
-            margin: 0.8rem 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        #setup-screen button {
-            width: 100%;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-    </style>
+    <title>MyBeeApp</title>
 </head>
 <body>
 
-    <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <span>🐝 MyBeeApp</span>
-        <div style="width: 24px;"></div>
-    </header>
-
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
-        <a href="index.html">🏠 Hem / Karta</a>
-        <a href="ny-bigard.html">➕ Lägg till bigård</a>
-        <a href="#" onclick="bytUrl()">⚙️ Byt anslutningslänk</a>
-    </div>
-
-    <div class="container">
-        <!-- Setup-skärm -->
-        <div id="setup-screen" style="display: none;">
-            <h2>Välkommen till MyBeeApp!</h2>
-            <p>För att använda appen behöver du koppla den till ett eget Google-kalkylark.</p>
-            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här...">
-            <button onclick="sparaUrl()">Spara och starta appen</button>
-        </div>
-
-        <!-- Appens innehåll -->
-        <div id="app-content" style="display: none;">
-            <div class="section-title">Karta över bigårdar</div>
-            <div id="map"></div>
-
-            <div class="section-title">Mina bigårdar (Lista)</div>
-            <div id="bigard-lista">
-                <p>Laddar bigårdar...</p>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div id="bigardar-lista">Laddar bigårdar...</div>
 
     <script>
-        function toggleMenu() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
-        }
+        // Din fasta, permanenta Apps Script-länk är inlagd här:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
 
-        let map;
-
-        function initApp() {
-            const savedUrl = localStorage.getItem("myBeeApp_url");
+        // Funktion för att hämta kalkylarks-ID från localStorage eller extrahera det om man klistrat in hela länk-adressen
+        function getSpreadsheetId() {
+            let stored = localStorage.getItem("myBeeApp_sheetId");
+            if (!stored) return "";
             
-            if (!savedUrl) {
-                document.getElementById("setup-screen").style.display = "block";
-                document.getElementById("app-content").style.display = "none";
-            } else {
-                document.getElementById("setup-screen").style.display = "none";
-                document.getElementById("app-content").style.display = "block";
-                
-                if (!map) {
-                    map = L.map('map').setView([62.1957, 14.9436], 5);
-                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; OpenStreetMap'
-                    }).addTo(map);
-                }
-                hämtaDataOchVisa(savedUrl);
-            }
-        }
-
-        function sparaUrl() {
-            const url = document.getElementById("url-input").value.trim();
-            if (url.startsWith("https://script.google.com")) {
-                localStorage.setItem("myBeeApp_url", url);
-                initApp();
-            } else {
-                alert("Vänligen ange en giltig Google Apps Script-URL.");
-            }
-        }
-
-        function bytUrl() {
-            localStorage.removeItem("myBeeApp_url");
-            sessionStorage.clear(); // Rensa cache vid byte
-            toggleMenu();
-            initApp();
-        }
-
-        async function hämtaDataOchVisa(WEB_APP_URL) {
-            let bigårdar = [];
-
-            // Kolla om vi har sparad data i webbläsaren sedan tidigare (cache)
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-            
-            if (cachedData) {
-                let parsed = JSON.parse(cachedData);
-                bigårdar = parsed.bigardar;
-                visaBigårdar(bigårdar); // Visa direkt utan väntetid!
-            } else {
-                document.getElementById('bigard-lista').innerHTML = "<p>Hämtar data från molnet...</p>";
-            }
-
-            try {
-                // Gör ett enda anrop för att hämta allt (och uppdatera cachen i bakgrunden)
-                let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
-                
-                // Spara ner i sessionstryggt minne
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(data));
-                
-                bigårdar = data.bigardar;
-                visaBigårdar(bigårdar);
-
-            } catch (error) {
-                console.error("Kunde inte hämta data:", error);
-                if (!cachedData) {
-                    document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera anslutningen.</p>";
+            if (stored.includes("docs.google.com")) {
+                let match = stored.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (match && match[1]) {
+                    return match[1];
                 }
             }
+            return stored;
         }
 
-        function visaBigårdar(bigårdar) {
-    let listaDiv = document.getElementById('bigard-lista');
-    listaDiv.innerHTML = "";
+        // 1. HÄMTA ALL DATA
+        function fetchData() {
+            const sheetId = getSpreadsheetId();
+            
+            if (!sheetId) {
+                const listaDiv = document.getElementById("bigardar-lista");
+                if (listaDiv) {
+                    listaDiv.innerHTML = "Inget kalkylarks-ID hittades. Ange ditt kalkylarks-ID/länk i appens inställningar.";
+                }
+                return;
+            }
 
-    if (!bigårdar || bigårdar.length === 0) {
-        listaDiv.innerHTML = "<p>Inga bigårdar hittades i kalkylarket.</p>";
-        return;
-    }
-
-    bigårdar.forEach(b => {
-        // Skriv ut även om Namn skulle heta något annat eller saknas
-        let namn = b.Namn || b.namn || "Namnlös bigård";
-        let typ = b.Typ || "Ej angivet";
-        let antal = b.AntalSamhallen || 0;
-        let id = b.BigardsID || "";
-
-        let card = document.createElement('div');
-        card.className = 'bee-yard-card';
-        card.innerHTML = `
-            <h3>${namn}</h3>
-            <p><strong>Typ:</strong> ${typ}</p>
-            <p><strong>Antal samhällen:</strong> ${antal}</p>
-            <a href="skotsel.html?id=${id}" style="display:inline-block; margin-top:0.6rem; background:#3498db; color:white; padding:0.4rem 0.8rem; text-decoration:none; border-radius:4px; font-size:0.85rem;">📝 Visa skötselkort</a>
-        `;
-        listaDiv.appendChild(card);
-
-        if (b.Latitud && b.Longitud && map) {
-            L.marker([b.Latitud, b.Longitud]).addTo(map).bindPopup(`<b>${namn}</b>`);
+            fetch(`${SCRIPT_URL}?id=${sheetId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error("Fel från Apps Script:", data.error);
+                        return;
+                    }
+                    uppdateraBigardsLista(data.bigardar);
+                })
+                .catch(error => {
+                    console.error("Kunde inte hämta data:", error);
+                });
         }
-    });
-}
 
-        initApp();
+        // 2. SPARA NY DATA
+        function saveData(sheetName, rowData) {
+            const sheetId = getSpreadsheetId();
+            
+            if (!sheetId) {
+                alert("Inget kalkylarks-ID är inställt!");
+                return;
+            }
+
+            fetch(`${SCRIPT_URL}?sheet=${sheetName}&id=${sheetId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(rowData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    fetchData();
+                } else {
+                    console.error("Kunde inte spara:", result.message);
+                }
+            })
+            .catch(error => {
+                console.error("Fel vid sparande:", error);
+            });
+        }
+
+        // 3. SPARA ANVÄNDARENS ID/LÄNK VIA GRÄNSSNITTET
+        function sparaAnvandarId(inputVardde) {
+            if (!inputVardde) return;
+            localStorage.setItem("myBeeApp_sheetId", inputVardde.trim());
+            alert("Kalkylarks-koppling sparad!");
+            fetchData();
+        }
+
+        // Fyll gränssnittet
+        function uppdateraBigardsLista(bigardar) {
+            const listaDiv = document.getElementById("bigardar-lista");
+            if (!listaDiv) return;
+            
+            if (!bigardar || bigardar.length === 0) {
+                listaDiv.innerHTML = "Inga bigårdar hittades i kalkylarket.";
+                return;
+            }
+            
+            let html = "<ul>";
+            bigardar.forEach(b => {
+                html += `<li>${b.Namn || "Namnlös bigård"} (Lat: ${b.Latitud || "-"}, Lon: ${b.Longitud || "-"})</li>`;
+            });
+            html += "</ul>";
+            
+            listaDiv.innerHTML = html;
+        }
+
+        // Kör automatiskt när sidan laddas
+        window.onload = function() {
+            fetchData();
+        };
     </script>
 </body>
 </html>
