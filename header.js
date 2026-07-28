@@ -1,54 +1,44 @@
-// header.js - Genererar gemensam header och meny för alla sidor
-function laddaHeader(sidRubrik, breadcrumbHtml) {
+
+
+// Filnamn: header.js
+
+function laddaHeader(titelTekst, breadcrumbHTML = '') {
+    // Skapa HTML-strukturen för header och sidomeny
     const headerHTML = `
-        <header>
-            <div class="menu-container">
-                <button class="menu-btn" onclick="toggleAppMenu()">☰</button>
-                <ul id="appDropdownMenu" class="dropdown-menu">
-                    <li><a href="index.html">Hem / Översikt</a></li>
-                    <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
-                    <li><a href="#" onclick="rensaAppUrl(); return false;">Byt anslutningslänk</a></li>
-                </ul>
-            </div>
-            <div class="header-title">${sidRubrik}</div>
+        <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
+            <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">☰</button>
+            <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
+            <div style="width: 24px;"></div>
         </header>
-        <div class="nav-bar" style="justify-content: flex-start; gap: 0.5rem;">
-            ${breadcrumbHtml}
+
+        <!-- Sidomeny (Sidebar) -->
+        <div id="mySidebar" class="sidebar" style="height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #2c3e50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 5px rgba(0,0,0,0.5);">
+            <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" style="position: absolute; top: 15px; right: 25px; font-size: 36px; color: white; text-decoration: none;">&times;</a>
+            <a href="index.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🏠 Hem / Karta</a>
+            <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
+            <a href="javascript:void(0)" onclick="bytUrlSide()" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">⚙️ Byt anslutningslänk</a>
         </div>
+
+        ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">${breadcrumbHTML}</div>` : ''}
     `;
 
-    // Sätt in cachen/headern i början av body
+    // Infoga headern i början av body
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
 
-function toggleAppMenu() {
-    const menu = document.getElementById("appDropdownMenu");
-    if (menu) {
-        menu.classList.toggle("show");
+// Funktion för att öppna/stänga sidebaren
+function toggleSidebar() {
+    const sidebar = document.getElementById("mySidebar");
+    if (sidebar.style.width === "250px") {
+        sidebar.style.width = "0";
+    } else {
+        sidebar.style.width = "250px";
     }
 }
 
-// Stäng menyn om man klickar utanför
-window.addEventListener('click', function(event) {
-    if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
-        const dropdowns = document.getElementsByClassName("dropdown-menu");
-        for (let i = 0; i < dropdowns.length; i++) {
-            let openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-                openDropdown.classList.remove('show');
-            }
-        }
-    }
-});
-
-function rensaAppUrl() {
+// Global hjälpfunktion för att nollställa URL
+function bytUrlSide() {
     localStorage.removeItem("myBeeApp_url");
-    // Om sidan har en egen init-funktion, anropa den, annars ladda om
-    if (typeof initApp === 'function') {
-        initApp();
-    } else if (typeof initForm === 'function') {
-        initForm();
-    } else {
-        location.reload();
-    }
+    sessionStorage.clear();
+    window.location.href = "index.html";
 }
