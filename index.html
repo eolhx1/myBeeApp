@@ -2,17 +2,31 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .settings-box { background: #f4f4f4; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
+        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
+    <!-- Enkelt inställningsfält för plattan -->
+    <div class="settings-box">
+        <h3>Inställningar</h3>
+        <label for="sheetInput">Klistra in länk eller ID till ditt Google Kalkylark:</label>
+        <input type="text" id="sheetInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+        <button onclick="sparaFranFalt()">Spara koppling</button>
+    </div>
+
+    <h2>Mina Bigårdar</h2>
     <div id="bigardar-lista">Laddar bigårdar...</div>
 
     <script>
-        // Din fasta, permanenta Apps Script-länk är inlagd här:
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
 
-        // Funktion för att hämta kalkylarks-ID från localStorage eller extrahera det om man klistrat in hela länk-adressen
         function getSpreadsheetId() {
             let stored = localStorage.getItem("myBeeApp_sheetId");
             if (!stored) return "";
@@ -26,14 +40,13 @@
             return stored;
         }
 
-        // 1. HÄMTA ALL DATA
         function fetchData() {
             const sheetId = getSpreadsheetId();
             
             if (!sheetId) {
                 const listaDiv = document.getElementById("bigardar-lista");
                 if (listaDiv) {
-                    listaDiv.innerHTML = "Inget kalkylarks-ID hittades. Ange ditt kalkylarks-ID/länk i appens inställningar.";
+                    listaDiv.innerHTML = "Inget kalkylarks-ID hittades. Ange ditt kalkylarks-ID/länk i fältet ovan.";
                 }
                 return;
             }
@@ -43,6 +56,7 @@
                 .then(data => {
                     if (data.error) {
                         console.error("Fel från Apps Script:", data.error);
+                        document.getElementById("bigardar-lista").innerHTML = "Fel: " + data.error;
                         return;
                     }
                     uppdateraBigardsLista(data.bigardar);
@@ -52,44 +66,17 @@
                 });
         }
 
-        // 2. SPARA NY DATA
-        function saveData(sheetName, rowData) {
-            const sheetId = getSpreadsheetId();
-            
-            if (!sheetId) {
-                alert("Inget kalkylarks-ID är inställt!");
+        function sparaFranFalt() {
+            const inputVardde = document.getElementById("sheetInput").value;
+            if (!inputVardde) {
+                alert("Fältet är tomt!");
                 return;
             }
-
-            fetch(`${SCRIPT_URL}?sheet=${sheetName}&id=${sheetId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8"
-                },
-                body: JSON.stringify(rowData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === "success") {
-                    fetchData();
-                } else {
-                    console.error("Kunde inte spara:", result.message);
-                }
-            })
-            .catch(error => {
-                console.error("Fel vid sparande:", error);
-            });
-        }
-
-        // 3. SPARA ANVÄNDARENS ID/LÄNK VIA GRÄNSSNITTET
-        function sparaAnvandarId(inputVardde) {
-            if (!inputVardde) return;
             localStorage.setItem("myBeeApp_sheetId", inputVardde.trim());
             alert("Kalkylarks-koppling sparad!");
             fetchData();
         }
 
-        // Fyll gränssnittet
         function uppdateraBigardsLista(bigardar) {
             const listaDiv = document.getElementById("bigardar-lista");
             if (!listaDiv) return;
@@ -108,8 +95,12 @@
             listaDiv.innerHTML = html;
         }
 
-        // Kör automatiskt när sidan laddas
         window.onload = function() {
+            // Fyll i fältet automatiskt om det redan finns sparat
+            let savedId = localStorage.getItem("myBeeApp_sheetId");
+            if (savedId) {
+                document.getElementById("sheetInput").value = savedId;
+            }
             fetchData();
         };
     </script>
