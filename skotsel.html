@@ -406,7 +406,7 @@
             }
         });
 
-        document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
+                document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const submitBtn = document.getElementById('submit-btn');
@@ -415,31 +415,26 @@
 
             const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
 
-        
-const formData = {
-    action: "sparaSkotsel",
-    bigardsID: bigardsID,
-    samhallsID: document.getElementById("valt-samhalle").value,
-    datum: document.getElementById("datum").value,
-    drottningsett: document.getElementById("drottningsett").value,
-    svarmlystnad: document.getElementById("svarmlystnad").value,
-    temperament: document.getElementById("temperament").value,
-    anteckningar: document.getElementById("anteckningar").value,
-    // Nya fält för läkemedelsjournalen:
-    lakemedel: document.getElementById("lakemedel").value,
-    diagnos: document.getElementById("diagnos").value,
-    mangd: document.getElementById("mangd").value,
-    tid: document.getElementById("tid").value,
-    leverantor: document.getElementById("leverantor").value,
-    veterinar: document.getElementById("veterinar").value,
-    karenstid: document.getElementById("karenstid").value,
-        kvalsternetfall: document.getElementById("kvalsternetfall").value,
-    sjukdomskontroll: document.getElementById("sjukdomskontroll").value,
-    skattadMangd: document.getElementById("skattadMangd").value
-
-};
-
-
+            const formData = {
+                SkotselID: autoID,
+                BigardsID: bigardsId,
+                SamhallsID: document.getElementById("valt-samhalle").value,
+                Datum: document.getElementById("datum").value,
+                Drottningsett: document.getElementById("drottning").value, // Ändrat från drottningsett till drottning
+                Svarmlystnad: document.getElementById("svarmlystnad").value,
+                Temperament: document.getElementById("temperament").value,
+                Anteckningar: document.getElementById("anteckningar").value,
+                Lakemedel: document.getElementById("lakemedel").value,
+                Diagnos: document.getElementById("diagnos").value,
+                Mangd: document.getElementById("mangd").value,
+                Tid: document.getElementById("tid").value,
+                Leverantor: document.getElementById("leverantor").value,
+                Veterinar: document.getElementById("veterinar").value,
+                Karenstid: document.getElementById("karenstid").value,
+                Kvalsternedfall: document.getElementById("kvalsternetfall").value,
+                Sjukdomskontroll: document.getElementById("sjukdomskontroll").value,
+                SkattadMangd: document.getElementById("skattadMangd").value
+            };
 
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
@@ -454,6 +449,16 @@ const formData = {
                 if (result.status === "success") {
                     alert("Besöket har sparats!");
                     document.getElementById('anteckningar').value = "";
+                    document.getElementById('lakemedel').value = "";
+                    document.getElementById('diagnos').value = "";
+                    document.getElementById('mangd').value = "";
+                    document.getElementById('tid').value = "";
+                    document.getElementById('leverantor').value = "";
+                    document.getElementById('veterinar').value = "";
+                    document.getElementById('karenstid').value = "";
+                    document.getElementById('kvalsternetfall').value = "";
+                    document.getElementById('sjukdomskontroll').value = "";
+                    document.getElementById('skattadMangd').value = "";
                     
                     sessionStorage.removeItem("myBeeApp_allData");
                     
@@ -472,6 +477,7 @@ const formData = {
                 submitBtn.textContent = "Spara besök";
             }
         });
+
         
         function toggleLakemedelsJournal() {
     const section = document.getElementById("lakemedelsJournalSection");
