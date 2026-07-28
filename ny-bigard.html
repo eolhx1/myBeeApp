@@ -10,8 +10,16 @@
 </head>
 <body>
 
-    <header id="page-header">
-        🐝 Lägg till ny bigård
+    <header>
+        <div class="header-title" id="page-header-title">🐝 Lägg till ny bigård</div>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu()">⋮</button>
+            <ul id="dropdownMenu" class="dropdown-menu">
+                <li><a href="index.html">Hem / Översikt</a></li>
+                <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
+                <li><a href="#" onclick="visaInstallningar(); return false;">Byt anslutningslänk</a></li>
+            </ul>
+        </div>
     </header>
 
     <!-- Brödsmulor / Navigation -->
@@ -87,11 +95,34 @@
     </div>
 
     <script>
+        // Meny-funktioner
+        function toggleMenu() {
+            const menu = document.getElementById("dropdownMenu");
+            menu.classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
+                const dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function visaInstallningar() {
+            localStorage.removeItem("myBeeApp_url");
+            initForm();
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('id');
 
         if (editId) {
-            document.getElementById('page-header').textContent = "🐝 Redigera bigård";
+            document.getElementById('page-header-title').textContent = "🐝 Redigera bigård";
             document.getElementById('submit-btn').textContent = "Spara ändringar";
         } else {
             document.getElementById('datum').valueAsDate = new Date();
@@ -195,7 +226,7 @@
             } catch (error) {
                 console.error("Fel:", error);
                 alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
+                submitBtn.disabled.false;
                 submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
             }
         });
