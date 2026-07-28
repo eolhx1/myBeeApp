@@ -13,7 +13,7 @@
     <header>
         <div class="header-title" id="page-header-title">🐝 Lägg till ny bigård</div>
         <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()">⋮</button>
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
             <ul id="dropdownMenu" class="dropdown-menu">
                 <li><a href="index.html">Hem / Översikt</a></li>
                 <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
@@ -95,7 +95,6 @@
     </div>
 
     <script>
-        // Meny-funktioner
         function toggleMenu() {
             const menu = document.getElementById("dropdownMenu");
             menu.classList.toggle("show");
@@ -159,7 +158,6 @@
                     document.getElementById('lon').value = found.Longitud || "";
                     document.getElementById('anteckningar').value = found.Anteckningar || "";
 
-                    // Uppdatera brödsmulan med bigårdens namn
                     document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
                 }
             } catch (e) {
@@ -226,7 +224,7 @@
             } catch (error) {
                 console.error("Fel:", error);
                 alert("Kunde inte nå servern.");
-                submitBtn.disabled.false;
+                submitBtn.disabled = false;
                 submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
             }
         });
