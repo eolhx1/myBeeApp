@@ -26,6 +26,9 @@
             justify-content: space-between;
             position: relative;
         }
+        .menu-container {
+            position: relative;
+        }
         .menu-btn {
             background: none;
             border: none;
@@ -41,16 +44,18 @@
         .dropdown-menu {
             display: none;
             position: absolute;
-            top: 100%;
+            top: calc(100% + 10px);
             left: 0;
             background-color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             list-style: none;
             padding: 0;
             margin: 0;
             width: 220px;
             z-index: 1000;
             text-align: left;
+            border-radius: 4px;
+            overflow: hidden;
         }
         .dropdown-menu.show {
             display: block;
@@ -63,6 +68,9 @@
             border-bottom: 1px solid #eee;
             font-size: 0.95rem;
         }
+        .dropdown-menu li:last-child a {
+            border-bottom: none;
+        }
         .dropdown-menu li a:hover {
             background-color: #f4f4f9;
             color: #f39c12;
@@ -71,23 +79,6 @@
             padding: 1rem;
             max-width: 600px;
             margin: auto;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            background-color: #27ae60;
-            color: white;
-            padding: 0.8rem;
-            text-align: center;
-            font-size: 1rem;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-bottom: 1.5rem;
-            box-sizing: border-box;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background-color: #219653;
         }
         .card {
             background: white;
@@ -162,14 +153,15 @@
 <body>
 
     <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            <ul id="dropdownMenu" class="dropdown-menu">
+                <li><a href="#" onclick="visaInstallningar()">Ändra anslutningslänk</a></li>
+                <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
+            </ul>
+        </div>
         <div class="header-title">🐝 MyBeeApp - Bigårdar</div>
         <div style="width: 24px;"></div>
-
-        <ul id="dropdownMenu" class="dropdown-menu">
-            <li><a href="#" onclick="visaInstallningar()">Ändra anslutningslänk</a></li>
-            <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
-        </ul>
     </header>
 
     <div class="container">
@@ -183,8 +175,6 @@
 
         <!-- Huvudinnehåll -->
         <div id="main-content" style="display: none;">
-            <a href="ny-bigard.html" class="btn">+ Lägg till ny bigård</a>
-            
             <h3>Karta över bigårdar</h3>
             <div id="map"></div>
 
@@ -206,7 +196,7 @@
         }
 
         window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn')) {
+            if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
                 const dropdowns = document.getElementsByClassName("dropdown-menu");
                 for (let i = 0; i < dropdowns.length; i++) {
                     let openDropdown = dropdowns[i];
