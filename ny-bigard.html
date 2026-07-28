@@ -192,17 +192,6 @@
     <script>
         document.getElementById('datum').valueAsDate = new Date();
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
-
-        function getSpreadsheetId() {
-            let stored = localStorage.getItem("myBeeApp_url") || localStorage.getItem("myBeeApp_sheetId");
-            if (!stored) return "";
-            
-            // Om det är en fullständig Google Docs-länk eller URL, plocka ut ID om det behövs, 
-            // eller använd hela Apps Script-länken beroende på hur den sparats.
-            return stored;
-        }
-
         function initForm() {
             const savedUrl = localStorage.getItem("myBeeApp_url");
             if (!savedUrl) {
@@ -228,9 +217,6 @@
             e.preventDefault();
             
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-            // Hämta kalkylarks-ID (eller länk) sparat på startsidan om det behövs, 
-            // här använder vi länk-parametrarna som skriptet förväntar sig.
-            
             if (!WEB_APP_URL) {
                 alert("Ingen anslutningslänk hittades.");
                 initForm();
@@ -255,8 +241,8 @@
             };
 
             try {
-                // Vi skickar med både sheet-namn och länk/ID korrekt i anropet
-                let targetUrl = `${WEB_APP_URL}?sheet=Bigårdar&id=${encodeURIComponent(WEB_APP_URL)}`;
+                // Ändrat till "Bigardar" för att matcha fliknamnet i Google Sheets
+                let targetUrl = `${WEB_APP_URL}?sheet=Bigardar&id=${encodeURIComponent(WEB_APP_URL)}`;
                 
                 let response = await fetch(targetUrl, {
                     method: "POST",
