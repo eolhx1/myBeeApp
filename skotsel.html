@@ -105,6 +105,43 @@
                 </div>
 
 
+<!-- Dragspelsknapp för Bihälsa & Sjukdomskontroll -->
+<div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #27ae60; padding-top: 1rem;">
+    <button type="button" onclick="toggleBihalsaSection()" style="background: #27ae60; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span>🔬 Bihälsa, Varroanedfall & Sjukdomskontroll</span>
+        <span id="bihalsa-arrow">▼</span>
+    </button>
+</div>
+
+<div id="bihalsaSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #27ae60; border-radius: 4px; margin-bottom: 1rem;">
+    <div class="form-group">
+        <label for="kvalsternetfall">Varroanedfall (antal kvalster):</label>
+        <input type="number" id="kvalsternetfall" placeholder="T.ex. 5 st (eller bottenbrädesräkning)">
+    </div>
+
+    <div class="form-group">
+        <label for="sjukdomskontroll">Sjukdomskontroll / Avvikelser:</label>
+        <textarea id="sjukdomskontroll" placeholder="T.ex. Inga tecken på kalkyngel, säckyngel eller yngelröta. Allt frisk yngelbild."></textarea>
+    </div>
+</div>
+
+<!-- Dragspelsknapp för Skörd -->
+<div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #f39c12; padding-top: 1rem;">
+    <button type="button" onclick="toggleSkordSection()" style="background: #e67e22; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span>🍯 Honungsskörd (Skattad mängd)</span>
+        <span id="skord-arrow">▼</span>
+    </button>
+</div>
+
+<div id="skordSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #e67e22; border-radius: 4px; margin-bottom: 1rem;">
+    <div class="form-group">
+        <label for="skattadMangd">Skattad mängd honung (kilon eller lådor):</label>
+        <input type="text" id="skattadMangd" placeholder="T.ex. 15 kg eller 1 skattlåda">
+    </div>
+</div>
+
+
+
 <!-- Dragspelsknapp för Läkemedelsjournal (Lagkrav) -->
 <div style="margin: 1.5rem 0 1rem 0; border-top: 2px dashed #e67e22; padding-top: 1rem;">
     <button type="button" onclick="toggleLakemedelsJournal()" style="background: #f39c12; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
@@ -276,7 +313,7 @@
                 return;
             }
 
-            minaLoggar.reverse().forEach(logg => {
+                        minaLoggar.reverse().forEach(logg => {
                 let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
                 let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
 
@@ -284,16 +321,34 @@
                 let svarmText = logg.Svarmlystnad || "Ej angivet";
                 let tempText = logg.Temperament || "Ej angivet";
 
+                // Bygg extra rader dynamiskt om fälten finns ifyllda
+                let extraInfoHTML = "";
+                
+                if (logg.Lakemedel) {
+                    extraInfoHTML += `<p style="color: #d35400; margin: 0.2rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}, Karenstid: ${logg.Karenstid || 0} dygn</p>`;
+                }
+                if (logg.Kvalsternedfall) {
+                    extraInfoHTML += `<p style="margin: 0.2rem 0;">🔬 <strong>Varroanedfall:</strong> ${logg.Kvalsternedfall} st</p>`;
+                }
+                if (logg.Sjukdomskontroll) {
+                    extraInfoHTML += `<p style="margin: 0.2rem 0;">📋 <strong>Sjukdomskontroll:</strong> ${logg.Sjukdomskontroll}</p>`;
+                }
+                if (logg.SkattadMangd) {
+                    extraInfoHTML += `<p style="color: #e67e22; margin: 0.2rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
+                }
+
                 let item = document.createElement('div');
                 item.className = 'log-item';
                 item.innerHTML = `
-                    <p><strong>📅 ${logg.Datum}</strong> &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
+                    <p><strong>📅 ${logg.Datum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
                     <p>👑 ${drottningText}</p>
                     <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
                     ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
+                    ${extraInfoHTML}
                 `;
                 historikDiv.appendChild(item);
             });
+
         }
 
         document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
@@ -377,7 +432,11 @@ const formData = {
     tid: document.getElementById("tid").value,
     leverantor: document.getElementById("leverantor").value,
     veterinar: document.getElementById("veterinar").value,
-    karenstid: document.getElementById("karenstid").value
+    karenstid: document.getElementById("karenstid").value,
+        kvalsternetfall: document.getElementById("kvalsternetfall").value,
+    sjukdomskontroll: document.getElementById("sjukdomskontroll").value,
+    skattadMangd: document.getElementById("skattadMangd").value
+
 };
 
 
@@ -425,6 +484,31 @@ const formData = {
         arrow.textContent = "▼";
     }
 }
+
+function toggleBihalsaSection() {
+    const section = document.getElementById("bihalsaSection");
+    const arrow = document.getElementById("bihalsa-arrow");
+    if (section.style.display === "none") {
+        section.style.display = "block";
+        arrow.textContent = "▲";
+    } else {
+        section.style.display = "none";
+        arrow.textContent = "▼";
+    }
+}
+
+function toggleSkordSection() {
+    const section = document.getElementById("skordSection");
+    const arrow = document.getElementById("skord-arrow");
+    if (section.style.display === "none") {
+        section.style.display = "block";
+        arrow.textContent = "▲";
+    } else {
+        section.style.display = "none";
+        arrow.textContent = "▼";
+    }
+}
+
 
 
         laddaData();
