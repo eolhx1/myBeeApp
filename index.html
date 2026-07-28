@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Mina Bigårdar</title>
-    <!-- Om du har Leaflet-bibliotek för kartan här låter vi dem ligga kvar -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body {
@@ -22,6 +21,21 @@
             text-align: center;
             font-size: 1.2rem;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 0.5rem;
+        }
+        .header-title {
+            flex-grow: 1;
+            text-align: center;
         }
         .container {
             padding: 1rem;
@@ -118,7 +132,9 @@
 <body>
 
     <header>
-        🐝 MyBeeApp - Bigårdar
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <div class="header-title">🐝 MyBeeApp - Bigårdar</div>
+        <div style="width: 24px;"></div>
     </header>
 
     <div class="container">
@@ -144,11 +160,14 @@
         </div>
     </div>
 
-    <!-- Leaflet JS om kartan används -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         let map;
+
+        function toggleMenu() {
+            alert("Meny");
+        }
 
         function initApp() {
             const savedUrl = localStorage.getItem("myBeeApp_url");
@@ -159,7 +178,6 @@
                 document.getElementById("setup-screen").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
                 
-                // Initiera karta om den inte redan är skapad
                 if (!map && typeof L !== 'undefined') {
                     map = L.map('map').setView([62.0, 15.0], 4);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -187,7 +205,7 @@
             const listContainer = document.getElementById("bigard-list");
 
             try {
-                let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
+                let response = andrest = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
                 let data = await response.json();
 
                 if (data.status === "error") {
@@ -202,7 +220,6 @@
 
                 listContainer.innerHTML = "";
                 
-                // Om kartan finns, rensa gamla markers eller hantera dem
                 if (map) {
                     map.invalidateSize();
                 }
@@ -225,7 +242,6 @@
                     `;
                     listContainer.appendChild(card);
 
-                    // Lägg till markör på kartan om lat/long finns
                     if (map && b.Latitud && b.Longitud) {
                         let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
                         let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
