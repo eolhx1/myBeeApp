@@ -104,6 +104,56 @@
                     <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Gav en skattlåda till, foderstatus OK..."></textarea>
                 </div>
 
+
+<!-- Dragspelsknapp för Läkemedelsjournal (Lagkrav) -->
+<div style="margin: 1.5rem 0 1rem 0; border-top: 2px dashed #e67e22; padding-top: 1rem;">
+    <button type="button" onclick="toggleLakemedelsJournal()" style="background: #f39c12; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        <span>💊 Registrera läkemedelsbehandling (Läkemedelsjournal)</span>
+        <span id="journal-arrow">▼</span>
+    </button>
+</div>
+
+<!-- Den utfällbara sektionen (dold som standard) -->
+<div id="lakemedelsJournalSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #f39c12; border-radius: 4px; margin-bottom: 1rem;">
+    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0; margin-bottom: 1rem;">Fylls endast i vid faktisk behandling (krav enligt EU/Jordbruksverket).</p>
+
+    <div class="form-group">
+        <label for="lakemedel">Läkemedel:</label>
+        <input type="text" id="lakemedel" placeholder="T.ex. Myrsyra 60%, Oxalsyra">
+    </div>
+
+    <div class="form-group">
+        <label for="diagnos">Diagnos / Orsak:</label>
+        <input type="text" id="diagnos" placeholder="T.ex. Varroakontroll / Varroabehandling">
+    </div>
+
+    <div class="form-group">
+        <label for="mangd">Mängd och styrka:</label>
+        <input type="text" id="mangd" placeholder="T.ex. 40 ml per kupa">
+    </div>
+
+    <div class="form-group">
+        <label for="tid">Klockslag (Tid):</label>
+        <input type="time" id="tid">
+    </div>
+
+    <div class="form-group">
+        <label for="leverantor">Leverantör / Inköpsställe:</label>
+        <input type="text" id="leverantor" placeholder="T.ex. Biodlarna / Utländsk leverantör">
+    </div>
+
+    <div class="form-group">
+        <label for="veterinar">Förskrivande veterinär (om tillämpligt):</label>
+        <input type="text" id="veterinar" placeholder="Lämna tomt om ej anvisat av vet.">
+    </div>
+
+    <div class="form-group">
+        <label for="karenstid">Karenstid (dygn):</label>
+        <input type="number" id="karenstid" placeholder="T.ex. 0 eller antal dygn">
+    </div>
+</div>
+
+
                 <button type="submit" class="btn" id="submit-btn">Spara besök</button>
             </form>
         </div>
@@ -263,6 +313,9 @@
                 Anteckningar: document.getElementById('samhalle-anteckningar').value
             };
 
+
+
+
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Samhallen", {
                     method: "POST",
@@ -307,16 +360,27 @@
 
             const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
 
-            const formData = {
-                SkotselID: autoID,
-                BigardsID: bigardsId,
-                SamhallsID: document.getElementById('valt-samhalle').value,
-                Datum: document.getElementById('datum').value,
-                Drottningsett: document.getElementById('drottning').value,
-                Svarmlystnad: document.getElementById('svarmlystnad').value,
-                Temperament: document.getElementById('temperament').value,
-                Anteckningar: document.getElementById('anteckningar').value
-            };
+        
+const formData = {
+    action: "sparaSkotsel",
+    bigardsID: bigardsID,
+    samhallsID: document.getElementById("valt-samhalle").value,
+    datum: document.getElementById("datum").value,
+    drottningsett: document.getElementById("drottningsett").value,
+    svarmlystnad: document.getElementById("svarmlystnad").value,
+    temperament: document.getElementById("temperament").value,
+    anteckningar: document.getElementById("anteckningar").value,
+    // Nya fält för läkemedelsjournalen:
+    lakemedel: document.getElementById("lakemedel").value,
+    diagnos: document.getElementById("diagnos").value,
+    mangd: document.getElementById("mangd").value,
+    tid: document.getElementById("tid").value,
+    leverantor: document.getElementById("leverantor").value,
+    veterinar: document.getElementById("veterinar").value,
+    karenstid: document.getElementById("karenstid").value
+};
+
+
 
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
@@ -349,6 +413,19 @@
                 submitBtn.textContent = "Spara besök";
             }
         });
+        
+        function toggleLakemedelsJournal() {
+    const section = document.getElementById("lakemedelsJournalSection");
+    const arrow = document.getElementById("journal-arrow");
+    if (section.style.display === "none") {
+        section.style.display = "block";
+        arrow.textContent = "▲";
+    } else {
+        section.style.display = "none";
+        arrow.textContent = "▼";
+    }
+}
+
 
         laddaData();
     </script>
