@@ -161,6 +161,8 @@
                 map.invalidateSize();
             }
 
+            let markers = []; // <-- Samlar ihop positioner för kartan
+
             data.forEach(b => {
                 const status = b.Status || "Aktiv";
                 const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
@@ -168,7 +170,7 @@
                 const card = document.createElement("div");
                 card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
                 
-                // HUVUDKLICK: Tar dig direkt till skötselsidan för denna bigård (så som en biodlare jobbar)
+                // HUVUDKLICK: Tar dig direkt till skötselsidan för denna bigård
                 card.onclick = () => {
                     window.location.href = `skotsel.html?id=${encodeURIComponent(b.BigardsID)}`;
                 };
@@ -190,12 +192,22 @@
                     let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
                     let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
                     if (!isNaN(lat) && !isNaN(lon)) {
-                        L.marker([lat, lon]).addTo(map)
+                        let latLng = [lat, lon];
+                        L.marker(latLng).addTo(map)
                             .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
+                        
+                        markers.push(latLng); // <-- Lägg till koordinaten i listan
                     }
                 }
             });
+
+            // Om vi har hittat några giltiga positioner, zooma så alla syns perfekt
+            if (map && markers.length > 0) {
+                let bounds = L.latLngBounds(markers);
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
         }
+
 
         // Hjälpfunktion för att nå inställningar/formuläret för bigården via kugghjulet
         function redigeraBigard(id) {
