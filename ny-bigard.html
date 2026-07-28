@@ -1,5 +1,3 @@
-
-
 <!-- Filnamn: ny-bigard.html -->
 <!DOCTYPE html>
 <html lang="sv">
@@ -11,10 +9,14 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header -->
+    <!-- Generera gemensam header och dynamisk rubrik -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("🐝 Lägg till ny bigård", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span id="breadcrumb-text">Ny bigård</span>');
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('id');
+        const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
+        
+        laddaHeader(rubrikText, '<a href="index.html">🏠 Hem</a><span>&gt;</span><span id="breadcrumb-text">Ny bigård</span>');
     </script>
 
     <div class="container">
@@ -76,43 +78,16 @@
                 <textarea id="anteckningar" name="Anteckningar" placeholder="Kort beskrivning..."></textarea>
             </div>
 
-            <button type="submit" class="btn" id="submit-btn">Spara bigård</button>
+            <button type="submit" class="btn" id="submit-btn">Spara ändringar</button>
         </form>
 
         <a href="index.html" class="back-link" style="display:none;">← Tillbaka till översikten</a>
     </div>
 
     <script>
-        function toggleMenu() {
-            const menu = document.getElementById("dropdownMenu");
-            menu.classList.toggle("show");
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
-                const dropdowns = document.getElementsByClassName("dropdown-menu");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    let openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-
-        function visaInstallningar() {
-            localStorage.removeItem("myBeeApp_url");
-            initForm();
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const editId = urlParams.get('id');
-
-        if (editId) {
-            document.getElementById('page-header-title').textContent = "🐝 Redigera bigård";
-            document.getElementById('submit-btn').textContent = "Spara ändringar";
-        } else {
+        if (!editId) {
             document.getElementById('datum').valueAsDate = new Date();
+            document.getElementById('submit-btn').textContent = "Spara bigård";
         }
 
         function initForm() {
@@ -143,23 +118,13 @@
                     document.getElementById('antal').value = found.AntalSamhallen || 0;
                     document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
                     document.getElementById('lat').value = found.Latitud || "";
-                    document.getElementById('lon').value = found.Longitud || "";
+                    document.getElementById('lon').value, found.Longitud || "";
                     document.getElementById('anteckningar').value = found.Anteckningar || "";
 
                     document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
                 }
             } catch (e) {
                 console.error("Kunde inte ladda data för redigering", e);
-            }
-        }
-
-        function sparaUrl() {
-            const url = document.getElementById("url-input").value.trim();
-            if (url.startsWith("https://script.google.com")) {
-                localStorage.setItem("myBeeApp_url", url);
-                initForm();
-            } else {
-                alert("Vänligen ange en giltig länk.");
             }
         }
 
