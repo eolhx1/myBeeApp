@@ -1,3 +1,5 @@
+
+
 <!-- Filnamn: ny-bigard.html -->
 <!DOCTYPE html>
 <html lang="sv">
@@ -5,29 +7,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Bigård</title>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <div class="header-title" id="page-header-title">🐝 Lägg till ny bigård</div>
-        <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()">☰</button>
-            <ul id="dropdownMenu" class="dropdown-menu">
-                <li><a href="index.html">Hem / Översikt</a></li>
-                <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
-                <li><a href="#" onclick="visaInstallningar(); return false;">Byt anslutningslänk</a></li>
-            </ul>
-        </div>
-    </header>
-
-    <!-- Brödsmulor / Navigation -->
-    <div class="nav-bar" style="justify-content: flex-start; gap: 0.5rem;">
-        <a href="index.html">🏠 Hem</a>
-        <span>&gt;</span>
-        <span id="breadcrumb-text">Ny bigård</span>
-    </div>
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🐝 Lägg till ny bigård", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span id="breadcrumb-text">Ny bigård</span>');
+    </script>
 
     <div class="container">
         <div id="setup-screen" style="display: none;">

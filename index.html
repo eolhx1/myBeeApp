@@ -1,33 +1,25 @@
+
+
+
+
+
 <!-- Filnamn: index.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp - Mina Bigårdar</title>
+    <title>MyBeeApp - Översikt</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<link rel="stylesheet" href="style.css">
-
-
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()">☰</button>
-            <ul id="dropdownMenu" class="dropdown-menu">
-                <li><a href="#" onclick="visaInstallningar()">Ändra anslutningslänk</a></li>
-                <li><a href="ny-bigard.html">Lägg till ny bigård</a></li>
-            </ul>
-        </div>
-        <div class="header-title">🐝 MyBeeApp - Bigårdar</div>
-        <div style="width: 24px;"></div>
-    </header>
-    
-    <!-- Brödsmulor / Navigation för startsidan -->
-    <div class="nav-bar" style="justify-content: flex-start;">
-        <span>🏠 Hem</span>
-    </div>   
+
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🐝 Mina Bigårdar", '<span>🏠 Hem</span>');
+    </script>
 
     <div class="container">
         <!-- Setup om URL saknas -->
