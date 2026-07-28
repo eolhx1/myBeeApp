@@ -138,7 +138,7 @@
     </header>
 
     <div class="container">
-        <!-- Setup om URL saknas -->
+        <!-- Setup om URL saknas / HÄR ÄR RUTA FÖR ATT LÄGGA IN ANSLUTNINGSLÄNK -->
         <div id="setup-screen" style="display: none;">
             <h2>Anslut din app</h2>
             <p>Klistra in din Google Apps Script Web App URL nedan:</p>
@@ -166,7 +166,11 @@
         let map;
 
         function toggleMenu() {
-            alert("Meny");
+            // Om man vill nollställa eller byta länk kan man t.ex. rensa länk eller visa inställningar
+            if (confirm("Vill du byta anslutningslänk?")) {
+                localStorage.removeItem("myBeeApp_url");
+                location.reload();
+            }
         }
 
         function initApp() {
@@ -205,7 +209,7 @@
             const listContainer = document.getElementById("bigard-list");
 
             try {
-                let response = andrest = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
+                let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
                 let data = await response.json();
 
                 if (data.status === "error") {
