@@ -1,7 +1,7 @@
 // Filnamn: header.js
 
 function laddaHeader(titelTekst, breadcrumbHTML = '') {
-    // Skapa HTML-strukturen för header, sidomeny och inställningsmeny
+    // Skapa HTML-strukturen med vänsterställda brödsmulor
     const headerHTML = `
         <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
             <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
@@ -16,7 +16,7 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
         </div>
 
-        <!-- Inställningsmodal / Meny som fälls ut eller dyker upp -->
+        <!-- Inställningsmodal -->
         <div id="settingsModal" style="display: none; position: fixed; z-index: 3000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
             <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -25,7 +25,6 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <!-- Framtida mörkt läge-knapp/switch kan ligga här -->
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
                         <span>🌙 Mörkt läge (kommer)</span>
                         <input type="checkbox" disabled title="Kommer snart" style="cursor: not-allowed;">
@@ -36,25 +35,22 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             </div>
         </div>
 
-        ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">${breadcrumbHTML}</div>` : ''}
+        ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; text-align: left;">${breadcrumbHTML}</div>` : ''}
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
 }
 
-// Funktion för sidomenyn
 function toggleSidebar() {
     const sidebar = document.getElementById("mySidebar");
     sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
 }
 
-// Funktion för inställningsmenyn
 function toggleSettingsMenu() {
     const modal = document.getElementById("settingsModal");
     modal.style.display = modal.style.display === "flex" ? "none" : "flex";
 }
 
-// Nollställningsfunktion
 function bytUrlSide() {
     if (confirm("Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.")) {
         localStorage.removeItem("myBeeApp_url");
