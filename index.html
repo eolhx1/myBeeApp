@@ -157,7 +157,7 @@
             }
         }
 
-        function visaBigardar(data) {
+                function visaBigardar(data) {
             const listContainer = document.getElementById("bigard-list");
             listContainer.innerHTML = "";
             
@@ -171,15 +171,22 @@
                 
                 const card = document.createElement("div");
                 card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
+                
+                // HUVUDKLICK: Tar dig direkt till skötselsidan för denna bigård (så som en biodlare jobbar)
                 card.onclick = () => {
-                    window.location.href = `ny-bigard.html?id=${encodeURIComponent(b.BigardsID)}`;
+                    window.location.href = `skotsel.html?id=${encodeURIComponent(b.BigardsID)}`;
                 };
 
                 card.innerHTML = `
-                    <h3>${b.Namn || 'Namnlös bigård'}</h3>
-                    <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
-                    <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
-                    <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3>${b.Namn || 'Namnlös bigård'}</h3>
+                            <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
+                            <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
+                            <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" title="Ändra bigård" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
+                    </div>
                 `;
                 listContainer.appendChild(card);
 
@@ -188,11 +195,17 @@
                     let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
                     if (!isNaN(lat) && !isNaN(lon)) {
                         L.marker([lat, lon]).addTo(map)
-                            .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}`);
+                            .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
                     }
                 }
             });
         }
+
+        // Hjälpfunktion för att nå inställningar/formuläret för bigården via kugghjulet
+        function redigeraBigard(id) {
+            window.location.href = `ny-bigard.html?id=${id}`;
+        }
+
 
         initApp();
     </script>
