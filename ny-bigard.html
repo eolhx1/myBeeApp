@@ -7,14 +7,18 @@
     <title>MyBeeApp - Bigård</title>
     
     <link rel="stylesheet" href="style.css">
-
-
 </head>
 <body>
 
     <header id="page-header">
         🐝 Lägg till ny bigård
     </header>
+
+    <!-- Brödsmulor / Navigation -->
+    <div class="nav-bar">
+        <a href="index.html">🏠 Hem</a>
+        <span id="breadcrumb-text">Ny bigård</span>
+    </div>
 
     <div class="container">
         <div id="setup-screen" style="display: none;">
@@ -78,7 +82,7 @@
             <button type="submit" class="btn" id="submit-btn">Spara bigård</button>
         </form>
 
-        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+        <a href="index.html" class="back-link" style="display:none;">← Tillbaka till översikten</a>
     </div>
 
     <script>
@@ -122,6 +126,9 @@
                     document.getElementById('lat').value = found.Latitud || "";
                     document.getElementById('lon').value = found.Longitud || "";
                     document.getElementById('anteckningar').value = found.Anteckningar || "";
+
+                    // Uppdatera brödsmulan med bigårdens namn
+                    document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
                 }
             } catch (e) {
                 console.error("Kunde inte ladda data för redigering", e);
@@ -151,7 +158,6 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            // Om det är en ny bigård skapas ett ID, annars behålls det befintliga
             const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
@@ -167,7 +173,7 @@
             };
 
             try {
-let targetUrl = `${WEB_APP_URL}?sheet=Bigardar`;
+                let targetUrl = `${WEB_APP_URL}?sheet=Bigardar`;
                 
                 let response = await fetch(targetUrl, {
                     method: "POST",
