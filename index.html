@@ -46,6 +46,7 @@
         </div>
     </div>
 
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -70,6 +71,7 @@
 
         function visaInstallningar() {
             localStorage.removeItem("myBeeApp_url");
+            sessionStorage.removeItem("myBeeApp_bigardar");
             initApp();
         }
 
@@ -90,7 +92,19 @@
                     }).addTo(map);
                 }
 
-                hamtaBigardar();
+                // Kolla om vi har sparad data i sessionen först för direkt visning
+                const cachedBigardar = sessionStorage.getItem("myBeeApp_bigardar");
+                if (cachedBigardar) {
+                    try {
+                        let data = JSON.parse(cachedBigardar);
+                        visaBigardar(data);
+                    } catch (e) {
+                        console.error("Kunde inte läsa cache", e);
+                    }
+                }
+
+                // Hämta alltid färsk data i bakgrunden (eller direkt om ingen cache fanns)
+                hamtaBigardar(!cachedBigardar);
             }
         }
 
@@ -104,65 +118,84 @@
             }
         }
 
-        async function hamtaBigardar() {
+        async function hamtaBigardar(visaLaddarText = false) {
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             const listContainer = document.getElementById("bigard-list");
+
+            if (visaLaddarText && !sessionStorage.getItem("myBeeApp_bigardar")) {
+                listContainer.innerHTML = "<p>Laddar bigårdar...</p>";
+            }
 
             try {
                 let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
                 let data = await response.json();
 
                 if (data.status === "error") {
-                    listContainer.innerHTML = `<p style="color:red;">Fel: ${data.message}</p>`;
+                    if (!sessionStorage.getItem("myBeeApp_bigardar")) {
+                        listContainer.innerHTML = `<p style="color:red;">Fel: ${data.message}</p>`;
+                    }
                     return;
                 }
 
                 if (!data || data.length === 0) {
                     listContainer.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
+                    sessionStorage.removeItem("myBeeApp_bigardar");
                     return;
                 }
 
-                listContainer.innerHTML = "";
-                
-                if (map) {
-                    map.invalidateSize();
-                }
+                // Spara ner i cachen
+                sessionStorage.setItem("myBeeApp_bigardar", JSON.stringify(data));
 
-                data.forEach(b => {
-                    const status = b.Status || "Aktiv";
-                    const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
-                    
-                    const card = document.createElement("div");
-                    card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
-                    card.onclick = () => {
-                        window.location.href = `ny-bigard.html?id=${encodeURIComponent(b.BigardsID)}`;
-                    };
-
-                    card.innerHTML = `
-                        <h3>${b.Namn || 'Namnlös bigård'}</h3>
-                        <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
-                        <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
-                        <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
-                    `;
-                    listContainer.appendChild(card);
-
-                    if (map && b.Latitud && b.Longitud) {
-                        let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
-                        let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
-                        if (!isNaN(lat) && !isNaN(lon)) {
-                            L.marker([lat, lon]).addTo(map)
-                                .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}`);
-                        }
-                    }
-                });
+                // Rita ut listan och kartan med nya datan
+                visaBigardar(data);
 
             } catch (error) {
                 console.error(error);
-                listContainer.innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
+                if (!sessionStorage.getItem("myBeeApp_bigardar")) {
+                    listContainer.innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
+                }
             }
+        }
+
+        function visaBigardar(data) {
+            const listContainer = document.getElementById("bigard-list");
+            listContainer.innerHTML = "";
+            
+            if (map) {
+                map.invalidateSize();
+            }
+
+            data.forEach(b => {
+                const status = b.Status || "Aktiv";
+                const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
+                
+                const card = document.createElement("div");
+                card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
+                card.onclick = () => {
+                    window.location.href = `ny-bigard.html?id=${encodeURIComponent(b.BigardsID)}`;
+                };
+
+                card.innerHTML = `
+                    <h3>${b.Namn || 'Namnlös bigård'}</h3>
+                    <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
+                    <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
+                    <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
+                `;
+                listContainer.appendChild(card);
+
+                if (map && b.Latitud && b.Longitud) {
+                    let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
+                    let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}`);
+                    }
+                }
+            });
         }
 
         initApp();
     </script>
+
 </body>
 </html>
