@@ -3,26 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp</title>
+    <title>MyBeeApp - Mina Bigårdar</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-        .settings-box { background: #f4f4f4; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
-        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f9f9f9; color: #333; }
+        .card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background: #45a049; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- Enkelt inställningsfält för plattan -->
-    <div class="settings-box">
-        <h3>Inställningar</h3>
-        <label for="sheetInput">Klistra in länk eller ID till ditt Google Kalkylark:</label>
-        <input type="text" id="sheetInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+    <!-- Inställnings- och kopplingsruta -->
+    <div class="card">
+        <h3>Kalkylarks-koppling</h3>
+        <label for="sheetInput">Google Kalkylark Länk / ID:</label>
+        <input type="text" id="sheetInput" placeholder="Klistra in länk eller ID här...">
         <button onclick="sparaFranFalt()">Spara koppling</button>
     </div>
 
-    <h2>Mina Bigårdar</h2>
-    <div id="bigardar-lista">Laddar bigårdar...</div>
+    <!-- Formulär för att lägga till ny bigård -->
+    <div class="card">
+        <h3>Lägg till ny bigård</h3>
+        <label for="namn">Bigårdens namn:</label>
+        <input type="text" id="namn" placeholder="T.ex. Hemma bigården">
+        
+        <label for="latitud">Latitud:</label>
+        <input type="text" id="latitud" placeholder="T.ex. 57.3243">
+        
+        <label for="longitud">Longitud:</label>
+        <input type="text" id="longitud" placeholder="T.ex. 13.0056">
+        
+        <button onclick="laggTillBigard()">Spara till kalkylark</button>
+    </div>
+
+    <!-- Lista över befintliga bigårdar -->
+    <div class="card">
+        <h3>Mina Bigårdar</h3>
+        <div id="bigardar-lista">Laddar bigårdar...</div>
+    </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOmE9c8y8bNdNmBmf1V7tWVuR1aJQfxjhwwDDAFu1oWSeQQx29VHHue2jcziql9ltK/exec";
@@ -40,13 +61,14 @@
             return stored;
         }
 
+        // Hämta data från Apps Script / Kalkylark
         function fetchData() {
             const sheetId = getSpreadsheetId();
+            const listaDiv = document.getElementById("bigardar-lista");
             
             if (!sheetId) {
-                const listaDiv = document.getElementById("bigardar-lista");
                 if (listaDiv) {
-                    listaDiv.innerHTML = "Inget kalkylarks-ID hittades. Ange ditt kalkylarks-ID/länk i fältet ovan.";
+                    listaDiv.innerHTML = "Inget kalkylarks-ID hittades. Ange länk eller ID ovan.";
                 }
                 return;
             }
@@ -56,14 +78,63 @@
                 .then(data => {
                     if (data.error) {
                         console.error("Fel från Apps Script:", data.error);
-                        document.getElementById("bigardar-lista").innerHTML = "Fel: " + data.error;
+                        listaDiv.innerHTML = "Fel: " + data.error;
                         return;
                     }
                     uppdateraBigardsLista(data.bigardar);
                 })
                 .catch(error => {
                     console.error("Kunde inte hämta data:", error);
+                    listaDiv.innerHTML = "Kunde inte nå servern.";
                 });
+        }
+
+        // Spara ny post till fliken 'Bigårdar' i kalkylarket
+        function laggTillBigard() {
+            const sheetId = getSpreadsheetId();
+            if (!sheetId) {
+                alert("Ange kalkylarks-koppling först!");
+                return;
+            }
+
+            const namn = document.getElementById("namn").value;
+            const latitud = document.getElementById("latitud").value;
+            const longitud = document.getElementById("longitud").value;
+
+            if (!namn) {
+                alert("Du måste ange ett namn på bigården!");
+                return;
+            }
+
+            const nyRad = {
+                Namn: namn,
+                Latitud: latitud,
+                Longitud: longitud
+            };
+
+            fetch(`${SCRIPT_URL}?sheet=Bigårdar&id=${sheetId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(nyRad)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    alert("Bigården har sparats!");
+                    document.getElementById("namn").value = "";
+                    document.getElementById("latitud").value = "";
+                    document.getElementById("longitud").value = "";
+                    fetchData(); // Uppdatera listan direkt
+                } else {
+                    alert("Kunde inte spara: " + (result.message || "Okänt fel"));
+                }
+            })
+            .catch(error => {
+                console.error("Fel vid sparande:", error);
+                alert("Ett fel uppstod vid kommunikation med kalkylarket.");
+            });
         }
 
         function sparaFranFalt() {
@@ -88,7 +159,7 @@
             
             let html = "<ul>";
             bigardar.forEach(b => {
-                html += `<li>${b.Namn || "Namnlös bigård"} (Lat: ${b.Latitud || "-"}, Lon: ${b.Longitud || "-"})</li>`;
+                html += `<li><b>${b.Namn || "Namnlös bigård"}</b> (Lat: ${b.Latitud || "-"}, Lon: ${b.Longitud || "-"})</li>`;
             });
             html += "</ul>";
             
@@ -96,7 +167,6 @@
         }
 
         window.onload = function() {
-            // Fyll i fältet automatiskt om det redan finns sparat
             let savedId = localStorage.getItem("myBeeApp_sheetId");
             if (savedId) {
                 document.getElementById("sheetInput").value = savedId;
