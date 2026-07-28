@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp - Lägg till bigård</title>
+    <title>MyBeeApp - Bigård</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,19 +91,6 @@
             color: #d35400;
             margin-top: 0;
         }
-        .instruction-box {
-            background: #f9f9f9;
-            border-left: 4px solid #f39c12;
-            padding: 0.8rem 1rem;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            text-align: left;
-        }
-        .instruction-box ol {
-            margin: 0.5rem 0 0 1.2rem;
-            padding: 0;
-        }
         #setup-screen input {
             width: 100%;
             padding: 0.7rem;
@@ -127,22 +114,29 @@
 </head>
 <body>
 
-    <header>
+    <header id="page-header">
         🐝 Lägg till ny bigård
     </header>
 
     <div class="container">
-        <!-- Setup-skärm om URL saknas -->
         <div id="setup-screen" style="display: none;">
             <h2>Anslut din app</h2>
-            <p>Du behöver ansluta appen till ditt Google-ark innan du kan lägga till bigårdar.</p>
-            
-            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här...">
+            <input type="text" id="url-input" placeholder="Web App URL...">
             <button onclick="sparaUrl()">Spara länk</button>
         </div>
 
-        <!-- Formulär -->
         <form id="bigard-form" style="display: none;">
+            <!-- Dold input för ID om vi redigerar -->
+            <input type="hidden" id="bigards-id" name="BigardsID">
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="Status">
+                    <option value="Aktiv">Aktiv</option>
+                    <option value="Inaktiv">Inaktiv / Ej aktiv</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="namn">Bigårdens namn:</label>
                 <input type="text" id="namn" name="Namn" required placeholder="T.ex. Hemmabigården">
@@ -180,7 +174,7 @@
 
             <div class="form-group">
                 <label for="anteckningar">Anteckningar:</label>
-                <textarea id="anteckningar" name="Anteckningar" placeholder="Kort beskrivning av platsen..."></textarea>
+                <textarea id="anteckningar" name="Anteckningar" placeholder="Kort beskrivning..."></textarea>
             </div>
 
             <button type="submit" class="btn" id="submit-btn">Spara bigård</button>
@@ -190,7 +184,15 @@
     </div>
 
     <script>
-        document.getElementById('datum').valueAsDate = new Date();
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('id');
+
+        if (editId) {
+            document.getElementById('page-header').textContent = "🐝 Redigera bigård";
+            document.getElementById('submit-btn').textContent = "Spara ändringar";
+        } else {
+            document.getElementById('datum').valueAsDate = new Date();
+        }
 
         function initForm() {
             const savedUrl = localStorage.getItem("myBeeApp_url");
@@ -200,6 +202,31 @@
             } else {
                 document.getElementById("setup-screen").style.display = "none";
                 document.getElementById("bigard-form").style.display = "block";
+                if (editId) {
+                    laddaDataForRedigering(savedUrl, editId);
+                }
+            }
+        }
+
+        async function laddaDataForRedigering(webAppUrl, id) {
+            try {
+                let response = await fetch(`${webAppUrl}?sheet=Bigardar`);
+                let data = await response.json();
+                let found = data.find(b => b.BigardsID == id);
+
+                if (found) {
+                    document.getElementById('bigards-id').value = found.BigardsID || "";
+                    document.getElementById('status').value = found.Status || "Aktiv";
+                    document.getElementById('namn').value = found.Namn || "";
+                    document.getElementById('typ').value = found.Typ || "Produktionsbigård";
+                    document.getElementById('antal').value = found.AntalSamhallen || 0;
+                    document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
+                    document.getElementById('lat').value = found.Latitud || "";
+                    document.getElementById('lon').value = found.Longitud || "";
+                    document.getElementById('anteckningar').value = found.Anteckningar || "";
+                }
+            } catch (e) {
+                console.error("Kunde inte ladda data för redigering", e);
             }
         }
 
@@ -209,7 +236,7 @@
                 localStorage.setItem("myBeeApp_url", url);
                 initForm();
             } else {
-                alert("Vänligen ange en giltig Google Apps Script-URL.");
+                alert("Vänligen ange en giltig länk.");
             }
         }
 
@@ -219,7 +246,6 @@
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             if (!WEB_APP_URL) {
                 alert("Ingen anslutningslänk hittades.");
-                initForm();
                 return;
             }
 
@@ -227,10 +253,12 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const autoID = "B" + Math.floor(1000 + Math.random() * 9000);
+            // Om det är en ny bigård skapas ett ID, annars behålls det befintliga
+            const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
-                BigardsID: autoID,
+                BigardsID: currentId,
+                Status: document.getElementById('status').value,
                 Namn: document.getElementById('namn').value,
                 Typ: document.getElementById('typ').value,
                 AntalSamhallen: document.getElementById('antal').value,
@@ -241,32 +269,29 @@
             };
 
             try {
-                // Ändrat till "Bigardar" för att matcha fliknamnet i Google Sheets
                 let targetUrl = `${WEB_APP_URL}?sheet=Bigardar&id=${encodeURIComponent(WEB_APP_URL)}`;
                 
                 let response = await fetch(targetUrl, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    },
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(formData)
                 });
                 
                 let result = await response.json();
                 
                 if (result.status === "success") {
-                    alert("Bigården har sparats!");
+                    alert("Ändringarna har sparats!");
                     window.location.href = "index.html";
                 } else {
-                    alert("Ett fel uppstod vid sparandet: " + (result.message || "Okänt fel"));
+                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
                     submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara bigård";
+                    submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
                 }
             } catch (error) {
                 console.error("Fel:", error);
                 alert("Kunde inte nå servern.");
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Spara bigård";
+                submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
             }
         });
 

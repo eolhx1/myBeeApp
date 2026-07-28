@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Mina Bigårdar</title>
-    
+    <!-- Om du har Leaflet-bibliotek för kartan här låter vi dem ligga kvar -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,82 +19,72 @@
             background-color: #f39c12;
             color: white;
             padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
             font-size: 1.2rem;
             font-weight: bold;
-        }
-        .menu-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .sidebar {
-            height: 100%;
-            width: 0;
-            position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            background-color: #2c3e50;
-            overflow-x: hidden;
-            transition: 0.3s;
-            padding-top: 60px;
-            color: white;
-            box-shadow: 5px 0px 15px rgba(0,0,0,0.5);
-        }
-        .sidebar a {
-            padding: 12px 20px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            color: #ecf0f1;
-            display: block;
-            transition: 0.2s;
-        }
-        .sidebar a:hover {
-            background-color: #34495e;
-            color: #f39c12;
-        }
-        .sidebar .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 1.8rem;
         }
         .container {
             padding: 1rem;
             max-width: 600px;
             margin: auto;
         }
-        #map {
-            height: 300px;
-            border-radius: 8px;
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 1rem;
+            border-radius: 5px;
+            text-decoration: none;
             margin-bottom: 1.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            font-weight: bold;
         }
-        .section-title {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
+        .btn:hover {
+            background-color: #219653;
         }
-        .bee-yard-card {
+        .card {
             background: white;
             padding: 1rem;
             border-radius: 8px;
-            margin-bottom: 0.8rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            border-left: 5px solid #27ae60;
+            position: relative;
         }
-        .bee-yard-card h3 {
-            margin: 0 0 0.4rem 0;
-            color: #d35400;
+        .card.inaktiv {
+            border-left-color: #95a5a6;
+            opacity: 0.7;
         }
-        .bee-yard-card p {
-            margin: 0;
-            font-size: 0.9rem;
+        .card h3 {
+            margin: 0 0 0.5rem 0;
+            color: #2c3e50;
+        }
+        .card p {
+            margin: 0.2rem 0;
             color: #555;
+            font-size: 0.95rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            background: #e1f5fe;
+            color: #0288d1;
+            margin-top: 0.4rem;
+        }
+        .badge.inaktiv {
+            background: #eceff1;
+            color: #546e7a;
+        }
+        #map {
+            height: 250px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
         }
         #setup-screen {
             background: white;
@@ -103,23 +92,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             margin-top: 1rem;
-        }
-        #setup-screen h2 {
-            color: #d35400;
-            margin-top: 0;
-        }
-        .instruction-box {
-            background: #f9f9f9;
-            border-left: 4px solid #f39c12;
-            padding: 0.8rem 1rem;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            text-align: left;
-        }
-        .instruction-box ol {
-            margin: 0.5rem 0 0 1.2rem;
-            padding: 0;
+            text-align: center;
         }
         #setup-screen input {
             width: 100%;
@@ -145,67 +118,57 @@
 <body>
 
     <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <span>🐝 MyBeeApp</span>
-        <div style="width: 24px;"></div>
+        🐝 MyBeeApp - Bigårdar
     </header>
 
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="close-btn" onclick="toggleMenu()">&times;</a>
-        <a href="index.html">🏠 Hem / Karta</a>
-        <a href="ny-bigard.html">➕ Lägg till bigård</a>
-        <a href="#" onclick="bytUrl()">⚙️ Byt anslutningslänk</a>
-    </div>
-
     <div class="container">
-        <!-- Setup-skärm -->
+        <!-- Setup om URL saknas -->
         <div id="setup-screen" style="display: none;">
-            <h2>Välkommen till MyBeeApp!</h2>
-            <p>För att använda appen behöver du koppla den till ett eget Google-kalkylark.</p>
-            <input type="text" id="url-input" placeholder="Klistra in din Web App URL här...">
-            <button onclick="sparaUrl()">Spara och starta appen</button>
+            <h2>Anslut din app</h2>
+            <p>Klistra in din Google Apps Script Web App URL nedan:</p>
+            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button onclick="sparaUrl()">Anslut</button>
         </div>
 
-        <!-- Appens innehåll -->
-        <div id="app-content" style="display: none;">
-            <div class="section-title">Karta över bigårdar</div>
+        <!-- Huvudinnehåll -->
+        <div id="main-content" style="display: none;">
+            <a href="ny-bigard.html" class="btn">+ Lägg till ny bigård</a>
+            
+            <h3>Karta över bigårdar</h3>
             <div id="map"></div>
 
-            <div class="section-title">Mina bigårdar (Lista)</div>
-            <div id="bigard-lista">
+            <h3>Mina bigårdar (Lista)</h3>
+            <div id="bigard-list">
                 <p>Laddar bigårdar...</p>
             </div>
         </div>
     </div>
 
+    <!-- Leaflet JS om kartan används -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        function toggleMenu() {
-            const sidebar = document.getElementById("mySidebar");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
-        }
-
         let map;
 
         function initApp() {
             const savedUrl = localStorage.getItem("myBeeApp_url");
-            
             if (!savedUrl) {
                 document.getElementById("setup-screen").style.display = "block";
-                document.getElementById("app-content").style.display = "none";
+                document.getElementById("main-content").style.display = "none";
             } else {
                 document.getElementById("setup-screen").style.display = "none";
-                document.getElementById("app-content").style.display = "block";
+                document.getElementById("main-content").style.display = "block";
                 
-                if (!map) {
-                    map = L.map('map').setView([62.1957, 14.9436], 5);
-                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                // Initiera karta om den inte redan är skapad
+                if (!map && typeof L !== 'undefined') {
+                    map = L.map('map').setView([62.0, 15.0], 4);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
-                        attribution: '&copy; OpenStreetMap'
+                        attribution: '© OpenStreetMap'
                     }).addTo(map);
                 }
-                hämtaDataOchVisa(savedUrl);
+
+                hamtaBigardar();
             }
         }
 
@@ -215,84 +178,67 @@
                 localStorage.setItem("myBeeApp_url", url);
                 initApp();
             } else {
-                alert("Vänligen ange en giltig Google Apps Script-URL.");
+                alert("Ange en giltig Apps Script URL.");
             }
         }
 
-        function bytUrl() {
-            localStorage.removeItem("myBeeApp_url");
-            sessionStorage.clear();
-            toggleMenu();
-            initApp();
-        }
-
-        async function hämtaDataOchVisa(WEB_APP_URL) {
-            let bigårdar = [];
-
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-            
-            if (cachedData) {
-                let parsed = JSON.parse(cachedData);
-                bigårdar = parsed.bigardar;
-                visaBigårdar(bigårdar);
-            } else {
-                document.getElementById('bigard-lista').innerHTML = "<p>Hämtar data från molnet...</p>";
-            }
+        async function hamtaBigardar() {
+            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+            const listContainer = document.getElementById("bigard-list");
 
             try {
-                let response = await fetch(WEB_APP_URL);
+                let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
                 let data = await response.json();
+
+                if (data.status === "error") {
+                    listContainer.innerHTML = `<p style="color:red;">Fel: ${data.message}</p>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    listContainer.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
+                    return;
+                }
+
+                listContainer.innerHTML = "";
                 
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(data));
-                
-                bigårdar = data.bigardar;
-                visaBigårdar(bigårdar);
+                // Om kartan finns, rensa gamla markers eller hantera dem
+                if (map) {
+                    map.invalidateSize();
+                }
+
+                data.forEach(b => {
+                    const status = b.Status || "Aktiv";
+                    const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
+                    
+                    const card = document.createElement("div");
+                    card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
+                    card.onclick = () => {
+                        window.location.href = `ny-bigard.html?id=${encodeURIComponent(b.BigardsID)}`;
+                    };
+
+                    card.innerHTML = `
+                        <h3>${b.Namn || 'Namnlös bigård'}</h3>
+                        <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
+                        <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
+                        <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
+                    `;
+                    listContainer.appendChild(card);
+
+                    // Lägg till markör på kartan om lat/long finns
+                    if (map && b.Latitud && b.Longitud) {
+                        let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
+                        let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            L.marker([lat, lon]).addTo(map)
+                                .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}`);
+                        }
+                    }
+                });
 
             } catch (error) {
-                console.error("Kunde inte hämta data:", error);
-                if (!cachedData) {
-                    document.getElementById('bigard-lista').innerHTML = "<p>Kunde inte ladda bigårdar. Kontrollera anslutningen.</p>";
-                }
-            }
-        }
-
-        function visaBigårdar(bigårdar) {
-            let listaDiv = document.getElementById('bigard-lista');
-            listaDiv.innerHTML = "";
-
-            if (!bigårdar || bigårdar.length === 0) {
-                listaDiv.innerHTML = "<p>Inga bigårdar hittades i kalkylarket.</p>";
-                return;
-            }
-
-            let markers = [];
-
-            bigårdar.forEach(b => {
-                let namn = b.Namn || b.namn || "Namnlös bigård";
-                let typ = b.Typ || "Ej angivet";
-                let antal = b.AntalSamhallen || 0;
-                let id = b.BigardsID || "";
-
-                let card = document.createElement('div');
-                card.className = 'bee-yard-card';
-                card.innerHTML = `
-                    <h3>${namn}</h3>
-                    <p><strong>Typ:</strong> ${typ}</p>
-                    <p><strong>Antal samhällen:</strong> ${antal}</p>
-                    <a href="skotsel.html?id=${id}" style="display:inline-block; margin-top:0.6rem; background:#3498db; color:white; padding:0.4rem 0.8rem; text-decoration:none; border-radius:4px; font-size:0.85rem;">📝 Visa skötselkort</a>
-                `;
-                listaDiv.appendChild(card);
-
-                if (b.Latitud && b.Longitud && map) {
-                    let marker = L.marker([b.Latitud, b.Longitud]).addTo(map).bindPopup(`<b>${namn}</b>`);
-                    markers.push(marker);
-                }
-            });
-
-            // Automatiskt inzoomad vy på bigårdarna
-            if (markers.length > 0 && map) {
-                let group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.2));
+                console.error(error);
+                listContainer.innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
             }
         }
 
