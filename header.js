@@ -1,14 +1,12 @@
-
-
 // Filnamn: header.js
 
 function laddaHeader(titelTekst, breadcrumbHTML = '') {
-    // Skapa HTML-strukturen för header och sidomeny
+    // Skapa HTML-strukturen för header, sidomeny och inställningsknapp (kugghjul)
     const headerHTML = `
         <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
-            <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">☰</button>
+            <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
             <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
-            <div style="width: 24px;"></div>
+            <button onclick="bytUrlSide()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar / Byt anslutningslänk" aria-label="Inställningar">⚙️</button>
         </header>
 
         <!-- Sidomeny (Sidebar) -->
@@ -16,7 +14,6 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" style="position: absolute; top: 15px; right: 25px; font-size: 36px; color: white; text-decoration: none;">&times;</a>
             <a href="index.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🏠 Hem / Karta</a>
             <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
-            <a href="javascript:void(0)" onclick="bytUrlSide()" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">⚙️ Byt anslutningslänk</a>
         </div>
 
         ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">${breadcrumbHTML}</div>` : ''}
@@ -36,9 +33,11 @@ function toggleSidebar() {
     }
 }
 
-// Global hjälpfunktion för att nollställa URL
+// Global hjälpfunktion för att nollställa URL när man klickar på kugghjulet
 function bytUrlSide() {
-    localStorage.removeItem("myBeeApp_url");
-    sessionStorage.clear();
-    window.location.href = "index.html";
+    if (confirm("Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.")) {
+        localStorage.removeItem("myBeeApp_url");
+        sessionStorage.clear();
+        window.location.href = "index.html";
+    }
 }
