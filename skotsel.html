@@ -492,9 +492,10 @@
         document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
         document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
 
-        function fyllIBehfitligLoggOmFinns() {
+                function fyllIBehfitligLoggOmFinns() {
             const valtSamhallsID = document.getElementById("valt-samhalle").value;
             const valtDatum = document.getElementById("datum").value;
+            const submitBtn = document.getElementById("submit-btn");
 
             if (!valtSamhallsID || !valtDatum) return;
 
@@ -512,6 +513,9 @@
                 });
 
                 if (matchadLogg) {
+                    // Det finns en logg – fyll i fälten och ändra knapptexten till Uppdatera
+                    submitBtn.textContent = "Uppdatera besök";
+
                     document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
                     document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
                     document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
@@ -543,6 +547,9 @@
                         document.getElementById("journal-arrow").textContent = "▲";
                     }
                 } else {
+                    // Ingen logg finns – nollställ fälten och ändra knapptexten till Spara besök
+                    submitBtn.textContent = "Spara besök";
+
                     document.getElementById("anteckningar").value = "";
                     document.getElementById("lakemedel").value = "";
                     document.getElementById("diagnos").value = "";
@@ -554,11 +561,19 @@
                     document.getElementById("kvalsternedfall").value = "";
                     document.getElementById("sjukdomskontroll").value = "";
                     document.getElementById("skattadMangd").value = "";
+
+                    document.getElementById("bihalsaSection").style.display = "none";
+                    document.getElementById("bihalsa-arrow").textContent = "▼";
+                    document.getElementById("skordSection").style.display = "none";
+                    document.getElementById("skord-arrow").textContent = "▼";
+                    document.getElementById("lakemedelsJournalSection").style.display = "none";
+                    document.getElementById("journal-arrow").textContent = "▼";
                 }
             } catch (err) {
                 console.error("Kunde inte söka efter befintlig logg för autofyll", err);
             }
         }
+
 
         function toggleLakemedelsJournal() {
             const section = document.getElementById("lakemedelsJournalSection");
