@@ -45,6 +45,16 @@
             font-size: 0.9rem;
             color: #117a65;
         }
+        /* Stil för resultatbox som alltid visas */
+        .result-box {
+            background: #fdf2e9;
+            border: 1px solid #f39c12;
+            padding: 0.8rem;
+            border-radius: 4px;
+            margin-top: 0.8rem;
+            font-weight: bold;
+            color: #d35400;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +72,7 @@
             <button class="tool-tab active" onclick="bytFlik('socker')">💧 Sockerlag</button>
             <button class="tool-tab" onclick="bytFlik('oxalsyra')">⚗️ Oxalsyra</button>
             <button class="tool-tab" onclick="bytFlik('myrsyra')">🧪 Myrsyra</button>
-            <button class="tool-tab" onclick="bytFlik('ymp')">🍯 Ympning</button>
+            <button class="tool-tab" onclick="bytFlik('ymp')">🍯 Ympning (Ekobi)</button>
             <button class="tool-tab" onclick="bytFlik('schema')">👑 Drottning</button>
         </div>
 
@@ -75,7 +85,9 @@
                 <label for="socker-mangd">Önskad mängd socker (kg):</label>
                 <input type="number" id="socker-mangd" placeholder="T.ex. 15" oninput="raknaSockerlag()">
             </div>
-            <div id="sockerlag-resultat" style="background: #fdf2e9; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem; font-weight: bold; display: none;">
+            
+            <div id="sockerlag-resultat" class="result-box">
+                💧 Vatten att blanda i: <em>Fyll i önskad mängd socker ovan...</em>
             </div>
 
             <div class="instructions">
@@ -92,7 +104,9 @@
                 <label for="oxalsyra-liter">Antal liter färdig sockerlag som ska blandas:</label>
                 <input type="number" id="oxalsyra-liter" placeholder="T.ex. 2" step="0.5" oninput="raknaOxalsyra()">
             </div>
-            <div id="oxalsyra-resultat" style="background: #fdf2e9; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem; font-weight: bold; display: none;">
+            
+            <div id="oxalsyra-resultat" class="result-box">
+                ⚖️ Ingredienser: <em>Fyll i antal liter sockerlag ovan...</em>
             </div>
 
             <div class="instructions">
@@ -124,7 +138,9 @@
                 <label for="myrsyra-volym">Önskad slutvolym (ml):</label>
                 <input type="number" id="myrsyra-volym" value="1000" oninput="raknaMyrsyra()">
             </div>
-            <div id="myrsyra-resultat" style="background: #fdf2e9; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem; font-weight: bold; display: none;">
+            
+            <div id="myrsyra-resultat" class="result-box">
+                🧪 Ingredienser: <em>Fyll i giltiga värden ovan...</em>
             </div>
 
             <div class="instructions">
@@ -132,23 +148,26 @@
             </div>
         </div>
 
-        <!-- 4. Ympningskalkylator för honung -->
+        <!-- 4. Ympningskalkylator för honung (Ekobi-metoden) -->
         <div id="sec-ymp" class="tool-section card">
-            <h3 style="color: #2c3e50; margin-top: 0;">Ympningskalkylator (Krämig honung)</h3>
-            <p style="font-size: 0.9rem; color: #555;">Räkna ut fördelningen mellan fast kristalliserad ymp och nyslungad flytande honung för perfekt konsistens (ca 5% ymp).</p>
+            <h3 style="color: #2c3e50; margin-top: 0;">Ympningskalkylator (Ekobi-metoden)</h3>
+            <p style="font-size: 0.9rem; color: #555;">Räkna ut fördelningen enligt Ekobimodlingens principer för krämig honung.</p>
             
             <div class="form-group">
                 <label for="honung-total-vikt">Önskad total mängd färdig honung (kg):</label>
                 <input type="number" id="honung-total-vikt" placeholder="T.ex. 40" oninput="raknaYmp()">
             </div>
-            <div id="ymp-resultat" style="background: #fdf2e9; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem; font-weight: bold; display: none;">
+            
+            <div id="ymp-resultat" class="result-box">
+                🍯 Ingredienser: <em>Fyll i total mängd honung för att se fördelning...</em>
             </div>
 
             <div class="instructions">
-                <strong>Instruktion:</strong> 
-                1. Se till att din ymp-honung (grunden) är helt finfördelad och fri från stora korn.<br>
-                2. Blanda i ympen ordentligt i den nyslungade, flytande honungen utan att vispa in för mycket luftbubblor.<br>
-                3. Låt stå svalt och rör om regelbundet tills honungen har satt sig och fått önskad krämighet innan den tapetseras på burk.
+                <strong>Ekobi-instruktioner för ympning:</strong><br>
+                1. <strong>Ympen:</strong> Använd fast, finkornig och väl kristallerad honung av god kvalitet (gärna från föregående skörd). Den ska vara rumstempererad och fri från jäsning.<br>
+                2. <strong>Blandning:</strong> Tillsätt den uppmätta mängden ymp i den nyslungade, flytande (och rumstempererade) honungen.<br>
+                3. <strong>Omrörning:</strong> Rör om långsamt och noggrant så att ympen fördelar sig homogent i hela volymen utan att du vispar ner onödiga luftbubblor.<br>
+                4. <strong>Lagring & SlutsteG:</strong> Låt kärlet stå i rumstemperatur (ca 14–18°C) och rör om försiktigt någon gång per dag tills honungen börjar tjockna (vitna/sätta sig), därefter burkas den direkt.
             </div>
         </div>
 
@@ -161,7 +180,9 @@
                 <label for="ymp-datum">Datum för ympning (larver flyttas):</label>
                 <input type="date" id="ymp-datum" onchange="raknaSchema()">
             </div>
-            <div id="schema-resultat" style="background: #fdf2e9; padding: 0.8rem; border-radius: 4px; margin-top: 0.5rem; display: none; font-size: 0.9rem;">
+            
+            <div id="schema-resultat" class="result-box" style="font-size: 0.9rem;">
+                📅 <strong>Milstolpar:</strong> <em>Välj ett datum ovan...</em>
             </div>
 
             <div class="instructions">
@@ -203,12 +224,11 @@
             let kg = parseFloat(document.getElementById('socker-mangd').value);
             let resDiv = document.getElementById('sockerlag-resultat');
             if (!kg || kg <= 0) {
-                resDiv.style.display = 'none';
+                resDiv.innerHTML = `💧 Vatten att blanda i: <em>Fyll i önskad mängd socker ovan...</em>`;
                 return;
             }
             let vattenKg = kg * (2/3);
             let totalVolymL = (kg * 0.63) + vattenKg; 
-            resDiv.style.display = 'block';
             resDiv.innerHTML = `💧 Vatten att blanda i: <strong>${vattenKg.toFixed(1)} kg (liter)</strong><br>` +
                                `🍯 Uppskattad färdig volym: <strong>~${totalVolymL.toFixed(1)} liter</strong>`;
         }
@@ -217,13 +237,12 @@
             let liter = parseFloat(document.getElementById('oxalsyra-liter').value);
             let resDiv = document.getElementById('oxalsyra-resultat');
             if (!liter || liter <= 0) {
-                resDiv.style.display = 'none';
+                resDiv.innerHTML = `⚖️ Ingredienser: <em>Fyll i antal liter sockerlag ovan...</em>`;
                 return;
             }
             let gramPulver = liter * 35;
             let sockerGram = liter * 600; 
             let vattenMl = liter * 1000;
-            resDiv.style.display = 'block';
             resDiv.innerHTML = `⚖️ Oxalsyrepulver: <strong>${gramPulver.toFixed(1)} gram</strong><br>` +
                                `🍬 Strösocker: <strong>${sockerGram} gram</strong><br>` +
                                `💧 Vatten: <strong>${vattenMl} ml</strong>`;
@@ -236,14 +255,13 @@
             let resDiv = document.getElementById('myrsyra-resultat');
             
             if (!cStart || !cMal || !vMal || cStart <= cMal) {
-                resDiv.style.display = 'none';
+                resDiv.innerHTML = `🧪 Ingredienser: <em>Fyll i giltiga värden ovan...</em>`;
                 return;
             }
 
             let syraVolym = (cMal * vMal) / cStart;
             let vattenVolym = vMal - syraVolym;
 
-            resDiv.style.display = 'block';
             resDiv.innerHTML = `🧪 Stark syra (${cStart}%): <strong>${syraVolym.toFixed(1)} ml</strong><br>` +
                                `💧 Vatten: <strong>${vattenVolym.toFixed(1)} ml</strong>`;
         }
@@ -252,14 +270,14 @@
             let totalKg = parseFloat(document.getElementById('honung-total-vikt').value);
             let resDiv = document.getElementById('ymp-resultat');
             if (!totalKg || totalKg <= 0) {
-                resDiv.style.display = 'none';
+                resDiv.innerHTML = `🍯 Ingredienser (Ekobi): <em>Fyll i total mängd honung ovan...</em>`;
                 return;
             }
-            let ympKg = totalKg * 0.05; // 5% kristallerad ymp
-            let flytandeKg = totalKg * 0.95; // 95% nyslungad flytande honung
+            // Ekobi-metodens proportioner (standard ca 5-10% ymp, här satt på beprövad ekobibaserad fördelning, 5%)
+            let ympKg = totalKg * 0.05; 
+            let flytandeKg = totalKg * 0.95; 
             
-            resDiv.style.display = 'block';
-            resDiv.innerHTML = `🥄 Kristalliserad ymp-honung: <strong>${ympKg.toFixed(2)} kg</strong><br>` +
+            resDiv.innerHTML = `🥄 Kristalliserad ymp-honung (Ekobi): <strong>${ympKg.toFixed(2)} kg</strong><br>` +
                                `🍯 Nyslungad flytande honung: <strong>${flytandeKg.toFixed(2)} kg</strong>`;
         }
 
@@ -267,7 +285,7 @@
             let valdtDatum = document.getElementById('ymp-datum').value;
             let resDiv = document.getElementById('schema-resultat');
             if (!valdtDatum) {
-                resDiv.style.display = 'none';
+                resDiv.innerHTML = `📅 <strong>Drottningschema:</strong> <em>Välj ett datum ovan...</em>`;
                 return;
             }
 
@@ -279,7 +297,6 @@
                 return ny.toLocaleDateString('sv-SE', { weekday: 'short', month: 'short', day: 'numeric' });
             }
 
-            resDiv.style.display = 'block';
             resDiv.innerHTML = `📅 <strong>Drottningschema (från ympning Dag 0):</strong><br>` +
                                `• Dag 0 (Ympning): ${laggTillDagar(d, 0)}<br>` +
                                `• Dag 4 (Celler täcks): ${laggTillDagar(d, 4)}<br>` +
