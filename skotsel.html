@@ -515,6 +515,72 @@ function toggleSkordSection() {
     }
 }
 
+        // Lyssna efter ändringar på kupa eller datum för att fylla i befintlig data
+        document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
+        document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
+
+        function fyllIBehfitligLoggOmFinns() {
+            const valtSamhallsID = document.getElementById("valt-samhalle").value;
+            const valtDatum = document.getElementById("datum").value;
+
+            // Om inte både kupa och datum är valda gör vi ingenting
+            if (!valtSamhallsID || !valtDatum) return;
+
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            if (!cachedData) return;
+
+            try {
+                let parsedData = JSON.parse(cachedData);
+                let skotselLoggar = parsedData.skotsel || [];
+                
+                // Leta efter en matchande logg för samma kupa och datum
+                let matchadLogg = skotselLoggar.find(s => s.SamhallsID === valtSamhallsID && s.Datum === valtDatum);
+
+                if (matchadLogg) {
+                    // Fyll i standardfälten
+                    document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
+                    document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
+                    document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
+                    document.getElementById("anteckningar").value = matchadLogg.Anteckningar || "";
+
+                    // Fyll i Bihälsa / Varroa om det finns
+                    document.getElementById("kvalsternetfall").value = matchadLogg.Kvalsternedfall || "";
+                    document.getElementById("sjukdomskontroll").value = matchadLogg.Sjukdomskontroll || "";
+                    if (matchadLogg.Kvalsternedfall || matchadLogg.Sjukdomskontroll) {
+                        document.getElementById("bihalsaSection").style.display = "block";
+                        document.getElementById("bihalsa-arrow").textContent = "▲";
+                    }
+
+                    // Fyll i Skörd om det finns
+                    document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
+                    if (matchadLogg.SkattadMangd) {
+                        document.getElementById("skordSection").style.display = "block";
+                        document.getElementById("skord-arrow").textContent = "▲";
+                    }
+
+                    // Fyll i Läkemedelsjournal om det finns
+                    document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
+                    document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
+                    document.getElementById("mangd").value = matchadLogg.Mangd || "";
+                    document.getElementById("tid").value = matchadLogg.Tid || "";
+                    document.getElementById("leverantor").value = matchadLogg.Leverantor || "";
+                    document.getElementById("veterinar").value = matchadLogg.Veterinar || "";
+                    document.getElementById("karenstid").value = matchadLogg.Karenstid || "";
+                    
+                    if (matchadLogg.Lakemedel || matchadLogg.Diagnos || matchadLogg.Mangd) {
+                        document.getElementById("lakemedelsJournalSection").style.display = "block";
+                        document.getElementById("journal-arrow").textContent = "▲";
+                    }
+
+                } else {
+                    // Om det inte finns någon logg för detta datum kan vi rensa formuläret (valfritt, eller låta det vara om man vill skriva nytt)
+                    // Här låter vi fälten vara kvar eller nollställer vid behov.
+                }
+            } catch (err) {
+                console.error("Kunde inte söka efter befintlig logg för autofyll", err);
+            }
+        }
+
 
 
         laddaData();
