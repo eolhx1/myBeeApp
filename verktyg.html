@@ -45,7 +45,7 @@
             font-size: 0.9rem;
             color: #117a65;
         }
-        /* Stil för resultatbox som alltid visas */
+        /* Fast resultatbox som inte hoppar */
         .result-box {
             background: #fdf2e9;
             border: 1px solid #f39c12;
@@ -54,6 +54,7 @@
             margin-top: 0.8rem;
             font-weight: bold;
             color: #d35400;
+            min-height: 50px;
         }
     </style>
 </head>
@@ -72,7 +73,8 @@
             <button class="tool-tab active" onclick="bytFlik('socker')">💧 Sockerlag</button>
             <button class="tool-tab" onclick="bytFlik('oxalsyra')">⚗️ Oxalsyra</button>
             <button class="tool-tab" onclick="bytFlik('myrsyra')">🧪 Myrsyra</button>
-            <button class="tool-tab" onclick="bytFlik('ymp')">🍯 Ympning (Ekobi)</button>
+            <button class="tool-tab" onclick="bytFlik('ymp')">🍯 Ympning</button>
+            <button class="tool-tab" onclick="bytFlik('honung')">⚖️ Honungsskörden</button>
             <button class="tool-tab" onclick="bytFlik('schema')">👑 Drottning</button>
         </div>
 
@@ -87,7 +89,8 @@
             </div>
             
             <div id="sockerlag-resultat" class="result-box">
-                💧 Vatten att blanda i: <em>Fyll i önskad mängd socker ovan...</em>
+                💧 Vatten att blanda i: <strong>- kg (liter)</strong><br>
+                🍯 Uppskattad färdig volym: <strong>~- liter</strong>
             </div>
 
             <div class="instructions">
@@ -106,7 +109,9 @@
             </div>
             
             <div id="oxalsyra-resultat" class="result-box">
-                ⚖️ Ingredienser: <em>Fyll i antal liter sockerlag ovan...</em>
+                ⚖️ Oxalsyrepulver: <strong>- gram</strong><br>
+                🍬 Strösocker: <strong>- gram</strong><br>
+                💧 Vatten: <strong>- ml</strong>
             </div>
 
             <div class="instructions">
@@ -140,7 +145,8 @@
             </div>
             
             <div id="myrsyra-resultat" class="result-box">
-                🧪 Ingredienser: <em>Fyll i giltiga värden ovan...</em>
+                🧪 Stark syra: <strong>- ml</strong><br>
+                💧 Vatten: <strong>- ml</strong>
             </div>
 
             <div class="instructions">
@@ -148,7 +154,7 @@
             </div>
         </div>
 
-        <!-- 4. Ympningskalkylator (Ekobi-metoden baserat på Kupan) -->
+        <!-- 4. Ympningskalkylator (Ekobi-metoden) -->
         <div id="sec-ymp" class="tool-section card">
             <h3 style="color: #2c3e50; margin-top: 0;">Ympningskalkylator (Ekobi-metoden)</h3>
             <p style="font-size: 0.9rem; color: #555;">Beräkna den levande ympsatsen (2,5% av totalmängden) uppdelad på 10% finkristalliserad och 90% nyslungad honung.</p>
@@ -159,20 +165,52 @@
             </div>
             
             <div id="ymp-resultat" class="result-box">
-                🍯 Ympsatsens sammansättning: <em>Fyll i total mängd honung ovan...</em>
+                🥄 Total mängd levande ymp (2,5%): <strong>- kg</strong><br>
+                &nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>- g</strong><br>
+                &nbsp;&nbsp;&nbsp;• Varav nyslungad/smält honung (90%): <strong>- kg</strong>
             </div>
 
             <div class="instructions">
                 <strong>Ekobi-instruktioner för tillverkning av levande ymp:</strong><br>
-                1. <strong>Blanda ympsatsen:</strong> Ta den beräknade mängden finkristalliserad honung (10% av ympen) och nyslungad honung (90% av ympen). Rör ihop kraftigt (t.ex. med borrmaskin och omrörare).<br>
+                1. <strong>Blanda ympsatsen:</strong> Ta den beräknade mängden finkristalliserad honung (10% av ympen) och nyslungad honung (90% av ympen). Rör ihop kraftigt.<br>
                 2. <strong>Kylskåpslagring:</strong> Ställ ympsatsen i kylskåp vid 8–10°C.<br>
                 3. <strong>Rörning:</strong> Rör om kraftigt i ympsatsen var 12:e timma (ta ca 2 dygn) tills den stelnar mellan rörningarna.<br>
-                4. <strong>Inblandning:</strong> När ympsatsen är klar, rör ut den (ca 10-gradig) i den storskaliga nyslungade honungen (som bör hålla minst 20°C) snabbt och kraftigt.<br>
+                4. <strong>Inblandning:</strong> När ympsatsen är klar, rör ut den i den storskaliga nyslungade honungen (som bör hålla minst 20°C).<br>
                 5. <strong>Tappning:</strong> Tappa på burk och ställ i kyllager (helst ca 14°C).
             </div>
         </div>
 
-        <!-- 5. Drottningodling - Schema -->
+        <!-- 5. Beräkning av honungsmängd per ramformat -->
+        <div id="sec-honung" class="tool-section card">
+            <h3 style="color: #2c3e50; margin-top: 0;">Uppskattad honungsmängd per ramformat</h3>
+            <p style="font-size: 0.9rem; color: #555;">Räkna ut uppskattad honungsskörd baserat på ramformat och antal skattramar.</p>
+            
+            <div class="form-group">
+                <label for="ramformat">Välj ramformat:</label>
+                <select id="ramformat" onchange="raknaHonungsmangd()">
+                    <option value="2.0">Langstroth (Hel - 2,0 kg / ram)</option>
+                    <option value="1.2" selected>3/4 Langstroth (Låg - 1,2 kg / ram)</option>
+                    <option value="2.5">Svea (2,5 kg / ram)</option>
+                    <option value="2.2">Lågnorsk (2,2 kg / ram)</option>
+                    <option value="3.0">Dadant (Hel - 3,0 kg / ram)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="antal-ramar">Antal skattramar med honung:</label>
+                <input type="number" id="antal-ramar" placeholder="T.ex. 10" oninput="raknaHonungsmangd()">
+            </div>
+            
+            <div id="honung-skörd-resultat" class="result-box">
+                🍯 Beräknad honungsskörd: <strong>- kg</strong> (ca <strong>- liter</strong>)
+            </div>
+
+            <div class="instructions">
+                <strong>Tips:</strong> Siffrorna baseras på schablonvärden för fullständigt utbyggda och täckta skattramar. Värdet kan variera beroende på om ramarna är helt slagna eller om vaxet är utbyggt lite tjockare över träramen.
+            </div>
+        </div>
+
+        <!-- 6. Drottningodling - Schema -->
         <div id="sec-schema" class="tool-section card">
             <h3 style="color: #2c3e50; margin-top: 0;">Drottningodling - Tidsschema</h3>
             <p style="font-size: 0.9rem; color: #555;">Välj datum för ympning av larver för att se viktiga milstolpar.</p>
@@ -182,8 +220,13 @@
                 <input type="date" id="ymp-datum" onchange="raknaSchema()">
             </div>
             
-            <div id="schema-resultat" class="result-box" style="font-size: 0.9rem;">
-                📅 <strong>Milstolpar:</strong> <em>Välj ett datum ovan...</em>
+            <div id="schema-resultat" class="result-box" style="font-size: 0.9rem; min-height: auto;">
+                📅 <strong>Drottningschema (från ympning Dag 0):</strong><br>
+                • Dag 0 (Ympning): <strong>-</strong><br>
+                • Dag 4 (Celler täcks): <strong>-</strong><br>
+                • Dag 10 (Sista chans att flytta): <strong>-</strong><br>
+                • Dag 11-12 (Kläckning): <strong>-</strong><br>
+                • Dag ~18-21 (Äggläggning börjar): <strong>-</strong>
             </div>
 
             <div class="instructions">
@@ -211,6 +254,9 @@
             } else if (flikNamn === 'ymp') {
                 document.querySelector('[onclick="bytFlik(\'ymp\')"]').classList.add('active');
                 document.getElementById('sec-ymp').classList.add('active');
+            } else if (flikNamn === 'honung') {
+                document.querySelector('[onclick="bytFlik(\'honung\')"]').classList.add('active');
+                document.getElementById('sec-honung').classList.add('active');
             } else if (flikNamn === 'schema') {
                 document.querySelector('[onclick="bytFlik(\'schema\')"]').classList.add('active');
                 document.getElementById('sec-schema').classList.add('active');
@@ -225,7 +271,7 @@
             let kg = parseFloat(document.getElementById('socker-mangd').value);
             let resDiv = document.getElementById('sockerlag-resultat');
             if (!kg || kg <= 0) {
-                resDiv.innerHTML = `💧 Vatten att blanda i: <em>Fyll i önskad mängd socker ovan...</em>`;
+                resDiv.innerHTML = `💧 Vatten att blanda i: <strong>- kg (liter)</strong><br>🍯 Uppskattad färdig volym: <strong>~- liter</strong>`;
                 return;
             }
             let vattenKg = kg * (2/3);
@@ -238,7 +284,7 @@
             let liter = parseFloat(document.getElementById('oxalsyra-liter').value);
             let resDiv = document.getElementById('oxalsyra-resultat');
             if (!liter || liter <= 0) {
-                resDiv.innerHTML = `⚖️ Ingredienser: <em>Fyll i antal liter sockerlag ovan...</em>`;
+                resDiv.innerHTML = `⚖️ Oxalsyrepulver: <strong>- gram</strong><br>🍬 Strösocker: <strong>- gram</strong><br>💧 Vatten: <strong>- ml</strong>`;
                 return;
             }
             let gramPulver = liter * 35;
@@ -256,7 +302,7 @@
             let resDiv = document.getElementById('myrsyra-resultat');
             
             if (!cStart || !cMal || !vMal || cStart <= cMal) {
-                resDiv.innerHTML = `🧪 Ingredienser: <em>Fyll i giltiga värden ovan...</em>`;
+                resDiv.innerHTML = `🧪 Stark syra: <strong>- ml</strong><br>💧 Vatten: <strong>- ml</strong>`;
                 return;
             }
 
@@ -271,28 +317,39 @@
             let totalKg = parseFloat(document.getElementById('honung-total-vikt').value);
             let resDiv = document.getElementById('ymp-resultat');
             if (!totalKg || totalKg <= 0) {
-                resDiv.innerHTML = `🍯 Ympsatsens sammansättning: <em>Fyll i total mängd honung ovan...</em>`;
+                resDiv.innerHTML = `🥄 Total mängd levande ymp (2,5%): <strong>- kg</strong><br>&nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>- g</strong><br>&nbsp;&nbsp;&nbsp;• Varav nyslungad/smält honung (90%): <strong>- kg</strong>`;
                 return;
             }
             
-            // Ekobi-metoden: Levande ymp = 2.5% av totala mängden
             let totalYmpKg = totalKg * 0.025;
-            // Ympen består av 10% finkristalliserad och 90% nyslungad/smält honung
             let kristalliseradDel = totalYmpKg * 0.10;
             let flytandeDel = totalYmpKg * 0.90;
             
             resDiv.innerHTML = `🥄 Total mängd levande ymp som behövs (2,5%): <strong>${totalYmpKg.toFixed(2)} kg</strong><br>` +
-                               `&nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>${kristalliseradDel.toFixed(3)} kg (${(kristalliseradDel*1000).toFixed(0)} g)</strong><br>` +
+                               `&nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>${(kristalliseradDel*1000).toFixed(0)} g</strong><br>` +
                                `&nbsp;&nbsp;&nbsp;• Varav nyslungad/smält honung (90%): <strong>${flytandeDel.toFixed(2)} kg</strong>`;
+        }
+
+        function raknaHonungsmangd() {
+            let faktor = parseFloat(document.getElementById('ramformat').value);
+            let antal = parseFloat(document.getElementById('antal-ramar').value);
+            let resDiv = document.getElementById('honung-skörd-resultat');
+
+            if (!antal || antal <= 0) {
+                resDiv.innerHTML = `🍯 Beräknad honungsskörd: <strong>- kg</strong> (ca <strong>- liter</strong>)`;
+                return;
+            }
+
+            let totalKg = antal * faktor;
+            let totalLiter = totalKg / 1.42; // Honung har ungefärlig densitet 1.42 kg/liter
+
+            resDiv.innerHTML = `🍯 Beräknad honungsskörd: <strong>${totalKg.toFixed(1)} kg</strong> (ca <strong>${totalLiter.toFixed(1)} liter</strong>)`;
         }
 
         function raknaSchema() {
             let valdtDatum = document.getElementById('ymp-datum').value;
             let resDiv = document.getElementById('schema-resultat');
-            if (!valdtDatum) {
-                resDiv.innerHTML = `📅 <strong>Drottningschema:</strong> <em>Välj ett datum ovan...</em>`;
-                return;
-            }
+            if (!valdtDatum) return;
 
             let d = new Date(valdtDatum);
             
@@ -303,11 +360,11 @@
             }
 
             resDiv.innerHTML = `📅 <strong>Drottningschema (från ympning Dag 0):</strong><br>` +
-                               `• Dag 0 (Ympning): ${laggTillDagar(d, 0)}<br>` +
-                               `• Dag 4 (Celler täcks): ${laggTillDagar(d, 4)}<br>` +
-                               `• Dag 10 (Sista chans att flytta/skyddscirkla): ${laggTillDagar(d, 10)}<br>` +
-                               `• Dag 11-12 (Kläckning): ${laggTillDagar(d, 12)}<br>` +
-                               `• Dag ~18-21 (Äggläggning börjar): ${laggTillDagar(d, 20)}`;
+                               `• Dag 0 (Ympning): <strong>${laggTillDagar(d, 0)}</strong><br>` +
+                               `• Dag 4 (Celler täcks): <strong>${laggTillDagar(d, 4)}</strong><br>` +
+                               `• Dag 10 (Sista chans att flytta): <strong>${laggTillDagar(d, 10)}</strong><br>` +
+                               `• Dag 11-12 (Kläckning): <strong>${laggTillDagar(d, 12)}</strong><br>` +
+                               `• Dag ~18-21 (Äggläggning börjar): <strong>${laggTillDagar(d, 20)}</strong>`;
         }
     </script>
 </body>
