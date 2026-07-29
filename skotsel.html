@@ -43,18 +43,18 @@
     <div class="container">
         <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
 
-        <!-- Samhällen -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h3 style="margin: 0;">Samhällen / Kupor</h3>
-                <button onclick="toggleSamhalleFormModal()" class="btn" style="background-color: #27ae60; padding: 0.4rem 0.8rem; font-size: 0.85rem;">➕ Lägg till kupa</button>
-            </div>
-            <div id="samhalle-lista">
-                <p>
-                    Laddar samhällen...
-                </p>
-            </div>
-        </div>
+<!-- Samhällen -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 style="margin: 0;">Samhällen / Kupor</h3>
+        <!-- Diskret kugghjul för att hantera/lägga till samhällen -->
+        <button onclick="toggleSamhalleFormModal()" title="Lägg till nytt samhälle" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 0.5rem; line-height: 1;">⚙️</button>
+    </div>
+    <div id="samhalle-lista">
+        <p>Laddar samhällen...</p>
+    </div>
+</div>
+
 
         <!-- Skötselformulär -->
         <div class="card">
@@ -85,7 +85,7 @@
                 <div class="form-group">
                     <label for="svarmlystnad">Svärmlystnad:</label>
                     <select id="svarmlystnad" name="Svarmlystnad">
-                        <option value="">-- Välj svärmlystnad --</option>
+                        <option value="">-- Välj status --</option>
                         <option value="Inga svärmceller">Inga svärmceller</option>
                         <option value="Drönarbyggda svärmceller">Drönarbyggda svärmceller</option>
                         <option value="Fulla svärmceller (åtgärd krävs!)">Fulla svärmceller (åtgärd krävs!)</option>
@@ -95,7 +95,7 @@
                 <div class="form-group">
                     <label for="temperament">Temperament / Humör:</label>
                     <select id="temperament" name="Temperament">
-                        <option value="">-- Välj temperament --</option>
+                        <option value="">-- Välj humör --</option>
                         <option value="Lugna och snälla">Lugna och snälla</option>
                         <option value="Normala">Normala</option>
                         <option value="Aggressiva / Stickiga">Aggressiva / Stickiga</option>
@@ -483,7 +483,6 @@
             }
         }
 
-        // Formulär för att spara samhälle
         document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const samhalleBtn = document.getElementById('samhalle-btn');
@@ -528,7 +527,6 @@
             }
         });
 
-        // Formulär för att spara skötselbesök
         document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-btn');
@@ -591,9 +589,6 @@
                 if (result.status === "success") {
                     alert(befintligtSkotselID ? "Besöket har uppdaterats!" : "Besöket har sparats!");
 
-                    document.getElementById('drottning').value = "";
-                    document.getElementById('svarmlystnad').value = "";
-                    document.getElementById('temperament').value = "";
                     document.getElementById('anteckningar').value = "";
                     document.getElementById('lakemedel').value = "";
                     document.getElementById('diagnos').value = "";
