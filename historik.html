@@ -1,0 +1,283 @@
+<!-- Filnamn: historik.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Kupa & Historik</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span>Historik</span>');
+    </script>
+
+    <div class="container">
+        <!-- Steg 1: Välj bigård -->
+        <div class="card">
+            <h3>Steg 1: Välj bigård</h3>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="valt-bigard-historia">Bigård:</label>
+                <select id="valt-bigard-historia" name="BigardsID">
+                    <option value="">Laddar bigårdar...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Steg 2: Välj kupa (dold tills bigård är vald) -->
+        <div class="card" id="steg2-card" style="display: none;">
+            <h3>Steg 2: Välj kupa</h3>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="valt-samhalle-historia">Samhälle / Kupa i bigården:</label>
+                <select id="valt-samhalle-historia" name="SamhallsID">
+                    <option value="">-- Välj kupa --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Snabb-statistik / Nyckeltal -->
+        <div class="card" id="statistik-card" style="display: none;">
+            <h3>📊 Sammanställning för kupa</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; text-align: center;">
+                <div style="background: #f8f9f9; padding: 0.8rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Besök i år</span>
+                    <strong id="stat-besok" style="font-size: 1.2rem; color: #2c3e50;">0</strong>
+                </div>
+                <div style="background: #f8f9f9; padding: 0.8rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Total skörd</span>
+                    <strong id="stat-skord" style="font-size: 1.2rem; color: #e67e22;">0 kg</strong>
+                </div>
+                <div style="background: #f8f9f9; padding: 0.8rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Drottning år</span>
+                    <strong id="stat-drottning" style="font-size: 1.2rem; color: #2980b9;">-</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kronologisk tidslinje -->
+        <div class="card">
+            <h3>Tidslinje & Händelsehistorik</h3>
+            <div id="tidslinje-lista">
+                <p>Välj bigård och kupa ovan för att se historik.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+
+        async function laddaData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    fyllBigardarDropdown(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            }
+
+            try {
+                let response = await fetch(WEB_APP_URL);
+                allData = await response.json();
+                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+                fyllBigardarDropdown(allData);
+            } catch (error) {
+                console.error("Fel vid laddning:", error);
+                if (!cachedData) {
+                    document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
+                }
+            }
+        }
+
+        function fyllBigardarDropdown(data) {
+            let bigårdar = data.bigardar || [];
+            let bigardSelect = document.getElementById('valt-bigard-historia');
+            bigardSelect.innerHTML = '<option value="">-- Välj bigård --</option>';
+
+            if (bigårdar.length === 0) {
+                bigardSelect.innerHTML = '<option value="">Inga bigårdar inlagda</option>';
+                return;
+            }
+
+            bigårdar.forEach(b => {
+                let opt = document.createElement('option');
+                opt.value = b.BigardsID;
+                opt.textContent = b.Namn;
+                bigardSelect.appendChild(opt);
+            });
+
+            // Återställ tidigare val om det finns sparat
+            let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
+            if (valtBigardID) {
+                bigardSelect.value = valtBigardID;
+                uppdateraKuporDropdown(data);
+            }
+        }
+
+        function uppdateraKuporDropdown(dataProvided = null) {
+            const valtBigardsID = document.getElementById('valt-bigard-historia').value;
+            sessionStorage.setItem("myBeeApp_valdBigardHistoria", valtBigardsID);
+
+            let allData = dataProvided;
+            if (!allData) {
+                let cachedData = sessionStorage.getItem("myBeeApp_allData");
+                if (cachedData) allData = JSON.parse(cachedData);
+            }
+
+            let steg2Card = document.getElementById('steg2-card');
+            let samhalleSelect = document.getElementById('valt-samhalle-historia');
+
+            if (!valtBigardsID || !allData) {
+                steg2Card.style.display = 'none';
+                document.getElementById('statistik-card').style.display = 'none';
+                document.getElementById('tidslinje-lista').innerHTML = '<p>Välj bigård och kupa ovan för att se historik.</p>';
+                return;
+            }
+
+            let allaSamhällen = allData.samhallen || [];
+            let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
+
+            samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
+            if (minaSamhällen.length === 0) {
+                samhalleSelect.innerHTML = '<option value="">Inga samhällen i denna bigård</option>';
+                steg2Card.style.display = 'block';
+                document.getElementById('statistik-card').style.display = 'none';
+                document.getElementById('tidslinje-lista').innerHTML = '<p>Inga kupor finns i denna bigård.</p>';
+                return;
+            }
+
+            minaSamhällen.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.SamhallsID;
+                opt.textContent = `${s.Kupbenamning} ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}`;
+                samhalleSelect.appendChild(opt);
+            });
+
+            steg2Card.style.display = 'block';
+
+            // Kolla om kupa sedan tidigare var vald
+            let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
+            if (valtSamhallsID) {
+                // Kontrollera att kupan tillhör denna bigård
+                let finnsKupan = minaSamhällen.some(s => s.SamhallsID === valtSamhallsID);
+                if (finnsKupan) {
+                    samhalleSelect.value = valtSamhallsID;
+                    visaHistorikForKupa(allData);
+                } else {
+                    sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
+                    document.getElementById('statistik-card').style.display = 'none';
+                    document.getElementById('tidslinje-lista').innerHTML = '<p>Välj en kupa ovan för att se historik.</p>';
+                }
+            }
+        }
+
+        function visaHistorikForKupa(dataProvided = null) {
+            const valtSamhallsID = document.getElementById('valt-samhalle-historia').value;
+            sessionStorage.setItem("myBeeApp_valdKupaHistoria", valtSamhallsID);
+
+            let allData = dataProvided;
+            if (!allData) {
+                let cachedData = sessionStorage.getItem("myBeeApp_allData");
+                if (cachedData) allData = JSON.parse(cachedData);
+            }
+
+            if (!allData || !valtSamhallsID) {
+                document.getElementById('statistik-card').style.display = 'none';
+                document.getElementById('tidslinje-lista').innerHTML = '<p>Välj en kupa ovan för att se historik.</p>';
+                return;
+            }
+
+            let allaSamhällen = allData.samhallen || [];
+            let skotselLoggar = allData.skotsel || [];
+
+            let aktivKupa = allaSamhällen.find(s => s.SamhallsID === valtSamhallsID);
+            let minaLoggar = skotselLoggar.filter(s => s.SamhallsID === valtSamhallsID);
+
+            // Sortera loggar kronologiskt (nyast överst)
+            minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+
+            // Räkna ut statistik
+            let antalBesök = minaLoggar.length;
+            document.getElementById('stat-besok').textContent = antalBesök;
+            document.getElementById('stat-drottning').textContent = aktivKupa && aktivKupa.DrottningAr ? aktivKupa.DrottningAr : "-";
+
+            let totalSkördKilo = 0;
+            minaLoggar.forEach(l => {
+                if (l.SkattadMangd) {
+                    let matchNummer = l.SkattadMangd.match(/\d+/);
+                    if (matchNummer) {
+                        totalSkördKilo += parseInt(matchNummer[0]);
+                    }
+                }
+            });
+            document.getElementById('stat-skord').textContent = totalSkördKilo > 0 ? `${totalSkördKilo} kg` : "0 kg";
+            document.getElementById('statistik-card').style.display = 'block';
+
+            // Bygg tidslinjen
+            let tidslinjeDiv = document.getElementById('tidslinje-lista');
+            tidslinjeDiv.innerHTML = "";
+
+            if (minaLoggar.length === 0) {
+                tidslinjeDiv.innerHTML = "<p>Inga sparade besök registrerade för denna kupa ännu.</p>";
+                return;
+            }
+
+            minaLoggar.forEach(logg => {
+                let kortDatum = logg.Datum ? logg.Datum.substring(0, 10) : "";
+                let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
+                let svarmText = logg.Svarmlystnad || "Ej angivet";
+                let tempText = logg.Temperament || "Ej angivet";
+
+                let extraInfoHTML = "";
+                if (logg.Lakemedel) {
+                    extraInfoHTML += `<p style="color: #d35400; margin: 0.3rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}</p>`;
+                }
+                if (logg.Kvalsternedfall) {
+                    extraInfoHTML += `<p style="margin: 0.3rem 0;">🔬 <strong>Varroanedfall:</strong> ${logg.Kvalsternedfall} st</p>`;
+                }
+                if (logg.Sjukdomskontroll) {
+                    extraInfoHTML += `<p style="margin: 0.3rem 0;">📋 <strong>Sjukdomskontroll:</strong> ${logg.Sjukdomskontroll}</p>`;
+                }
+                if (logg.SkattadMangd) {
+                    extraInfoHTML += `<p style="color: #e67e22; margin: 0.3rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
+                }
+
+                let item = document.createElement('div');
+                item.className = 'log-item';
+                item.style.borderLeftColor = '#27ae60';
+                item.innerHTML = `
+                    <p style="margin-top: 0;"><strong>📅 ${kortDatum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''}</p>
+                    <p>👑 ${drottningText}</p>
+                    <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
+                    ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
+                    ${extraInfoHTML}
+                `;
+                tidslinjeDiv.appendChild(item);
+            });
+        }
+
+        document.getElementById('valt-bigard-historia').addEventListener('change', () => {
+            sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
+            uppdateraKuporDropdown(null);
+        });
+        
+        document.getElementById('valt-samhalle-historia').addEventListener('change', () => visaHistorikForKupa(null));
+
+        laddaData();
+    </script>
+</body>
+</html>
