@@ -167,7 +167,7 @@
                         <label for="diagnos">Diagnos / Orsak:</label>
                         <input type="text" id="diagnos" placeholder="T.ex. Varroakontroll / Varroabehandling">
                     </div>
-8
+
                     <div class="form-group">
                         <label for="mangd">Mängd och styrka:</label>
                         <input type="text" id="mangd" placeholder="T.ex. 40 ml per kupa">
@@ -314,44 +314,177 @@
 
             if (minaLoggar.length === 0) {
                 historikDiv.innerHTML = "<p>Inga sparade besök för denna bigård ännu.</p>";
+            } else {
+                minaLoggar.reverse().forEach(logg => {
+                    let matchadKupa = minaSamhällen.filter(s => s.BigardsID === bigardsId).find(s => s.SamhallsID === logg.SamhallsID);
+                    let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+
+                    let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
+                    let svarmText = logg.Svarmlystnad || "Ej angivet";
+                    let tempText = logg.Temperament || "Ej angivet";
+
+                    let extraInfoHTML = "";
+                    if (logg.Lakemedel) {
+                        extraInfoHTML += `<p style="color: #d35400; margin: 0.2rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}, Karenstid: ${logg.Karenstid || 0} dygn</p>`;
+                    }
+                    if (logg.Kvalsternedfall) {
+                        extraInfoHTML += `<p style="margin: 0.2rem 0;">🔬 <strong>Varroanedfall:</strong> ${logg.Kvalsternedfall} st</p>`;
+                    }
+                    if (logg.Sjukdomskontroll) {
+                        extraInfoHTML += `<p style="margin: 0.2rem 0;">📋 <strong>Sjukdomskontroll:</strong> ${logg.Sjukdomskontroll}</p>`;
+                    }
+                    if (logg.SkattadMangd) {
+                        extraInfoHTML += `<p style="color: #e67e22; margin: 0.2rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
+                    }
+
+                    let kortDatum = logg.Datum ? logg.Datum.substring(0, 10) : "";
+
+                    let item = document.createElement('div');
+                    item.className = 'log-item';
+                    item.innerHTML = `
+                        <p><strong>📅 ${kortDatum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
+                        <p>👑 ${drottningText}</p>
+                        <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
+                        ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
+                        ${extraInfoHTML}
+                    `;
+                    historikDiv.appendChild(item);
+                });
+            }
+
+            // Kontrollera om det redan finns en logg för valbar kupa/datum direkt efter inläsning
+            fyllIBehfitligLoggOmFinns();
+        }
+
+        function fyllIBehfitligLoggOmFinns() {
+            const valtSamhallsID = document.getElementById("valt-samhalle").value;
+            const valtDatum = document.getElementById("datum").value;
+            const submitBtn = document.getElementById("submit-btn");
+
+            // Om inget samhälle är valt (t.ex. vid "-- Välj kupa --"), nollställ och avbryt
+            if (!valtSamhallsID || !valtDatum) {
+                submitBtn.textContent = "Spara besök";
                 return;
             }
 
-            minaLoggar.reverse().forEach(logg => {
-                let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
-                let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            if (!cachedData) return;
 
-                let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
-                let svarmText = logg.Svarmlystnad || "Ej angivet";
-                let tempText = logg.Temperament || "Ej angivet";
+            try {
+                let parsedData = JSON.parse(cachedData);
+                let skotselLoggar = parsedData.skotsel || [];
+                
+                let matchadLogg = skotselLoggar.find(s => {
+                    if (!s.Datum) return false;
+                    let loggDatumKort = s.Datum.substring(0, 10);
+                    return s.SamhallsID === valtSamhallsID && loggDatumKort === valtDatum;
+                });
 
-                let extraInfoHTML = "";
-                if (logg.Lakemedel) {
-                    extraInfoHTML += `<p style="color: #d35400; margin: 0.2rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}, Karenstid: ${logg.Karenstid || 0} dygn</p>`;
-                }
-                if (logg.Kvalsternedfall) {
-                    extraInfoHTML += `<p style="margin: 0.2rem 0;">🔬 <strong>Varroanedfall:</strong> ${logg.Kvalsternedfall} st</p>`;
-                }
-                if (logg.Sjukdomskontroll) {
-                    extraInfoHTML += `<p style="margin: 0.2rem 0;">📋 <strong>Sjukdomskontroll:</strong> ${logg.Sjukdomskontroll}</p>`;
-                }
-                if (logg.SkattadMangd) {
-                    extraInfoHTML += `<p style="color: #e67e22; margin: 0.2rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
+                if (matchadLogg) {
+                    // Det finns en logg – fyll i fälten och ändra knapptexten till Uppdatera
+                    submitBtn.textContent = "Uppdatera besök";
+
+                    document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
+                    document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
+                    document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
+                    document.getElementById("anteckningar").value = matchadLogg.Anteckningar || "";
+                    document.getElementById("tid").value = matchadLogg.Tid || "";
+
+                    document.getElementById("kvalsternedfall").value = matchadLogg.Kvalsternedfall || "";
+                    document.getElementById("sjukdomskontroll").value = matchadLogg.Sjukdomskontroll || "";
+                    if (matchadLogg.Kvalsternedfall || matchadLogg.Sjukdomskontroll) {
+                        document.getElementById("bihalsaSection").style.display = "block";
+                        document.getElementById("bihalsa-arrow").textContent = "▲";
+                    }
+
+                    document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
+                    if (matchadLogg.SkattadMangd) {
+                        document.getElementById("skordSection").style.display = "block";
+                        document.getElementById("skord-arrow").textContent = "▲";
+                    }
+
+                    document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
+                    document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
+                    document.getElementById("mangd").value = matchadLogg.Mangd || "";
+                    document.getElementById("leverantor").value = matchadLogg.Leverantor || "";
+                    document.getElementById("veterinar").value = matchadLogg.Veterinar || "";
+                    document.getElementById("karenstid").value = matchadLogg.Karenstid || "";
+                    
+                    if (matchadLogg.Lakemedel || matchadLogg.Diagnos || matchadLogg.Mangd) {
+                        document.getElementById("lakemedelsJournalSection").style.display = "block";
+                        document.getElementById("journal-arrow").textContent = "▲";
+                    }
+                } else {
+                    // Ingen logg finns – nollställ alla fält och återställ knappen
+                    submitBtn.textContent = "Spara besök";
+
+                    document.getElementById("drottning").selectedIndex = 0;
+                    document.getElementById("svarmlystnad").selectedIndex = 0;
+                    document.getElementById("temperament").selectedIndex = 0;
+
+                    document.getElementById("anteckningar").value = "";
+                    document.getElementById("lakemedel").value = "";
+                    document.getElementById("diagnos").value = "";
+                    document.getElementById("mangd").value = "";
+                    document.getElementById("tid").value = "";
+                    document.getElementById("leverantor").value = "";
+                    document.getElementById("veterinar").value = "";
+                    document.getElementById("karenstid").value = "";
+                    document.getElementById("kvalsternedfall").value = "";
+                    document.getElementById("sjukdomskontroll").value = "";
+                    document.getElementById("skattadMangd").value = "";
+
+                    document.getElementById("bihalsaSection").style.display = "none";
+                    document.getElementById("bihalsa-arrow").textContent = "▼";
+                    document.getElementById("skordSection").style.display = "none";
+                    document.getElementById("skord-arrow").textContent = "▼";
+                    document.getElementById("lakemedelsJournalSection").style.display = "none";
+                    document.getElementById("journal-arrow").textContent = "▼";
                 }
 
-                let kortDatum = logg.Datum ? logg.Datum.substring(0, 10) : "";
+            } catch (err) {
+                console.error("Kunde inte söka efter befintlig logg för autofyll", err);
+            }
+        }
 
-                let item = document.createElement('div');
-                item.className = 'log-item';
-                item.innerHTML = `
-                    <p><strong>📅 ${kortDatum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
-                    <p>👑 ${drottningText}</p>
-                    <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
-                    ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
-                    ${extraInfoHTML}
-                `;
-                historikDiv.appendChild(item);
-            });
+        // Lyssna efter ändringar för autofyll
+        document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
+        document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
+
+        function toggleLakemedelsJournal() {
+            const section = document.getElementById("lakemedelsJournalSection");
+            const arrow = document.getElementById("journal-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
+
+        function toggleBihalsaSection() {
+            const section = document.getElementById("bihalsaSection");
+            const arrow = document.getElementById("bihalsa-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
+
+        function toggleSkordSection() {
+            const section = document.getElementById("skordSection");
+            const arrow = document.getElementById("skord-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
         }
 
         // Formulär för att spara samhälle
@@ -487,137 +620,6 @@
                 submitBtn.textContent = "Spara besök";
             }
         });
-
-        // Lyssna efter ändringar för autofyll
-        document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
-        document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
-
-                function fyllIBehfitligLoggOmFinns() {
-            const valtSamhallsID = document.getElementById("valt-samhalle").value;
-            const valtDatum = document.getElementById("datum").value;
-            const submitBtn = document.getElementById("submit-btn");
-
-            if (!valtSamhallsID || !valtDatum) return;
-
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-            if (!cachedData) return;
-
-            try {
-                let parsedData = JSON.parse(cachedData);
-                let skotselLoggar = parsedData.skotsel || [];
-                
-                let matchadLogg = skotselLoggar.find(s => {
-                    if (!s.Datum) return false;
-                    let loggDatumKort = s.Datum.substring(0, 10);
-                    return s.SamhallsID === valtSamhallsID && loggDatumKort === valtDatum;
-                });
-
-                if (matchadLogg) {
-                    // Det finns en logg – fyll i fälten och ändra knapptexten till Uppdatera
-                    submitBtn.textContent = "Uppdatera besök";
-
-                    document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
-                    document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
-                    document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
-                    document.getElementById("anteckningar").value = matchadLogg.Anteckningar || "";
-                    document.getElementById("tid").value = matchadLogg.Tid || "";
-
-                    document.getElementById("kvalsternedfall").value = matchadLogg.Kvalsternedfall || "";
-                    document.getElementById("sjukdomskontroll").value = matchadLogg.Sjukdomskontroll || "";
-                    if (matchadLogg.Kvalsternedfall || matchadLogg.Sjukdomskontroll) {
-                        document.getElementById("bihalsaSection").style.display = "block";
-                        document.getElementById("bihalsa-arrow").textContent = "▲";
-                    }
-
-                    document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
-                    if (matchadLogg.SkattadMangd) {
-                        document.getElementById("skordSection").style.display = "block";
-                        document.getElementById("skord-arrow").textContent = "▲";
-                    }
-
-                    document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
-                    document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
-                    document.getElementById("mangd").value = matchadLogg.Mangd || "";
-                    document.getElementById("leverantor").value = matchadLogg.Leverantor || "";
-                    document.getElementById("veterinar").value = matchadLogg.Veterinar || "";
-                    document.getElementById("karenstid").value = matchadLogg.Karenstid || "";
-                    
-                    if (matchadLogg.Lakemedel || matchadLogg.Diagnos || matchadLogg.Mangd) {
-                        document.getElementById("lakemedelsJournalSection").style.display = "block";
-                        document.getElementById("journal-arrow").textContent = "▲";
-                    }
-                               } else {
-                    // Ingen logg finns – nollställ alla fält och återställ knappen
-                    submitBtn.textContent = "Spara besök";
-
-                    // Nollställ rullgardinsmenyer till toppen/standard
-                    document.getElementById("drottning").selectedIndex = 0;
-                    document.getElementById("svarmlystnad").selectedIndex = 0;
-                    document.getElementById("temperament").selectedIndex = 0;
-
-                    // Nollställ textfält
-                    document.getElementById("anteckningar").value = "";
-                    document.getElementById("lakemedel").value = "";
-                    document.getElementById("diagnos").value = "";
-                    document.getElementById("mangd").value = "";
-                    document.getElementById("tid").value = "";
-                    document.getElementById("leverantor").value = "";
-                    document.getElementById("veterinar").value = "";
-                    document.getElementById("karenstid").value = "";
-                    document.getElementById("kvalsternedfall").value = "";
-                    document.getElementById("sjukdomskontroll").value = "";
-                    document.getElementById("skattadMangd").value = "";
-
-                    // Fäll ihop alla sektioner
-                    document.getElementById("bihalsaSection").style.display = "none";
-                    document.getElementById("bihalsa-arrow").textContent = "▼";
-                    document.getElementById("skordSection").style.display = "none";
-                    document.getElementById("skord-arrow").textContent = "▼";
-                    document.getElementById("lakemedelsJournalSection").style.display = "none";
-                    document.getElementById("journal-arrow").textContent = "▼";
-                }
-
-            } catch (err) {
-                console.error("Kunde inte söka efter befintlig logg för autofyll", err);
-            }
-        }
-
-
-        function toggleLakemedelsJournal() {
-            const section = document.getElementById("lakemedelsJournalSection");
-            const arrow = document.getElementById("journal-arrow");
-            if (section.style.display === "none") {
-                section.style.display = "block";
-                arrow.textContent = "▲";
-            } else {
-                section.style.display = "none";
-                arrow.textContent = "▼";
-            }
-        }
-
-        function toggleBihalsaSection() {
-            const section = document.getElementById("bihalsaSection");
-            const arrow = document.getElementById("bihalsa-arrow");
-            if (section.style.display === "none") {
-                section.style.display = "block";
-                arrow.textContent = "▲";
-            } else {
-                section.style.display = "none";
-                arrow.textContent = "▼";
-            }
-        }
-
-        function toggleSkordSection() {
-            const section = document.getElementById("skordSection");
-            const arrow = document.getElementById("skord-arrow");
-            if (section.style.display === "none") {
-                section.style.display = "block";
-                arrow.textContent = "▲";
-            } else {
-                section.style.display = "none";
-                arrow.textContent = "▼";
-            }
-        }
 
         // Starta uppladdningen när sidan öppnas
         laddaData();
