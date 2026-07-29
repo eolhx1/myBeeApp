@@ -77,6 +77,7 @@
                 <div class="form-group">
                     <label for="drottning">Drottning observerad?</label>
                     <select id="drottning" name="Drottningsett">
+                        <option value="">-- Välj status --</option>
                         <option value="Ja - Sett drottningen">Ja - Sett drottningen</option>
                         <option value="Ej sett, men färska ägg finns">Ej sett, men färska ägg finns</option>
                         <option value="Ej sett / Osäker status">Ej sett / Osäker status</option>
@@ -86,6 +87,7 @@
                 <div class="form-group">
                     <label for="svarmlystnad">Svärmlystnad:</label>
                     <select id="svarmlystnad" name="Svarmlystnad">
+                        <option value="">-- Välj svärmlystnad --</option>
                         <option value="Inga svärmceller">Inga svärmceller</option>
                         <option value="Drönarbyggda svärmceller">Drönarbyggda svärmceller</option>
                         <option value="Fulla svärmceller (åtgärd krävs!)">Fulla svärmceller (åtgärd krävs!)</option>
@@ -95,6 +97,7 @@
                 <div class="form-group">
                     <label for="temperament">Temperament / Humör:</label>
                     <select id="temperament" name="Temperament">
+                        <option value="">-- Välj temperament --</option>
                         <option value="Lugna och snälla">Lugna och snälla</option>
                         <option value="Normala">Normala</option>
                         <option value="Aggressiva / Stickiga">Aggressiva / Stickiga</option>
@@ -117,7 +120,7 @@
 
                 <div id="bihalsaSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #27ae60; border-radius: 4px; margin-bottom: 1rem;">
                     <div class="form-group">
-                        <label for="Kvalsternedfall">Varroanedfall (antal kvalster):</label>
+                        <label for="kvalsternedfall">Varroanedfall (antal kvalster):</label>
                         <input type="number" id="kvalsternedfall" placeholder="T.ex. 5 st (eller bottenbrädesräkning)">
                     </div>
 
@@ -352,7 +355,6 @@
                 });
             }
 
-            // Kontrollera om det redan finns en logg för valbar kupa/datum direkt efter inläsning
             fyllIBehfitligLoggOmFinns();
         }
 
@@ -361,7 +363,6 @@
             const valtDatum = document.getElementById("datum").value;
             const submitBtn = document.getElementById("submit-btn");
 
-            // Om inget samhälle är valt (t.ex. vid "-- Välj kupa --"), nollställ och avbryt
             if (!valtSamhallsID || !valtDatum) {
                 submitBtn.textContent = "Spara besök";
                 return;
@@ -381,12 +382,12 @@
                 });
 
                 if (matchadLogg) {
-                    // Det finns en logg – fyll i fälten och ändra knapptexten till Uppdatera
+                    // Det finns en logg – fyll i fälten och ändra till Uppdatera
                     submitBtn.textContent = "Uppdatera besök";
 
-                    document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
-                    document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
-                    document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
+                    document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "";
+                    document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "";
+                    document.getElementById("temperament").value = matchadLogg.Temperament || "";
                     document.getElementById("anteckningar").value = matchadLogg.Anteckningar || "";
                     document.getElementById("tid").value = matchadLogg.Tid || "";
 
@@ -415,12 +416,12 @@
                         document.getElementById("journal-arrow").textContent = "▲";
                     }
                 } else {
-                    // Ingen logg finns – nollställ alla fält och återställ knappen
+                    // Ingen logg finns – nollställ alla fält till tomt/standard
                     submitBtn.textContent = "Spara besök";
 
-                    document.getElementById("drottning").selectedIndex = 0;
-                    document.getElementById("svarmlystnad").selectedIndex = 0;
-                    document.getElementById("temperament").selectedIndex = 0;
+                    document.getElementById("drottning").value = "";
+                    document.getElementById("svarmlystnad").value = "";
+                    document.getElementById("temperament").value = "";
 
                     document.getElementById("anteckningar").value = "";
                     document.getElementById("lakemedel").value = "";
@@ -447,7 +448,6 @@
             }
         }
 
-        // Lyssna efter ändringar för autofyll
         document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
         document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
 
@@ -595,6 +595,9 @@
                 if (result.status === "success") {
                     alert(befintligtSkotselID ? "Besöket har uppdaterats!" : "Besöket har sparats!");
 
+                    document.getElementById('drottning').value = "";
+                    document.getElementById('svarmlystnad').value = "";
+                    document.getElementById('temperament').value = "";
                     document.getElementById('anteckningar').value = "";
                     document.getElementById('lakemedel').value = "";
                     document.getElementById('diagnos').value = "";
