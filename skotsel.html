@@ -52,7 +52,9 @@
         <div class="card">
             <h3>Samhällen / Kupor</h3>
             <div id="samhalle-lista">
-                <p>Laddar samhällen...</p>
+                <p>
+                    Laddar samhällen...
+                </p>
             </div>
         </div>
 
@@ -105,90 +107,92 @@
                 </div>
 
 
-<!-- Dragspelsknapp för Bihälsa & Sjukdomskontroll -->
-<div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #27ae60; padding-top: 1rem;">
-    <button type="button" onclick="toggleBihalsaSection()" style="background: #27ae60; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-        <span>🔬 Bihälsa, Varroanedfall & Sjukdomskontroll</span>
-        <span id="bihalsa-arrow">▼</span>
-    </button>
-</div>
+                <!-- Dragspelsknapp för Bihälsa & Sjukdomskontroll -->
+                <div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #27ae60; padding-top: 1rem;">
+                    <button type="button" onclick="toggleBihalsaSection()" style="background: #27ae60; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🔬 Bihälsa, Varroanedfall & Sjukdomskontroll</span>
+                        <span id="bihalsa-arrow">▼</span>
+                    </button>
+                </div>
 
-<div id="bihalsaSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #27ae60; border-radius: 4px; margin-bottom: 1rem;">
-    <div class="form-group">
-        <label for="kvalsternetfall">Varroanedfall (antal kvalster):</label>
-        <input type="number" id="kvalsternetfall" placeholder="T.ex. 5 st (eller bottenbrädesräkning)">
-    </div>
+                <div id="bihalsaSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #27ae60; border-radius: 4px; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="kvalsternetfall">Varroanedfall (antal kvalster):</label>
+                        <input type="number" id="kvalsternetfall" placeholder="T.ex. 5 st (eller bottenbrädesräkning)">
+                    </div>
 
-    <div class="form-group">
-        <label for="sjukdomskontroll">Sjukdomskontroll / Avvikelser:</label>
-        <textarea id="sjukdomskontroll" placeholder="T.ex. Inga tecken på kalkyngel, säckyngel eller yngelröta. Allt frisk yngelbild."></textarea>
-    </div>
-</div>
+                    <div class="form-group">
+                        <label for="sjukdomskontroll">Sjukdomskontroll / Avvikelser:</label>
+                        <textarea id="sjukdomskontroll" placeholder="T.ex. Inga tecken på kalkyngel, säckyngel eller yngelröta. Allt frisk yngelbild."></textarea>
+                    </div>
+                </div>
 
-<!-- Dragspelsknapp för Skörd -->
-<div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #f39c12; padding-top: 1rem;">
-    <button type="button" onclick="toggleSkordSection()" style="background: #e67e22; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-        <span>🍯 Honungsskörd (Skattad mängd)</span>
-        <span id="skord-arrow">▼</span>
-    </button>
-</div>
+                <!-- Dragspelsknapp för Skörd -->
+                <div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #f39c12; padding-top: 1rem;">
+                    <button type="button" onclick="toggleSkordSection()" style="background: #e67e22; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🍯 Honungsskörd (Skattad mängd)</span>
+                        <span id="skord-arrow">▼</span>
+                    </button>
+                </div>
 
-<div id="skordSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #e67e22; border-radius: 4px; margin-bottom: 1rem;">
-    <div class="form-group">
-        <label for="skattadMangd">Skattad mängd honung (kilon eller lådor):</label>
-        <input type="text" id="skattadMangd" placeholder="T.ex. 15 kg eller 1 skattlåda">
-    </div>
-</div>
+                <div id="skordSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #e67e22; border-radius: 4px; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="skattadMangd">Skattad mängd honung (kilon eller lådor):</label>
+                        <input type="text" id="skattadMangd" placeholder="T.ex. 15 kg eller 1 skattlåda">
+                    </div>
+                </div>
 
 
 
-<!-- Dragspelsknapp för Läkemedelsjournal (Lagkrav) -->
-<div style="margin: 1.5rem 0 1rem 0; border-top: 2px dashed #e67e22; padding-top: 1rem;">
-    <button type="button" onclick="toggleLakemedelsJournal()" style="background: #f39c12; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-        <span>💊 Registrera läkemedelsbehandling (Läkemedelsjournal)</span>
-        <span id="journal-arrow">▼</span>
-    </button>
-</div>
+                <!-- Dragspelsknapp för Läkemedelsjournal (Lagkrav) -->
+                <div style="margin: 1.5rem 0 1rem 0; border-top: 2px dashed #e67e22; padding-top: 1rem;">
+                    <button type="button" onclick="toggleLakemedelsJournal()" style="background: #f39c12; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>💊 Registrera läkemedelsbehandling (Läkemedelsjournal)</span>
+                        <span id="journal-arrow">▼</span>
+                    </button>
+                </div>
 
-<!-- Den utfällbara sektionen (dold som standard) -->
-<div id="lakemedelsJournalSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #f39c12; border-radius: 4px; margin-bottom: 1rem;">
-    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0; margin-bottom: 1rem;">Fylls endast i vid faktisk behandling (krav enligt EU/Jordbruksverket).</p>
+                <!-- Den utfällbara sektionen (dold som standard) -->
+                <div id="lakemedelsJournalSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #f39c12; border-radius: 4px; margin-bottom: 1rem;">
+                    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0; margin-bottom: 1rem;">
+                        Fylls endast i vid faktisk behandling (krav enligt EU/Jordbruksverket).
+                    </p>
 
-    <div class="form-group">
-        <label for="lakemedel">Läkemedel:</label>
-        <input type="text" id="lakemedel" placeholder="T.ex. Myrsyra 60%, Oxalsyra">
-    </div>
+                    <div class="form-group">
+                        <label for="lakemedel">Läkemedel:</label>
+                        <input type="text" id="lakemedel" placeholder="T.ex. Myrsyra 60%, Oxalsyra">
+                    </div>
 
-    <div class="form-group">
-        <label for="diagnos">Diagnos / Orsak:</label>
-        <input type="text" id="diagnos" placeholder="T.ex. Varroakontroll / Varroabehandling">
-    </div>
+                    <div class="form-group">
+                        <label for="diagnos">Diagnos / Orsak:</label>
+                        <input type="text" id="diagnos" placeholder="T.ex. Varroakontroll / Varroabehandling">
+                    </div>
 
-    <div class="form-group">
-        <label for="mangd">Mängd och styrka:</label>
-        <input type="text" id="mangd" placeholder="T.ex. 40 ml per kupa">
-    </div>
+                    <div class="form-group">
+                        <label for="mangd">Mängd och styrka:</label>
+                        <input type="text" id="mangd" placeholder="T.ex. 40 ml per kupa">
+                    </div>
 
-    <div class="form-group">
-        <label for="tid">Klockslag (Tid):</label>
-        <input type="time" id="tid">
-    </div>
+                    <div class="form-group">
+                        <label for="tid">Klockslag (Tid):</label>
+                        <input type="time" id="tid">
+                    </div>
 
-    <div class="form-group">
-        <label for="leverantor">Leverantör / Inköpsställe:</label>
-        <input type="text" id="leverantor" placeholder="T.ex. Biodlarna / Utländsk leverantör">
-    </div>
+                    <div class="form-group">
+                        <label for="leverantor">Leverantör / Inköpsställe:</label>
+                        <input type="text" id="leverantor" placeholder="T.ex. Biodlarna / Utländsk leverantör">
+                    </div>
 
-    <div class="form-group">
-        <label for="veterinar">Förskrivande veterinär (om tillämpligt):</label>
-        <input type="text" id="veterinar" placeholder="Lämna tomt om ej anvisat av vet.">
-    </div>
+                    <div class="form-group">
+                        <label for="veterinar">Förskrivande veterinär (om tillämpligt):</label>
+                        <input type="text" id="veterinar" placeholder="Lämna tomt om ej anvisat av vet.">
+                    </div>
 
-    <div class="form-group">
-        <label for="karenstid">Karenstid (dygn):</label>
-        <input type="number" id="karenstid" placeholder="T.ex. 0 eller antal dygn">
-    </div>
-</div>
+                    <div class="form-group">
+                        <label for="karenstid">Karenstid (dygn):</label>
+                        <input type="number" id="karenstid" placeholder="T.ex. 0 eller antal dygn">
+                    </div>
+                </div>
 
 
                 <button type="submit" class="btn" id="submit-btn">Spara besök</button>
@@ -199,7 +203,9 @@
         <div class="card">
             <h3>Tidigare besök</h3>
             <div id="historik-lista">
-                <p>Laddar historik...</p>
+                <p>
+                    Laddar historik...
+                </p>
             </div>
         </div>
     </div>
@@ -221,7 +227,9 @@
             const container = document.getElementById('samhalle-form-container');
             if (container.style.display === "none") {
                 container.style.display = "block";
-                container.scrollIntoView({ behavior: 'smooth' });
+                container.scrollIntoView({
+                    behavior: 'smooth'
+                });
             } else {
                 container.style.display = "none";
             }
@@ -250,9 +258,9 @@
             try {
                 let response = await fetch(WEB_APP_URL);
                 allData = await response.json();
-                
+
                 sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
-                
+
                 bearbetaOchVisaData(allData);
 
             } catch (error) {
@@ -291,14 +299,14 @@
                     sItem.className = 'log-item';
                     sItem.style.borderLeftColor = '#3498db';
                     sItem.innerHTML = `
-                        <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}</p>
-                        ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
+                    <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})`: ''}</p>
+                    ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>`: ''}
                     `;
                     samhalleListaDiv.appendChild(sItem);
 
                     let opt = document.createElement('option');
                     opt.value = s.SamhallsID;
-                    opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
+                    opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})`: '');
                     samhalleSelect.appendChild(opt);
                 });
             }
@@ -313,9 +321,9 @@
                 return;
             }
 
-                        minaLoggar.reverse().forEach(logg => {
+            minaLoggar.reverse().forEach(logg => {
                 let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
-                let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+                let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning: "Gemensam / Okänd kupa";
 
                 let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
                 let svarmText = logg.Svarmlystnad || "Ej angivet";
@@ -323,7 +331,7 @@
 
                 // Bygg extra rader dynamiskt om fälten finns ifyllda
                 let extraInfoHTML = "";
-                
+
                 if (logg.Lakemedel) {
                     extraInfoHTML += `<p style="color: #d35400; margin: 0.2rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}, Karenstid: ${logg.Karenstid || 0} dygn</p>`;
                 }
@@ -340,11 +348,11 @@
                 let item = document.createElement('div');
                 item.className = 'log-item';
                 item.innerHTML = `
-                    <p><strong>📅 ${logg.Datum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
-                    <p>👑 ${drottningText}</p>
-                    <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
-                    ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
-                    ${extraInfoHTML}
+                <p><strong>📅 ${logg.Datum}</strong> ${logg.Tid ? `kl ${logg.Tid}`: ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
+                <p>👑 ${drottningText}</p>
+                <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
+                ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>`: ''}
+                ${extraInfoHTML}
                 `;
                 historikDiv.appendChild(item);
             });
@@ -378,18 +386,18 @@
                     redirect: "follow",
                     body: JSON.stringify(formDataSamhalle)
                 });
-                
+
                 let result = await response.json();
-                
+
                 if (result.status === "success") {
                     alert("Samhället har sparats!");
                     document.getElementById('kupnamn').value = "";
                     document.getElementById('drottning-ar').value = "";
                     document.getElementById('samhalle-anteckningar').value = "";
                     document.getElementById('samhalle-form-container').style.display = "none";
-                    
+
                     sessionStorage.removeItem("myBeeApp_allData");
-                    
+
                     samhalleBtn.disabled = false;
                     samhalleBtn.textContent = "Spara samhälle";
                     laddaData();
@@ -406,21 +414,42 @@
             }
         });
 
-                document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
+                // Sparande med stöd för uppdatering av befintlig logg
+        document.getElementById('skotsel-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const autoID = "S" + Math.floor(1000 + Math.random() * 9000);
+            const valtSamhallsID = document.getElementById("valt-samhalle").value;
+            const valtDatum = document.getElementById("datum").value;
+
+            // Kolla om det redan finns en logg för denna kupa och datum i cachen
+            let befintligtSkotselID = "";
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            if (cachedData) {
+                try {
+                    let parsedData = JSON.parse(cachedData);
+                    let skotselLoggar = parsedData.skotsel || [];
+                    let matchadLogg = skotselLoggar.find(s => s.SamhallsID === valtSamhallsID && s.Datum === valtDatum);
+                    if (matchadLogg && matchadLogg.SkotselID) {
+                        befintligtSkotselID = matchadLogg.SkotselID;
+                    }
+                } catch (err) {
+                    console.error("Kunde inte matcha befintlig logg vid sparande", err);
+                }
+            }
+
+            // Använd det gamla ID:t om det fanns, annars skapa ett nytt
+            const skotselID = befintligtSkotselID || ("S" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
-                SkotselID: autoID,
+                SkotselID: skotselID,
                 BigardsID: bigardsId,
-                SamhallsID: document.getElementById("valt-samhalle").value,
-                Datum: document.getElementById("datum").value,
-                Drottningsett: document.getElementById("drottning").value, // Ändrat från drottningsett till drottning
+                SamhallsID: valtSamhallsID,
+                Datum: valtDatum,
+                Drottningsett: document.getElementById("drottning").value,
                 Svarmlystnad: document.getElementById("svarmlystnad").value,
                 Temperament: document.getElementById("temperament").value,
                 Anteckningar: document.getElementById("anteckningar").value,
@@ -447,7 +476,9 @@
                 let result = await response.json();
                 
                 if (result.status === "success") {
-                    alert("Besöket har sparats!");
+                    alert(befintligtSkotselID ? "Besöket har uppdaterats!" : "Besöket har sparats!");
+                    
+                    // Rensa fälten
                     document.getElementById('anteckningar').value = "";
                     document.getElementById('lakemedel').value = "";
                     document.getElementById('diagnos').value = "";
@@ -478,44 +509,7 @@
             }
         });
 
-        
-        function toggleLakemedelsJournal() {
-    const section = document.getElementById("lakemedelsJournalSection");
-    const arrow = document.getElementById("journal-arrow");
-    if (section.style.display === "none") {
-        section.style.display = "block";
-        arrow.textContent = "▲";
-    } else {
-        section.style.display = "none";
-        arrow.textContent = "▼";
-    }
-}
-
-function toggleBihalsaSection() {
-    const section = document.getElementById("bihalsaSection");
-    const arrow = document.getElementById("bihalsa-arrow");
-    if (section.style.display === "none") {
-        section.style.display = "block";
-        arrow.textContent = "▲";
-    } else {
-        section.style.display = "none";
-        arrow.textContent = "▼";
-    }
-}
-
-function toggleSkordSection() {
-    const section = document.getElementById("skordSection");
-    const arrow = document.getElementById("skord-arrow");
-    if (section.style.display === "none") {
-        section.style.display = "block";
-        arrow.textContent = "▲";
-    } else {
-        section.style.display = "none";
-        arrow.textContent = "▼";
-    }
-}
-
-        // Lyssna efter ändringar på kupa eller datum för att fylla i befintlig data
+        // Lyssna efter ändringar för autofyll
         document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
         document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
 
@@ -523,7 +517,6 @@ function toggleSkordSection() {
             const valtSamhallsID = document.getElementById("valt-samhalle").value;
             const valtDatum = document.getElementById("datum").value;
 
-            // Om inte både kupa och datum är valda gör vi ingenting
             if (!valtSamhallsID || !valtDatum) return;
 
             let cachedData = sessionStorage.getItem("myBeeApp_allData");
@@ -532,18 +525,17 @@ function toggleSkordSection() {
             try {
                 let parsedData = JSON.parse(cachedData);
                 let skotselLoggar = parsedData.skotsel || [];
-                
-                // Leta efter en matchande logg för samma kupa och datum
                 let matchadLogg = skotselLoggar.find(s => s.SamhallsID === valtSamhallsID && s.Datum === valtDatum);
 
                 if (matchadLogg) {
-                    // Fyll i standardfälten
+                    // Fyll i grunddata
                     document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "Ja - Sett drottningen";
                     document.getElementById("svarmlystnad").value = matchadLogg.Svarmlystnad || "Inga svärmceller";
                     document.getElementById("temperament").value = matchadLogg.Temperament || "Lugna och snälla";
                     document.getElementById("anteckningar").value = matchadLogg.Anteckningar || "";
+                    document.getElementById("tid").value = matchadLogg.Tid || "";
 
-                    // Fyll i Bihälsa / Varroa om det finns
+                    // Bihälsa
                     document.getElementById("kvalsternetfall").value = matchadLogg.Kvalsternedfall || "";
                     document.getElementById("sjukdomskontroll").value = matchadLogg.Sjukdomskontroll || "";
                     if (matchadLogg.Kvalsternedfall || matchadLogg.Sjukdomskontroll) {
@@ -551,18 +543,17 @@ function toggleSkordSection() {
                         document.getElementById("bihalsa-arrow").textContent = "▲";
                     }
 
-                    // Fyll i Skörd om det finns
+                    // Skörd
                     document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
                     if (matchadLogg.SkattadMangd) {
                         document.getElementById("skordSection").style.display = "block";
                         document.getElementById("skord-arrow").textContent = "▲";
                     }
 
-                    // Fyll i Läkemedelsjournal om det finns
+                    // Läkemedel
                     document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
                     document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
                     document.getElementById("mangd").value = matchadLogg.Mangd || "";
-                    document.getElementById("tid").value = matchadLogg.Tid || "";
                     document.getElementById("leverantor").value = matchadLogg.Leverantor || "";
                     document.getElementById("veterinar").value = matchadLogg.Veterinar || "";
                     document.getElementById("karenstid").value = matchadLogg.Karenstid || "";
@@ -571,16 +562,62 @@ function toggleSkordSection() {
                         document.getElementById("lakemedelsJournalSection").style.display = "block";
                         document.getElementById("journal-arrow").textContent = "▲";
                     }
-
                 } else {
-                    // Om det inte finns någon logg för detta datum kan vi rensa formuläret (valfritt, eller låta det vara om man vill skriva nytt)
-                    // Här låter vi fälten vara kvar eller nollställer vid behov.
+                    // Om det inte finns någon logg för detta datum, nollställ fälten så det blir rent att skriva nytt
+                    document.getElementById("anteckningar").value = "";
+                    document.getElementById("lakemedel").value = "";
+                    document.getElementById("diagnos").value = "";
+                    document.getElementById("mangd").value = "";
+                    document.getElementById("tid").value = "";
+                    document.getElementById("leverantor").value = "";
+                    document.getElementById("veterinar").value = "";
+                    document.getElementById("karenstid").value = "";
+                    document.getElementById("kvalsternetfall").value = "";
+                    document.getElementById("sjukdomskontroll").value = "";
+                    document.getElementById("skattadMangd").value = "";
                 }
             } catch (err) {
                 console.error("Kunde inte söka efter befintlig logg för autofyll", err);
             }
         }
 
+
+
+        function toggleLakemedelsJournal() {
+            const section = document.getElementById("lakemedelsJournalSection");
+            const arrow = document.getElementById("journal-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
+
+        function toggleBihalsaSection() {
+            const section = document.getElementById("bihalsaSection");
+            const arrow = document.getElementById("bihalsa-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
+
+        function toggleSkordSection() {
+            const section = document.getElementById("skordSection");
+            const arrow = document.getElementById("skord-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
 
 
         laddaData();
