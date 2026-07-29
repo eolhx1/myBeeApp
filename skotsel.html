@@ -546,10 +546,16 @@
                         document.getElementById("lakemedelsJournalSection").style.display = "block";
                         document.getElementById("journal-arrow").textContent = "▲";
                     }
-                } else {
-                    // Ingen logg finns – nollställ fälten och ändra knapptexten till Spara besök
+                               } else {
+                    // Ingen logg finns – nollställ alla fält och återställ knappen
                     submitBtn.textContent = "Spara besök";
 
+                    // Nollställ rullgardinsmenyer till toppen/standard
+                    document.getElementById("drottning").selectedIndex = 0;
+                    document.getElementById("svarmlystnad").selectedIndex = 0;
+                    document.getElementById("temperament").selectedIndex = 0;
+
+                    // Nollställ textfält
                     document.getElementById("anteckningar").value = "";
                     document.getElementById("lakemedel").value = "";
                     document.getElementById("diagnos").value = "";
@@ -562,6 +568,7 @@
                     document.getElementById("sjukdomskontroll").value = "";
                     document.getElementById("skattadMangd").value = "";
 
+                    // Fäll ihop alla sektioner
                     document.getElementById("bihalsaSection").style.display = "none";
                     document.getElementById("bihalsa-arrow").textContent = "▼";
                     document.getElementById("skordSection").style.display = "none";
@@ -569,6 +576,7 @@
                     document.getElementById("lakemedelsJournalSection").style.display = "none";
                     document.getElementById("journal-arrow").textContent = "▼";
                 }
+
             } catch (err) {
                 console.error("Kunde inte söka efter befintlig logg för autofyll", err);
             }
