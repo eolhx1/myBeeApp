@@ -1,0 +1,247 @@
+<!-- Filnamn: drottningar.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Drottningregister</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("👑 Drottningregister", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span>Drottningar</span>');
+    </script>
+
+    <div class="container">
+        <!-- Lägg till ny drottning -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0;">Registrera ny drottning</h3>
+            </div>
+            <form id="drottning-form">
+                <div class="form-group">
+                    <label for="namn">Drottningens namn / ID:</label>
+                    <input type="text" id="namn" name="Namn" required placeholder="T.ex. Sinistra eller ID #1">
+                </div>
+
+                <div class="form-group">
+                    <label for="samhalls-koppling">Koppla till kupa / samhälle:</label>
+                    <select id="samhalls-koppling" name="SamhallsID">
+                        <option value="">-- Välj kupa (valfritt) --</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="drottning-ar">Årgång (År):</label>
+                        <input type="number" id="drottning-ar" name="DrottningAr" value="2026">
+                    </div>
+                    <div class="form-group">
+                        <label for="farg">Färgmarkering:</label>
+                        <select id="farg" name="Farg">
+                            <option value="Vit">Vit (år 2/7)</option>
+                            <option value="Gul">Gul (år 3/8)</option>
+                            <option value="Röd">Röd (år 4/9)</option>
+                            <option value="Grön">Grön (år 5/0)</option>
+                            <option value="Blå">Blå (år 1/6)</option>
+                            <option value="Ej märkt">Ej märkt</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="ras">Ras / Härstamning:</label>
+                        <input type="text" id="ras" name="Ras" placeholder="T.ex. Buckfast, Carnica">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select id="status" name="Status">
+                            <option value="Aktiv i kupa">Aktiv i kupa</option>
+                            <option value="Avsatt">Avsatt</option>
+                            <option value="Bytt">Bytt</option>
+                            <option value="Förlorad">Förlorad</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Egenskaper & Avelsvärde -->
+                <div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #3498db; padding-top: 1rem;">
+                    <h4 style="margin: 0 0 0.8rem 0; color: #2c3e50;">🧬 Egenskaper & Avelsvärde</h4>
+                    
+                    <div class="form-group">
+                        <label for="svarmtroghet">Svärmtröghet:</label>
+                        <select id="svarmtroghet" name="Svarmtroghet">
+                            <option value="">-- Välj bedömning --</option>
+                            <option value="Mycket svärmtrög">Mycket svärmtrög</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Svärmbenägen">Svärmbenägen</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="temperament">Temperament / Humör:</label>
+                        <select id="temperament" name="Temperament">
+                            <option value="">-- Välj bedömning --</option>
+                            <option value="Mycket lugna och snälla">Mycket lugna och snälla</option>
+                            <option value="Normala">Normala</option>
+                            <option value="Stickiga / Aggressiva">Stickiga / Aggressiva</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="honungsprestanda">Honungsprestanda:</label>
+                        <select id="honungsprestanda" name="Honungsprestanda">
+                            <option value="">-- Välj bedömning --</option>
+                            <option value="Topprestanda (mycket drag)">Topprestanda (mycket drag)</option>
+                            <option value="Medel">Medel</option>
+                            <option value="Svag samlare">Svag samlare</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yngelsattning">Yngelsättning:</label>
+                        <select id="yngelsattning" name="Yngelsattning">
+                            <option value="">-- Välj bedömning --</option>
+                            <option value="Tät och fin (inga luckor)">Tät och fin (inga luckor)</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Oregelbunden / Luckig">Oregelbunden / Luckig</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="anteckningar">Övriga anteckningar:</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Inköpt från..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="drottning-btn" style="background-color: #27ae60;">Spara drottning</button>
+            </form>
+        </div>
+
+        <!-- Lista över befintliga drottningar -->
+        <div class="card">
+            <h3>Dina drottningar</h3>
+            <div id="drottning-lista">
+                <p>Laddar drottningar...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+
+        async function laddaDrottningarData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                fyllDropdownOchLista(data);
+            } catch (error) {
+                console.error("Fel vid laddning av drottningar:", error);
+                document.getElementById('drottning-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+            }
+        }
+
+        function fyllDropdownOchLista(data) {
+            let samhallen = data.samhallen || [];
+            let drottningar = data.drottningar || [];
+
+            let select = document.getElementById('samhalls-koppling');
+            select.innerHTML = '<option value="">-- Välj kupa (valfritt) --</option>';
+            samhallen.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.SamhallsID;
+                opt.textContent = `${s.Kupbenamning}`;
+                select.appendChild(opt);
+            });
+
+            let listaDiv = document.getElementById('drottning-lista');
+            listaDiv.innerHTML = "";
+
+            if (drottningar.length === 0) {
+                listaDiv.innerHTML = "<p>Inga drottningar registrerade ännu.</p>";
+                return;
+            }
+
+            drottningar.forEach(d => {
+                let kupaObj = samhallen.find(s => s.SamhallsID === d.SamhallsID);
+                let kupaNamn = kupaObj ? kupaObj.Kupbenamning : "Ej placerad i kupa";
+
+                let item = document.createElement('div');
+                item.className = 'log-item';
+                item.style.borderLeftColor = '#e67e22';
+                item.innerHTML = `
+                    <p style="margin-top: 0;"><strong>👑 ${d.Namn || 'Namnlös'}</strong> (${d.Ras || 'Okänd ras'}) &nbsp;|&nbsp; Status: <em>${d.Status || 'Aktiv'}</em></p>
+                    <p>🏠 Kupa: <strong>${kupaNamn}</strong></p>
+                    <p>📅 Årgång: ${d.DrottningAr || '-'} | Färg: ${d.Farg || '-'}</p>
+                    <p style="font-size: 0.9rem; color: #555; margin: 0.3rem 0;">
+                        Svärmtröghet: ${d.Svarmtroghet || '-'} | Humör: ${d.Temperament || '-'}<br>
+                        Honung: ${d.Honungsprestanda || '-'} | Yngel: ${d.Yngelsattning || '-'}
+                    </p>
+                    ${d.Anteckningar ? `<p><em>Anteckning: ${d.Anteckningar}</em></p>` : ''}
+                `;
+                listaDiv.appendChild(item);
+            });
+        }
+
+        document.getElementById('drottning-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('drottning-btn');
+            btn.disabled = true;
+            btn.textContent = "Sparar drottning...";
+
+            const autoID = "DR" + Math.floor(1000 + Math.random() * 9000);
+            const formData = {
+                DrottningsID: autoID,
+                Namn: document.getElementById('namn').value,
+                SamhallsID: document.getElementById('samhalls-koppling').value,
+                DrottningAr: document.getElementById('drottning-ar').value,
+                Farg: document.getElementById('farg').value,
+                Ras: document.getElementById('ras').value,
+                Status: document.getElementById('status').value,
+                Svarmtroghet: document.getElementById('svarmtroghet').value,
+                Temperament: document.getElementById('temperament').value,
+                Honungsprestanda: document.getElementById('honungsprestanda').value,
+                Yngelsattning: document.getElementById('yngelsattning').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Drottningar", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formData)
+                });
+                let result = await response.json();
+
+                if (result.status === "success") {
+                    alert("Drottningen har sparats!");
+                    document.getElementById('drottning-form').reset();
+                    document.getElementById('drottning-ar').value = "2026";
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    laddaDrottningarData();
+                } else {
+                    alert("Ett fel uppstod när drottningen skulle sparas.");
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Spara drottning";
+            }
+        });
+
+        laddaDrottningarData();
+    </script>
+</body>
+</html>
