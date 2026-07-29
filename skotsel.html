@@ -41,16 +41,14 @@
     </div>
 
     <div class="container">
-        <!-- Snabbknapp för att öppna formuläret för att lägga till samhälle direkt på sidan -->
-        <div style="margin-bottom: 1rem;">
-            <button onclick="toggleSamhalleFormModal()" class="btn" style="background-color: #27ae60;">➕ Lägg till nytt samhälle</button>
-        </div>
-
         <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
 
         <!-- Samhällen -->
         <div class="card">
-            <h3>Samhällen / Kupor</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0;">Samhällen / Kupor</h3>
+                <button onclick="toggleSamhalleFormModal()" class="btn" style="background-color: #27ae60; padding: 0.4rem 0.8rem; font-size: 0.85rem;">➕ Lägg till kupa</button>
+            </div>
             <div id="samhalle-lista">
                 <p>
                     Laddar samhällen...
@@ -382,7 +380,6 @@
                 });
 
                 if (matchadLogg) {
-                    // Det finns en logg – fyll i fälten och ändra till Uppdatera
                     submitBtn.textContent = "Uppdatera besök";
 
                     document.getElementById("drottning").value = matchadLogg.Drottningsett || matchadLogg.Drottning || "";
@@ -416,7 +413,6 @@
                         document.getElementById("journal-arrow").textContent = "▲";
                     }
                 } else {
-                    // Ingen logg finns – nollställ alla fält till tomt/standard
                     submitBtn.textContent = "Spara besök";
 
                     document.getElementById("drottning").value = "";
@@ -624,7 +620,6 @@
             }
         });
 
-        // Starta uppladdningen när sidan öppnas
         laddaData();
     </script>
 
