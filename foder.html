@@ -1,0 +1,212 @@
+<!-- Filnamn: foder.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Fodring & Vinterfoder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🍯 Fodring & Vinterfoder", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span>Fodring</span>');
+    </script>
+
+    <div class="container">
+        <!-- Registrera ny fodring -->
+        <div class="card">
+            <h3>Registrera foderinsats</h3>
+            <form id="foder-form">
+                <div class="form-group">
+                    <label for="valt-bigard-foder">1. Välj bigård:</label>
+                    <select id="valt-bigard-foder" name="BigardsID" required>
+                        <option value="">-- Välj bigård --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="valt-samhalle-foder">2. Välj kupa / samhälle:</label>
+                    <select id="valt-samhalle-foder" name="SamhallsID" required>
+                        <option value="">-- Välj bigård först --</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="datum">Datum:</label>
+                        <input type="date" id="datum" name="Datum" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fodertyp">Fodertyp:</label>
+                        <select id="fodertyp" name="Fodertyp">
+                            <option value="Sockerlag (60%)">Sockerlag (60%)</option>
+                            <option value="Färdig foderlösning (ApiInvert)">Färdig foderlösning (ApiInvert)</option>
+                            <option value="Foderkaka / Apifonda">Foderkaka / Apifonda</option>
+                            <option value="Honungskaka">Honungskaka</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mangd">Mängd (t.ex. 12 kg socker / liter):</label>
+                    <input type="text" id="mangd" name="Mangd" placeholder="T.ex. 12 kg" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="anteckningar">Anteckningar:</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Inför invintring, flusterfoder"></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="foder-btn" style="background-color: #27ae60;">Spara fodring</button>
+            </form>
+        </div>
+
+        <!-- Foderhistorik -->
+        <div class="card">
+            <h3>Foderhistorik</h3>
+            <div id="foder-lista">
+                <p>Laddar foderdata...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+
+        // Sätt dagens datum som standard
+        document.getElementById('datum').valueAsDate = new Date();
+
+        async function laddaFoderData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                fyllBigardarDropdown(data);
+                visaFoderHistorik(data);
+            } catch (error) {
+                console.error("Fel vid laddning:", error);
+                document.getElementById('foder-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+            }
+        }
+
+        function fyllBigardarDropdown(data) {
+            let bigårdar = data.bigardar || [];
+            let select = document.getElementById('valt-bigard-foder');
+            select.innerHTML = '<option value="">-- Välj bigård --</option>';
+
+            bigårdar.forEach(b => {
+                let opt = document.createElement('option');
+                opt.value = b.BigardsID;
+                opt.textContent = b.Namn;
+                select.appendChild(opt);
+            });
+        }
+
+        document.getElementById('valt-bigard-foder').addEventListener('change', function() {
+            let valdtBigardsID = this.value;
+            let samhallenSelect = document.getElementById('valt-samhalle-foder');
+            samhallenSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            if (!cachedData) return;
+            let data = JSON.parse(cachedData);
+            let samhallen = data.samhallen || [];
+
+            let minaSamhällen = samhallen.filter(s => s.BigardsID === valdtBigardsID);
+            minaSamhällen.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.SamhallsID;
+                opt.textContent = s.Kupbenamning;
+                samhallenSelect.appendChild(opt);
+            });
+        });
+
+        function visaFoderHistorik(data) {
+            let fodringLoggar = data.fodring || [];
+            let samhallen = data.samhallen || [];
+            let bigardar = data.bigardar || [];
+            let listaDiv = document.getElementById('foder-lista');
+            listaDiv.innerHTML = "";
+
+            if (fodringLoggar.length === 0) {
+                listaDiv.innerHTML = "<p>Inga foderinsatser registrerade ännu.</p>";
+                return;
+            }
+
+            // Sortera nyast först
+            fodringLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+
+            fodringLoggar.forEach(f => {
+                let kupa = samhallen.find(s => s.SamhallsID === f.SamhallsID);
+                let bigard = bigardar.find(b => b.BigardsID === f.BigardsID);
+                let kupaNamn = kupa ? kupa.Kupbenamning : "Okänd kupa";
+                let bigardNamn = bigard ? bigard.Namn : "Okänd bigård";
+                let kortDatum = f.Datum ? f.Datum.substring(0, 10) : "";
+
+                let item = document.createElement('div');
+                item.className = 'log-item';
+                item.style.borderLeftColor = '#f39c12';
+                item.innerHTML = `
+                    <p style="margin-top: 0;"><strong>📅 ${kortDatum}</strong> - ${bigardNamn} / <strong>${kupaNamn}</strong></p>
+                    <p>🍯 <strong>Typ:</strong> ${f.Fodertyp || 'Foder'} | <strong>Mängd:</strong> ${f.Mangd || '-'}</p>
+                    ${f.Anteckningar ? `<p><em>Anteckning: ${f.Anteckningar}</em></p>` : ''}
+                `;
+                listaDiv.appendChild(item);
+            });
+        }
+
+        document.getElementById('foder-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('foder-btn');
+            btn.disabled = true;
+            btn.textContent = "Sparar fodring...";
+
+            const autoID = "FD" + Math.floor(1000 + Math.random() * 9000);
+            const formData = {
+                FoderID: autoID,
+                BigardsID: document.getElementById('valt-bigard-foder').value,
+                SamhallsID: document.getElementById('valt-samhalle-foder').value,
+                Datum: document.getElementById('datum').value,
+                Fodertyp: document.getElementById('fodertyp').value,
+                Mangd: document.getElementById('mangd').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Fodring", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formData)
+                });
+                let result = await response.json();
+
+                if (result.status === "success") {
+                    alert("Fodring har sparats!");
+                    document.getElementById('foder-form').reset();
+                    document.getElementById('datum').valueAsDate = new Date();
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    laddaFoderData();
+                } else {
+                    alert("Ett fel uppstod när fodringen skulle sparas.");
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Spara fodring";
+            }
+        });
+
+        laddaFoderData();
+    </script>
+</body>
+</html>
