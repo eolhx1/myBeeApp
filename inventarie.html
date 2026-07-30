@@ -1,0 +1,277 @@
+<!-- Filnamn: inventarie.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Inventarielista</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        table.inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        table.inventory-table th, table.inventory-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table.inventory-table th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .total-badge {
+            font-weight: bold;
+            background: #e8f8f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #117a65;
+        }
+        .btn-action {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 4px;
+        }
+        .btn-edit { background: #f39c12; color: white; }
+        .btn-delete { background: #c0392b; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("📦 Inventarielista", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span>Inventarie</span>');
+    </script>
+
+    <div class="container" style="max-width: 900px; margin: 20px auto; padding: 0 15px;">
+
+        <!-- Inmatnings / Redigeringsformulär -->
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <h3 id="form-title" style="margin-top: 0; color: #2c3e50;">Lägg till ny utrustning</h3>
+            <form id="inventory-form" onsubmit="sparaArtikel(event)">
+                <input type="hidden" id="rowIndex" value=""> <!-- Används vid redigering -->
+                
+                <div class="form-group">
+                    <label for="artikel">Artikel / Utrustning:</label>
+                    <input type="text" id="artikel" required placeholder="T.ex. Skattlåda 3/4 Langstroth">
+                </div>
+                <div class="form-group">
+                    <label for="kategori">Kategori:</label>
+                    <select id="kategori" required>
+                        <option value="Kupmaterial">Kupmaterial</option>
+                        <option value="Ramar">Ramar</option>
+                        <option value="Utrustning & Maskiner">Utrustning & Maskiner</option>
+                        <option value="Skyddsutrustning">Skyddsutrustning</option>
+                        <option value="Övrigt">Övrigt</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="lager">Antal i lager:</label>
+                        <input type="number" id="lager" min="0" value="0" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="aktiva">Antal aktiva (i bigård):</label>
+                        <input type="number" id="aktiva" min="0" value="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="placering">Placering / Förråd:</label>
+                    <input type="text" id="placering" placeholder="T.ex. Stora förrådet, Källaren">
+                </div>
+                <div class="form-group">
+                    <label for="anteckning">Anteckning:</label>
+                    <input type="text" id="anteckning" placeholder="T.ex. Behöver målas om">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="submit-btn" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1;">Spara artikel</button>
+                    <button type="button" id="cancel-btn" onclick="aterstallFormular()" style="background: #95a5a6; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none;">Avbryt</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Inventarietabell -->
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #2c3e50;">Lagersaldo</h3>
+            <div style="overflow-x: auto;">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Artikel</th>
+                            <th>Kategori</th>
+                            <th>I lager</th>
+                            <th>Aktiva</th>
+                            <th>Totalt</th>
+                            <th>Placering</th>
+                            <th>Anteckning</th>
+                            <th>Åtgärd</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-tbody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #777;">Laddar inventarie från Google Sheets...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const appUrl = localStorage.getItem("myBeeApp_url");
+        let nuvarandeInventarieData = [];
+
+        function hamtaInventarieData() {
+            if (!appUrl) {
+                document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Ingen anslutningslänk hittad till Google Sheets.</td></tr>';
+                return;
+            }
+
+            fetch(`${appUrl}?action=getInventarie`)
+                .then(response => response.json())
+                .then(data => {
+                    nuvarandeInventarieData = data;
+                    fyllInventarieTabell(data);
+                })
+                .catch(error => {
+                    console.error("Kunde inte hämta inventarie:", error);
+                    document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Kunde inte läsa data från bladet.</td></tr>';
+                });
+        }
+
+        function sparaArtikel(event) {
+            event.preventDefault();
+            
+            const rowIndex = document.getElementById('rowIndex').value;
+            const artikelData = {
+                artikel: document.getElementById('artikel').value,
+                kategori: document.getElementById('kategori').value,
+                lager: parseInt(document.getElementById('lager').value) || 0,
+                aktiva: parseInt(document.getElementById('aktiva').value) || 0,
+                placering: document.getElementById('placering').value,
+                anteckning: document.getElementById('anteckning').value
+            };
+
+            const actionType = rowIndex !== "" ? 'updateInventarie' : 'addInventarie';
+            const payload = rowIndex !== "" ? { action: actionType, rowIndex: rowIndex, ...artikelData } : { action: actionType, ...artikelData };
+
+            fetch(appUrl, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(resultat => {
+                alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
+                aterstallFormular();
+                hamtaInventarieData();
+            })
+            .catch(err => {
+                console.error("Fel vid sparande:", err);
+                alert("Kunde inte spara artikeln.");
+            });
+        }
+
+        function fyllInventarieTabell(artiklar) {
+            const tbody = document.getElementById('inventory-tbody');
+            tbody.innerHTML = '';
+
+            if (!artiklar || artiklar.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #777;">Inga artiklar registrerade än.</td></tr>';
+                return;
+            }
+
+            artiklar.forEach((a, index) => {
+                const lager = parseInt(a.lager) || 0;
+                const aktiva = parseInt(a.aktiva) || 0;
+                const totalt = lager + aktiva;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${a.artikel}</strong></td>
+                    <td>${a.kategori}</td>
+                    <td>${lager} st</td>
+                    <td>${aktiva} st</td>
+                    <td><span class="total-badge">${totalt} st</span></td>
+                    <td>${a.placering || ''}</td>
+                    <td>${a.anteckning || ''}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="forberedRedigering(${index})">Ändra</button>
+                        <button class="btn-action btn-delete" onclick="taBortArtikel(${index})">Ta bort</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function forberedRedigering(index) {
+            const a = nuvarandeInventarieData[index];
+            document.getElementById('rowIndex').value = index;
+            document.getElementById('artikel').value = a.artikel;
+            document.getElementById('kategori').value = a.kategori;
+            document.getElementById('lager').value = a.lager;
+            document.getElementById('aktiva').value = a.aktiva;
+            document.getElementById('placering').value = a.placering || '';
+            document.getElementById('anteckning').value = a.anteckning || '';
+
+            document.getElementById('form-title').innerText = "Redigera utrustning";
+            document.getElementById('submit-btn').innerText = "Uppdatera artikel";
+            document.getElementById('cancel-btn').style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function aterstallFormular() {
+            document.getElementById('inventory-form').reset();
+            document.getElementById('rowIndex').value = "";
+            document.getElementById('form-title').innerText = "Lägg till ny utrustning";
+            document.getElementById('submit-btn').innerText = "Spara artikel";
+            document.getElementById('cancel-btn').style.display = "none";
+        }
+
+        function taBortArtikel(index) {
+            if (!confirm("Är du säker på att du vill ta bort/avyttra denna artikel?")) return;
+
+            const a = nuvarandeInventarieData[index];
+
+            fetch(appUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'deleteInventarie', rowIndex: index, artikel: a.artikel })
+            })
+            .then(res => res.json())
+            .then(resultat => {
+                alert("Artikel borttagen!");
+                hamtaInventarieData();
+            })
+            .catch(err => {
+                console.error("Fel vid borttagning:", err);
+                alert("Kunde inte ta bort artikeln.");
+            });
+        }
+
+        // hamtaInventarieData();
+    </script>
+</body>
+</html>

@@ -25,6 +25,8 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             url: "verktyg.html",
             text: "🛠️ Biodlarverktyg"
         },
+        { url: "inventarie.html", text: "📦 Inventarie" },
+
         {
             url: "ekonomi.html",
             text: "💰 Kassabok"
