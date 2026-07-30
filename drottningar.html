@@ -150,7 +150,7 @@
             }
         }
 
-        function fyllDropdownOchLista(data) {
+                function fyllDropdownOchLista(data) {
             let samhallen = data.samhallen || [];
             let drottningar = data.drottningar || [];
 
@@ -171,17 +171,36 @@
                 return;
             }
 
+            const nuvarandeAr = 2026;
+
             drottningar.forEach(d => {
                 let kupaObj = samhallen.find(s => s.SamhallsID === d.SamhallsID);
                 let kupaNamn = kupaObj ? kupaObj.Kupbenamning : "Ej placerad i kupa";
 
+                // Beräkna ålder och kontrollera om det är dags för byte (>= 2 år)
+                let drottningAr = parseInt(d.DrottningAr) || nuvarandeAr;
+                let alder = nuvarandeAr - drottningAr;
+                if (alder < 0) alder = 0;
+
+                let arText = alder === 0 ? "Årets (0 år)" : alder === 1 ? "1 år gammal" : `${alder} år gammal`;
+                
+                // Varningsflagga om drottningen är 2 år eller äldre
+                letVarningHTML = "";
+                let kortBorderColor = '#e67e22';
+
+                if (alder >= 2 && d.Status === "Aktiv i kupa") {
+                    kortBorderColor = '#c0392b';
+                    letVarningHTML = `<div style="background: #fadbd8; color: #900c3f; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; margin-top: 5px; font-weight: bold;">⚠️ Bör ses över / Planera drottningbyte (ålder: ${alder} år)</div>`;
+                }
+
                 let item = document.createElement('div');
                 item.className = 'log-item';
-                item.style.borderLeftColor = '#e67e22';
+                item.style.borderLeftColor = kortBorderColor;
                 item.innerHTML = `
                     <p style="margin-top: 0;"><strong>👑 ${d.Namn || 'Namnlös'}</strong> (${d.Ras || 'Okänd ras'}) &nbsp;|&nbsp; Status: <em>${d.Status || 'Aktiv'}</em></p>
                     <p>🏠 Kupa: <strong>${kupaNamn}</strong></p>
-                    <p>📅 Årgång: ${d.DrottningAr || '-'} | Färg: ${d.Farg || '-'}</p>
+                    <p>📅 Årgång: ${d.DrottningAr || '-'} (${arText}) | Färg: ${d.Farg || '-'}</p>
+                    ${letVarningHTML}
                     <p style="font-size: 0.9rem; color: #555; margin: 0.3rem 0;">
                         Svärmtröghet: ${d.Svarmtroghet || '-'} | Humör: ${d.Temperament || '-'}<br>
                         Honung: ${d.Honungsprestanda || '-'} | Yngel: ${d.Yngelsattning || '-'}
@@ -191,6 +210,7 @@
                 listaDiv.appendChild(item);
             });
         }
+
 
         document.getElementById('drottning-form').addEventListener('submit', async function(e) {
             e.preventDefault();
