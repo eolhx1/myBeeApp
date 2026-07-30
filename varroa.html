@@ -29,8 +29,14 @@
             font-weight: bold;
             font-size: 0.8rem;
         }
-        .karenstid-aktiv { background: #fadbd8; color: #900c3f; }
-        .karenstid-ok { background: #e8f8f5; color: #117a65; }
+        .karenstid-aktiv {
+            background: #fadbd8;
+            color: #900c3f;
+        }
+        .karenstid-ok {
+            background: #e8f8f5;
+            color: #117a65;
+        }
         .card {
             background: white;
             padding: 20px;
@@ -51,8 +57,10 @@
 
         <div class="card">
             <h3 style="margin-top: 0; color: #2c3e50;">Sammanställning per samhälle</h3>
-            <p style="color: #666; font-size: 0.9rem;">Här ser du en överblick över senaste provtagningen, genomförda behandlingar samt eventuella aktiva karenstider innan honungsskörd.</p>
-            
+            <p style="color: #666; font-size: 0.9rem;">
+                Här ser du en överblick över senaste provtagningen, genomförda behandlingar samt eventuella aktiva karenstider innan honungsskörd.
+            </p>
+
             <div style="overflow-x: auto;">
                 <table class="varroa-table">
                     <thead>
@@ -85,19 +93,20 @@
                 return;
             }
 
-            // Vi hämtar skötseldata för att analysera historiken per samhälle
-            fetch(`${appUrl}?action=getSkotsel`)
-                .then(response => response.json())
-                .then(data => {
-                    bearbetaOchVisaVarroa(data);
-                })
-                .catch(error => {
-                    console.error("Kunde inte hämta data:", error);
-                    document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa skötseldata.</td></tr>';
-                });
+            // Hämta direkt från skötselbladet via webbappen
+            fetch(`${appUrl}?sheet=Skotsel`)
+            .then(response => response.json())
+            .then(data => {
+                bearbetaOchVisaVarroa(data);
+            })
+            .catch(error => {
+                console.error("Kunde inte hämta data:", error);
+                document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa skötseldata.</td></tr>';
+            });
         }
 
-                function bearbetaOchVisaVarroa(skotselLista) {
+
+        function bearbetaOchVisaVarroa(skotselLista) {
             const tbody = document.getElementById('varroa-tbody');
             tbody.innerHTML = '';
 
@@ -120,7 +129,7 @@
             Object.values(samhalleStatus).forEach(s => {
                 let karenstidSlut = s.Karenstid || s.KarenstidsDatum || "";
                 let harAktivKarenstid = false;
-                
+
                 if (karenstidSlut) {
                     const slutDatum = new Date(karenstidSlut);
                     if (slutDatum >= IDag) {
@@ -130,16 +139,15 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong>${s.BigardsNamn || s.Bigard || '-'}</strong></td>
-                    <td>${s.SamhallsID || s.Samhälle || '-'}</td>
-                    <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
-                    <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
-                    <td>${karenstidSlut || 'Ingen'}</td>
-                    <td>
-                        ${harAktivKarenstid 
-                            ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>' 
-                            : '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
-                    </td>
+                <td><strong>${s.BigardsNamn || s.Bigard || '-'}</strong></td>
+                <td>${s.SamhallsID || s.Samhälle || '-'}</td>
+                <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
+                <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
+                <td>${karenstidSlut || 'Ingen'}</td>
+                <td>
+                ${harAktivKarenstid
+                ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>': '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
+                </td>
                 `;
                 tbody.appendChild(tr);
             });
