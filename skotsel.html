@@ -43,17 +43,19 @@
     <div class="container">
         <h2 id="bigard-titel" style="margin-top: 0;">Laddar bigård...</h2>
 
-<!-- Samhällen -->
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <h3 style="margin: 0;">Samhällen / Kupor</h3>
-        <!-- Diskret kugghjul för att hantera/lägga till samhällen -->
-        <button onclick="toggleSamhalleFormModal()" title="Lägg till nytt samhälle" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 0.5rem; line-height: 1;">⚙️</button>
-    </div>
-    <div id="samhalle-lista">
-        <p>Laddar samhällen...</p>
-    </div>
-</div>
+        <!-- Samhällen -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0;">Samhällen / Kupor</h3>
+                <!-- Diskret kugghjul för att hantera/lägga till samhällen -->
+                <button onclick="toggleSamhalleFormModal()" title="Lägg till nytt samhälle" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 0.5rem; line-height: 1;">⚙️</button>
+            </div>
+            <div id="samhalle-lista">
+                <p>
+                    Laddar samhällen...
+                </p>
+            </div>
+        </div>
 
 
         <!-- Skötselformulär -->
@@ -143,6 +145,33 @@
                     </div>
                 </div>
 
+                <!-- Dragspelsknapp för Fodring -->
+                <div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #3498db; padding-top: 1rem;">
+                    <button type="button" onclick="toggleFoderSection()" style="background: #3498db; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🍯 Fodring & Fodertilldelning</span>
+                        <span id="foder-arrow">▼</span>
+                    </button>
+                </div>
+
+                <div id="foderSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #3498db; border-radius: 4px; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="fodertyp">Fodertyp:</label>
+                        <select id="fodertyp" name="Fodertyp">
+                            <option value="">-- Välj typ --</option>
+                            <option value="Sockerlösning (1:1 / 3:2)">Sockerlösning</option>
+                            <option value="Fardigt foder (Fond/Sirap)">Färdigt foder (ApiInvert / Fond)</option>
+                            <option value="Foderkaka (Pandy/Fonden)">Foderkaka</option>
+                            <option value="Vatten">Rent vatten</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fodermangd">Mängd (kg socker eller liter):</label>
+                        <input type="text" id="fodermangd" placeholder="T.ex. 12 kg socker (eller 15 liter lösning)">
+                    </div>
+                </div>
+
+
 
 
                 <!-- Dragspelsknapp för Läkemedelsjournal (Lagkrav) -->
@@ -227,7 +256,9 @@
             const container = document.getElementById('samhalle-form-container');
             if (container.style.display === "none") {
                 container.style.display = "block";
-                container.scrollIntoView({ behavior: 'smooth' });
+                container.scrollIntoView({
+                    behavior: 'smooth'
+                });
             } else {
                 container.style.display = "none";
             }
@@ -296,14 +327,14 @@
                     sItem.className = 'log-item';
                     sItem.style.borderLeftColor = '#3498db';
                     sItem.innerHTML = `
-                        <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}</p>
-                        ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>` : ''}
+                    <p><strong>🏠 ${s.Kupbenamning}</strong> ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})`: ''}</p>
+                    ${s.Anteckningar ? `<p><em>"${s.Anteckningar}"</em></p>`: ''}
                     `;
                     samhalleListaDiv.appendChild(sItem);
 
                     let opt = document.createElement('option');
                     opt.value = s.SamhallsID;
-                    opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})` : '');
+                    opt.textContent = s.Kupbenamning + (s.DrottningAr ? ` (Drottning: ${s.DrottningAr})`: '');
                     samhalleSelect.appendChild(opt);
                 });
             }
@@ -318,7 +349,7 @@
             } else {
                 minaLoggar.reverse().forEach(logg => {
                     let matchadKupa = minaSamhällen.filter(s => s.BigardsID === bigardsId).find(s => s.SamhallsID === logg.SamhallsID);
-                    let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning : "Gemensam / Okänd kupa";
+                    let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning: "Gemensam / Okänd kupa";
 
                     let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
                     let svarmText = logg.Svarmlystnad || "Ej angivet";
@@ -338,16 +369,16 @@
                         extraInfoHTML += `<p style="color: #e67e22; margin: 0.2rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
                     }
 
-                    let kortDatum = logg.Datum ? logg.Datum.substring(0, 10) : "";
+                    let kortDatum = logg.Datum ? logg.Datum.substring(0, 10): "";
 
                     let item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
-                        <p><strong>📅 ${kortDatum}</strong> ${logg.Tid ? `kl ${logg.Tid}` : ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
-                        <p>👑 ${drottningText}</p>
-                        <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
-                        ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>` : ''}
-                        ${extraInfoHTML}
+                    <p><strong>📅 ${kortDatum}</strong> ${logg.Tid ? `kl ${logg.Tid}`: ''} &nbsp;|&nbsp; <em>🏠 ${kupaNamn}</em></p>
+                    <p>👑 ${drottningText}</p>
+                    <p>🐝 Svärmlystnad: ${svarmText} | Humör: ${tempText}</p>
+                    ${logg.Anteckningar ? `<p><em>"${logg.Anteckningar}"</em></p>`: ''}
+                    ${extraInfoHTML}
                     `;
                     historikDiv.appendChild(item);
                 });
@@ -372,7 +403,7 @@
             try {
                 let parsedData = JSON.parse(cachedData);
                 let skotselLoggar = parsedData.skotsel || [];
-                
+
                 let matchadLogg = skotselLoggar.find(s => {
                     if (!s.Datum) return false;
                     let loggDatumKort = s.Datum.substring(0, 10);
@@ -407,7 +438,7 @@
                     document.getElementById("leverantor").value = matchadLogg.Leverantor || "";
                     document.getElementById("veterinar").value = matchadLogg.Veterinar || "";
                     document.getElementById("karenstid").value = matchadLogg.Karenstid || "";
-                    
+
                     if (matchadLogg.Lakemedel || matchadLogg.Diagnos || matchadLogg.Mangd) {
                         document.getElementById("lakemedelsJournalSection").style.display = "block";
                         document.getElementById("journal-arrow").textContent = "▲";
@@ -482,6 +513,19 @@
                 arrow.textContent = "▼";
             }
         }
+
+        function toggleFoderSection() {
+            const section = document.getElementById("foderSection");
+            const arrow = document.getElementById("foder-arrow");
+            if (section.style.display === "none") {
+                section.style.display = "block";
+                arrow.textContent = "▲";
+            } else {
+                section.style.display = "none";
+                arrow.textContent = "▼";
+            }
+        }
+
 
         document.getElementById('samhalle-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -574,7 +618,9 @@
                 Karenstid: document.getElementById("karenstid").value,
                 Kvalsternedfall: document.getElementById("kvalsternedfall").value,
                 Sjukdomskontroll: document.getElementById("sjukdomskontroll").value,
-                SkattadMangd: document.getElementById("skattadMangd").value
+                SkattadMangd: document.getElementById("skattadMangd").value,
+                Fodertyp: document.getElementById("fodertyp").value,
+                Fodermangd: document.getElementById("fodermangd").value
             };
 
             try {
@@ -587,7 +633,7 @@
                 let result = await response.json();
 
                 if (result.status === "success") {
-                    alert(befintligtSkotselID ? "Besöket har uppdaterats!" : "Besöket har sparats!");
+                    alert(befintligtSkotselID ? "Besöket har uppdaterats!": "Besöket har sparats!");
 
                     document.getElementById('anteckningar').value = "";
                     document.getElementById('lakemedel').value = "";
@@ -618,5 +664,5 @@
         laddaData();
     </script>
 
-    </body>
+</body>
 </html>
