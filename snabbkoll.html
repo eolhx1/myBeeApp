@@ -132,10 +132,12 @@
             });
         }
 
-        async function sparaSnabbkoll() {
+                async function sparaSnabbkoll() {
+            let bigardsID = document.getElementById('bigard-val').value;
             let samhallsID = document.getElementById('samhalle-val').value;
-            if (!samhallsID) {
-                alert("Vänligen välj en kupa/samhälle först!");
+            
+            if (!bigardsID || !samhallsID) {
+                alert("Vänligen välj både bigård och kupa!");
                 return;
             }
 
@@ -144,13 +146,16 @@
             btn.textContent = "Sparar...";
 
             let extraText = document.getElementById('extra-anteckning').value.trim();
-            let samladeAnteckningar = "";
+            let samladeAnteckningar = "Snabbkoll: ";
 
             if (aktivaVal.length > 0) {
                 samladeAnteckningar += aktivaVal.join(", ");
             }
             if (extraText) {
-                samladeAnteckningar += (samladeAnteckningar ? " | " : "") + extraText;
+                samladeAnteckningar += (aktivaVal.length > 0 ? " | " : "") + extraText;
+            }
+            if (aktivaVal.length === 0 && !extraText) {
+                samladeAnteckningar = "Snabbkoll utförd";
             }
 
             let d = new Date();
@@ -159,10 +164,10 @@
 
             let formData = {
                 SkotselID: autoID,
+                BigardsID: bigardsID, // <--- Nu följer BigardsID med till kolumn B!
                 SamhallsID: samhallsID,
                 Datum: datumStr,
-                Atgard: "Snabbkoll",
-                Anteckningar: samladeAnteckningar || "Snabbkoll utförd"
+                Anteckningar: samladeAnteckningar
             };
 
             try {
@@ -192,6 +197,7 @@
                 btn.textContent = "Spara snabbkoll";
             }
         }
+
 
         laddaData();
     </script>
