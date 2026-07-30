@@ -44,7 +44,7 @@
             
             <div class="form-group">
                 <label for="bigard-val">Bigård:</label>
-                <select id="bigard-val" class="form-control">
+                <select id="bigard-val" class="form-control" onchange="filterSamhallen()">
                     <option value="">-- Välj bigård --</option>
                 </select>
             </div>
@@ -58,12 +58,12 @@
 
             <h4 style="margin: 15px 0 10px 0; color: #2c3e50;">Snabbval (klicka för att aktivera):</h4>
             <div class="chip-container">
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Ägg ses')">🥚 Ägg ses</button>
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Gott om mat')">🍯 Gott om mat</button>
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Starkt samhälle')">🐝 Starkt samhälle</button>
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Drottning noterad')">👑 Drottning sedd</button>
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Svärmceller!')">⚠️ Svärmceller</button>
-                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Lugnt humör')">🟢 Lugna bin</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '🥚 Ägg ses')">🥚 Ägg ses</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '🍯 Gott om mat')">🍯 Gott om mat</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '🐝 Starkt samhälle')">🐝 Starkt samhälle</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '👑 Drottning sedd')">👑 Drottning sedd</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '⚠️ Svärmceller')">⚠️ Svärmceller</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, '🟢 Lugna bin')">🟢 Lugna bin</button>
             </div>
 
             <div class="form-group">
@@ -71,12 +71,13 @@
                 <textarea id="extra-anteckning" rows="3" placeholder="Tryck på mikrofonen på tangentbordet för att diktera..."></textarea>
             </div>
 
-            <button type="button" class="btn" id="spara-snabbkoll" style="background-color: #27ae60; width: 100%; padding: 12px; font-size: 1.1rem;">Spara snabbkoll</button>
+            <button type="button" class="btn" id="spara-btn" style="background-color: #27ae60; width: 100%; padding: 12px; font-size: 1.1rem;" onclick="sparaSnabbkoll()">Spara snabbkoll</button>
         </div>
     </div>
 
     <script>
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+        let globalData = {};
         let aktivaVal = [];
 
         function toggleTag(btn, text) {
@@ -88,7 +89,111 @@
             }
         }
 
-        // Här laddas bigårdar och samhällen på samma sätt som i övriga vyer för att fylla dropdown-listorna...
+        async function laddaData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                let response = await fetch(WEB_APP_URL);
+                globalData = await response.json();
+                fyllBigardar(globalData.bigardar || []);
+            } catch (error) {
+                console.error("Fel vid laddning:", error);
+                alert("Kunde inte hämta data från molnet.");
+            }
+        }
+
+        function fyllBigardar(bigardar) {
+            let select = document.getElementById('bigard-val');
+            select.innerHTML = '<option value="">-- Välj bigård --</option>';
+            bigardar.forEach(b => {
+                let opt = document.createElement('option');
+                opt.value = b.BigardsID;
+                opt.textContent = b.Bigardsnamn || b.Namn || b.BigardsID;
+                select.appendChild(opt);
+            });
+        }
+
+        function filterSamhallen() {
+            let valtBigardID = document.getElementById('bigard-val').value;
+            let samhallenSelect = document.getElementById('samhalle-val');
+            samhallenSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
+            let samhallen = globalData.samhallen || [];
+            let filtrerade = samhallen.filter(s => String(s.BigardsID) === String(valtBigardID));
+
+            filtrerade.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.SamhallsID;
+                opt.textContent = s.Kupbenamning || s.SamhallsID;
+                samhallenSelect.appendChild(opt);
+            });
+        }
+
+        async function sparaSnabbkoll() {
+            let samhallsID = document.getElementById('samhalle-val').value;
+            if (!samhallsID) {
+                alert("Vänligen välj en kupa/samhälle först!");
+                return;
+            }
+
+            const btn = document.getElementById('spara-btn');
+            btn.disabled = true;
+            btn.textContent = "Sparar...";
+
+            let extraText = document.getElementById('extra-anteckning').value.trim();
+            let samladeAnteckningar = "";
+
+            if (aktivaVal.length > 0) {
+                samladeAnteckningar += aktivaVal.join(", ");
+            }
+            if (extraText) {
+                samladeAnteckningar += (samladeAnteckningar ? " | " : "") + extraText;
+            }
+
+            let d = new Date();
+            let datumStr = d.toISOString().split('T')[0];
+            let autoID = "SK" + Math.floor(1000 + Math.random() * 9000);
+
+            let formData = {
+                SkotselID: autoID,
+                SamhallsID: samhallsID,
+                Datum: datumStr,
+                Atgard: "Snabbkoll",
+                Anteckningar: samladeAnteckningar || "Snabbkoll utförd"
+            };
+
+            try {
+                let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    body: JSON.stringify(formData)
+                });
+                let result = await response.json();
+
+                if (result.status === "success") {
+                    alert("Snabbkollen har sparats!");
+                    // Återställ formuläret
+                    document.getElementById('extra-anteckning').value = "";
+                    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+                    aktivaVal = [];
+                    sessionStorage.removeItem("myBeeApp_allData");
+                } else {
+                    alert("Ett fel uppstod när kollen skulle sparas.");
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Spara snabbkoll";
+            }
+        }
+
+        laddaData();
     </script>
 </body>
 </html>
