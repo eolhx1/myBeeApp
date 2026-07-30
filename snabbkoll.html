@@ -1,0 +1,94 @@
+<!-- Filnamn: snabbkoll.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Snabbkoll i bigård</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chip-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .tag-btn {
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            color: #2c3e50;
+        }
+        .tag-btn.active {
+            background: #e8f8f5;
+            border-color: #27ae60;
+            color: #117a65;
+        }
+    </style>
+</head>
+<body>
+
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("⚡ Snabbkoll i bigård", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span>');
+    </script>
+
+    <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
+        <div class="card">
+            <h3 style="margin-top: 0; color: #2c3e50;">Välj bigård & samhälle</h3>
+            
+            <div class="form-group">
+                <label for="bigard-val">Bigård:</label>
+                <select id="bigard-val" class="form-control">
+                    <option value="">-- Välj bigård --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="samhalle-val">Samhälle / Kupa:</label>
+                <select id="samhalle-val" class="form-control">
+                    <option value="">-- Välj kupa --</option>
+                </select>
+            </div>
+
+            <h4 style="margin: 15px 0 10px 0; color: #2c3e50;">Snabbval (klicka för att aktivera):</h4>
+            <div class="chip-container">
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Ägg ses')">🥚 Ägg ses</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Gott om mat')">🍯 Gott om mat</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Starkt samhälle')">🐝 Starkt samhälle</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Drottning noterad')">👑 Drottning sedd</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Svärmceller!')">⚠️ Svärmceller</button>
+                <button type="button" class="tag-btn" onclick="toggleTag(this, 'Lugnt humör')">🟢 Lugna bin</button>
+            </div>
+
+            <div class="form-group">
+                <label for="extra-anteckning">Röstanteckning / Text:</label>
+                <textarea id="extra-anteckning" rows="3" placeholder="Tryck på mikrofonen på tangentbordet för att diktera..."></textarea>
+            </div>
+
+            <button type="button" class="btn" id="spara-snabbkoll" style="background-color: #27ae60; width: 100%; padding: 12px; font-size: 1.1rem;">Spara snabbkoll</button>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+        let aktivaVal = [];
+
+        function toggleTag(btn, text) {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) {
+                aktivaVal.push(text);
+            } else {
+                aktivaVal = aktivaVal.filter(t => t !== text);
+            }
+        }
+
+        // Här laddas bigårdar och samhällen på samma sätt som i övriga vyer för att fylla dropdown-listorna...
+    </script>
+</body>
+</html>

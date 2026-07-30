@@ -10,6 +10,10 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
         text: "🏠 Hem / Karta"
     },
         {
+            url: "snabbkoll.html",
+            text: "⚡ Snabbkoll i bigård" // <--- Ny rad här!
+        },
+        {
             url: "historik.html",
             text: "📈 Historik & Trender"
         },
