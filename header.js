@@ -1,10 +1,10 @@
 // Filnamn: header.js
 
 function laddaHeader(titelTekst, breadcrumbHTML = '') {
-    // Gemensam stil för meny-länkarna för att slippa upprepning
+    // Gemensam stil för meny-länkarna
     const lankStil = "padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;";
 
-    // Lista över sidor i menyn (enkelt att lägga till eller ta bort länkar här)
+    // Lista över sidor i menyn
     const menylankar = [{
         url: "index.html",
         text: "🏠 Hem / Karta"
@@ -75,7 +75,7 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
     </div>
     </div>
 
-    ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; text-align: left;">${breadcrumbHTML}</div>`: ''}
+    ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; text-align: left;" > ${breadcrumbHTML}</div>`: ''}
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
