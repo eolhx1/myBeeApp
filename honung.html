@@ -1,0 +1,140 @@
+<!-- Filnamn: honung.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Honung</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🍯 Honungsskörd", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Honung</span>');
+    </script>
+
+    <div class="container">
+        <form id="honung-form">
+            <input type="hidden" id="skorde-id" name="SkördeID">
+
+            <div class="form-group">
+                <label for="datum">Datum för skörd/slungning:</label>
+                <input type="date" id="datum" name="Datum" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bigard">Bigård:</label>
+                <select id="bigard" name="Bigard">
+                    <!-- Fylls i dynamiskt från skriptet -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="antal-lodar">Antal skattlådor:</label>
+                <input type="number" id="antal-lodar" name="AntalSkattlodar" min="0" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="vikt">Slungad honung (kg):</label>
+                <input type="number" step="0.1" id="vikt" name="ViktKg" placeholder="T.ex. 45.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vattenhalt">Vattenhalt (%):</label>
+                <input type="number" step="0.1" id="vattenhalt" name="Vattenhalt" placeholder="T.ex. 17.5">
+            </div>
+
+            <div class="form-group">
+                <label for="batch">Batch- / Partinummer:</label>
+                <input type="text" id="batch" name="BatchNummer" placeholder="T.ex. B2026-01">
+            </div>
+
+            <div class="form-group">
+                <label for="anteckningar">Anteckningar (drag, karaktär m.m.):</label>
+                <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Rapsdrag, snabb kristallisering..."></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Spara skörd</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+    </div>
+
+    <script>
+        document.getElementById('datum').valueAsDate = new Date();
+
+        async function laddaBigardar() {
+            const savedUrl = localStorage.getItem("myBeeApp_url");
+            if (!savedUrl) return;
+            try {
+                let response = await fetch(`${savedUrl}?sheet=Bigardar`);
+                let data = await response.json();
+                let select = document.getElementById('bigard');
+                select.innerHTML = "";
+                data.forEach(b => {
+                    let option = document.createElement('option');
+                    option.value = b.Namn;
+                    option.textContent = b.Namn;
+                    select.appendChild(option);
+                });
+            } catch (e) {
+                console.error("Kunde inte ladda bigårdar", e);
+            }
+        }
+
+        document.getElementById('honung-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+            if (!WEB_APP_URL) {
+                alert("Ingen anslutningslänk hittades.");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
+            const currentId = document.getElementById('skorde-id').value || ("H" + Math.floor(1000 + Math.random() * 9000));
+
+            const formData = {
+                SkördeID: currentId,
+                Datum: document.getElementById('datum').value,
+                Bigard: document.getElementById('bigard').value,
+                AntalSkattlodar: document.getElementById('antal-lodar').value,
+                ViktKg: document.getElementById('vikt').value,
+                Vattenhalt: document.getElementById('vattenhalt').value,
+                BatchNummer: document.getElementById('batch').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(`${WEB_APP_URL}?sheet=Honung`, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(formData)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Honungsskörden har sparats!");
+                    window.location.href = "index.html";
+                } else {
+                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara skörd";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara skörd";
+            }
+        });
+
+        laddaBigardar();
+    </script>
+</body>
+</html>

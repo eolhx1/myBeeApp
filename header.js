@@ -22,6 +22,10 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             text: "🍯 Fodring & Vinterfoder"
         },
         {
+            url: "honung.html",
+            text: "🍯 Honungsskörd"
+        },
+        {
             url: "verktyg.html",
             text: "🛠️ Biodlarverktyg"
         },
