@@ -29,16 +29,23 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             url: "verktyg.html",
             text: "🛠️ Biodlarverktyg"
         },
-        { url: "inventarie.html", text: "📦 Inventarie" },
+        {
+            url: "inventarie.html",
+            text: "📦 Inventarie"
+        },
 
         {
             url: "ekonomi.html",
             text: "💰 Kassabok"
         },
         {
-    url: "odling.html",
-    text: "👑 Drottningodling"
-},
+            url: "odling.html",
+            text: "👑 Drottningodling"
+        },
+        {
+            url: "vaxhantering.html",
+            text: "🕯️ Vaxhantering"
+        },
 
         {
             url: "sasong.html",
