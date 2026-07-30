@@ -18,10 +18,11 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             
             <a href="drottningar.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">👑 Drottningregister</a>
 
-<a href="foder.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🍯 Fodring & Vinterfoder</a>
+            <a href="foder.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🍯 Fodring & Vinterfoder</a>
 
             <a href="verktyg.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🛠️ Biodlarverktyg</a>
 
+            <a href="sasong.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">📅 Säsongsschema</a>
             
             <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
         </div>
