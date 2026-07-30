@@ -148,28 +148,47 @@
                 <!-- Dragspelsknapp för Fodring -->
                 <div style="margin: 1rem 0 0.5rem 0; border-top: 2px dashed #3498db; padding-top: 1rem;">
                     <button type="button" onclick="toggleFoderSection()" style="background: #3498db; color: white; border: none; padding: 0.8rem 1rem; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                        <span>🍯 Fodring & Fodertilldelning</span>
+                        <span>🍯 Fodring & Proteintillskott</span>
                         <span id="foder-arrow">▼</span>
                     </button>
                 </div>
 
                 <div id="foderSection" style="display: none; background: #fdfefe; padding: 1rem; border: 1px solid #3498db; border-radius: 4px; margin-bottom: 1rem;">
+
+                    <!-- Del 1: Kolhydratfoder -->
+                    <h4 style="margin-top: 0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 0.3rem;">Kolhydratfoder (Socker / Deg)</h4>
                     <div class="form-group">
-                        <label for="fodertyp">Fodertyp:</label>
+                        <label for="fodertyp">Typ:</label>
                         <select id="fodertyp" name="Fodertyp">
-                            <option value="">-- Välj typ --</option>
+                            <option value="">-- Ingen kolhydratgivning --</option>
                             <option value="Sockerlösning (1:1 / 3:2)">Sockerlösning</option>
-                            <option value="Fardigt foder (Fond/Sirap)">Färdigt foder (ApiInvert / Fond)</option>
-                            <option value="Foderkaka (Pandy/Fonden)">Foderkaka</option>
-                            <option value="Vatten">Rent vatten</option>
+                            <option value="Färdigt foder (ApiInvert / Sirap)">Färdigt foder (Sirap)</option>
+                            <option value="Foderdeg (Fond)">Foderdeg (Fond)</option>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="fodermangd">Mängd (kg socker eller liter):</label>
-                        <input type="text" id="fodermangd" placeholder="T.ex. 12 kg socker (eller 15 liter lösning)">
+                        <label for="fodermangd">Mängd (kg / liter):</label>
+                        <input type="text" id="fodermangd" placeholder="T.ex. 12 kg socker">
                     </div>
+
+                    <!-- Del 2: Proteinfoder / Pollenersättning -->
+                    <h4 style="margin-top: 1rem; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 0.3rem;">Proteinfoder / Pollenersättning</h4>
+                    <div class="form-group">
+                        <label for="proteintyp">Typ av tillskott:</label>
+                        <select id="proteintyp" name="Proteintyp">
+                            <option value="">-- Inget proteintillskott --</option>
+                            <option value="Neopoll">Neopoll (Pollenkaka)</option>
+                            <option value="ApiPollen">ApiPollen</option>
+                            <option value="Hemmagjord pollenkaka">Hemmagjord pollenkaka (pollen + socker)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="proteinmangd">Antal kakor / Vikt:</label>
+                        <input type="text" id="proteinmangd" placeholder="T.ex. 1 kaka (500g)">
+                    </div>
+
                 </div>
+
 
 
 
