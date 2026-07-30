@@ -1,0 +1,150 @@
+<!-- Filnamn: odling.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Drottningodling</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("👑 Drottningodling", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Odling</span>');
+    </script>
+
+    <div class="container">
+        <form id="odling-form">
+            <input type="hidden" id="odlings-id" name="OdlingsID">
+
+            <div class="form-group">
+                <label for="datum-omlarvning">Datum för omlarvning:</label>
+                <input type="date" id="datum-omlarvning" name="DatumOmlarvning" required>
+            </div>
+
+            <div class="form-group">
+                <label for="mor-koloni">Mor-koloni (Stam):</label>
+                <input type="text" id="mor-koloni" name="MorKoloni" placeholder="T.ex. Avelsdrottning 2025" required>
+            </div>
+
+            <div class="form-group">
+                <label for="antal-startade">Antal startade celler:</label>
+                <input type="number" id="antal-startade" name="AntalStartade" min="1" value="10">
+            </div>
+
+            <div class="form-group">
+                <label for="klack-datum">Beräknat kläckdatum (ca 11-12 dgr):</label>
+                <input type="date" id="klack-datum" name="KlacckDatum">
+            </div>
+
+            <div class="form-group">
+                <label for="parings-kupa">Parningskupa / Nuk:</label>
+                <input type="text" id="parings-kupa" name="ParingsKupa" placeholder="T.ex. Mini-Plus #3">
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="Status">
+                    <option value="Omlarvad">Omlarvad / I startkoloni</option>
+                    <option value="Kläckt">Kläckt</option>
+                    <option value="I parningskupa">I parningskupa</option>
+                    <option value="Äggläggande">Äggläggande / Godkänd</option>
+                    <option value="Kasserad">Kasserad</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="markering-farg">Märkningsfärg:</label>
+                <select id="markering-farg" name="MarkeringFarg">
+                    <option value="Vit">Vit (År med 1 eller 6)</option>
+                    <option value="Gul">Gul (År med 2 eller 7)</option>
+                    <option value="Röd">Röd (År med 3 eller 8)</option>
+                    <option value="Grön">Grön (År med 4 eller 9)</option>
+                    <option value="Blå">Blå (År med 5 eller 0)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="anteckningar">Anteckningar:</label>
+                <textarea id="anteckningar" name="Anteckningar" placeholder="Lynne, cellstorlek, parningsresultat..."></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Spara odlingsparti</button>
+        </form>
+
+        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+    </div>
+
+    <script>
+        // Sätt dagens datum som standard för omlarvning och räkna ut kläckdatum (+12 dagar)
+        const idag = new Date();
+        document.getElementById('datum-omlarvning').valueAsDate = idag;
+        
+        const klackDatum = new Date();
+        klackDatum.setDate(idag.getDate() + 12);
+        document.getElementById('klack-datum').valueAsDate = klackDatum;
+
+        // Uppdatera kläckdatum automatiskt om man ändrar omlarvningsdatum
+        document.getElementById('datum-omlarvning').addEventListener('change', function() {
+            if(this.value) {
+                let d = new Date(this.value);
+                d.setDate(d.getDate() + 12);
+                document.getElementById('klack-datum').valueAsDate = d;
+            }
+        });
+
+        document.getElementById('odling-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+            if (!WEB_APP_URL) {
+                alert("Ingen anslutningslänk hittades.");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
+            const currentId = document.getElementById('odlings-id').value || ("O" + Math.floor(1000 + Math.random() * 9000));
+
+            const formData = {
+                OdlingsID: currentId,
+                DatumOmlarvning: document.getElementById('datum-omlarvning').value,
+                MorKoloni: document.getElementById('mor-koloni').value,
+                AntalStartade: document.getElementById('antal-startade').value,
+                KlacckDatum: document.getElementById('klack-datum').value,
+                ParingsKupa: document.getElementById('parings-kupa').value,
+                Status: document.getElementById('status').value,
+                MarkeringFarg: document.getElementById('markering-farg').value,
+                Anteckningar: document.getElementById('anteckningar').value
+            };
+
+            try {
+                let response = await fetch(`${WEB_APP_URL}?sheet=Odling`, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(formData)
+                });
+                
+                let result = await response.json();
+                
+                if (result.status === "success") {
+                    alert("Odlingspartiet har sparats!");
+                    window.location.href = "index.html";
+                } else {
+                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Spara odlingsparti";
+                }
+            } catch (error) {
+                console.error("Fel:", error);
+                alert("Kunde inte nå servern.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara odlingsparti";
+            }
+        });
+    </script>
+</body>
+</html>

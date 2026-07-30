@@ -36,6 +36,11 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             text: "💰 Kassabok"
         },
         {
+    url: "odling.html",
+    text: "👑 Drottningodling"
+},
+
+        {
             url: "sasong.html",
             text: "📅 Säsongsschema"
         },
