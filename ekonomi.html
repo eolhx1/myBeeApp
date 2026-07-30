@@ -1,69 +1,249 @@
-// Filnamn: header.js
+<!-- Filnamn: ekonomi.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Kassabok</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .summary-card {
+            display: flex;
+            justify-content: space-around;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .summary-item h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .summary-item p {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        table.eco-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        table.eco-table th, table.eco-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table.eco-table th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .text-income { color: #27ae60; font-weight: bold; }
+        .text-expense { color: #c0392b; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-function laddaHeader(titelTekst, breadcrumbHTML = '') {
-    // Skapa HTML-strukturen med vänsterställda brödsmulor
-    const headerHTML = `
-        <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
-            <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
-            <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
-            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
-        </header>
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("💰 Kassabok", '<a href="index.html">🏠 Hem</a><span>&gt;</span><span>Kassabok</span>');
+    </script>
 
-        <!-- Sidomeny (Sidebar) -->
-        <div id="mySidebar" class="sidebar" style="height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #2c3e50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 5px rgba(0,0,0,0.5);">
-            <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" style="position: absolute; top: 15px; right: 25px; font-size: 36px; color: white; text-decoration: none;">&times;</a>
-            <a href="index.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🏠 Hem / Karta</a>
-            
-            <a href="historik.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">📈 Historik & Trender</a>
-            
-            <a href="drottningar.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">👑 Drottningregister</a>
+    <div class="container" style="max-width: 700px; margin: 20px auto; padding: 0 15px;">
 
-<a href="foder.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">🍯 Fodring & Vinterfoder</a>
-
-            
-            
-            <a href="ny-bigard.html" style="padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;">➕ Lägg till bigård</a>
-        </div>
-
-        <!-- Inställningsmodal -->
-        <div id="settingsModal" style="display: none; position: fixed; z-index: 3000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
-                    <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
-                        <span>🌙 Mörkt läge (kommer)</span>
-                        <input type="checkbox" disabled title="Kommer snart" style="cursor: not-allowed;">
-                    </div>
-
-                    <button onclick="bytUrlSide()" style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Byt anslutningslänk</button>
-                </div>
+        <!-- Sammanfattning -->
+        <div class="summary-card">
+            <div class="summary-item">
+                <h4>Inkomster</h4>
+                <p id="sum-income" class="text-income">0 kr</p>
+            </div>
+            <div class="summary-item">
+                <h4>Utgifter</h4>
+                <p id="sum-expense" class="text-expense">0 kr</p>
+            </div>
+            <div class="summary-item">
+                <h4>Resultat</h4>
+                <p id="sum-net">0 kr</p>
             </div>
         </div>
 
-        ${breadcrumbHTML ? `<div class="nav-bar" style="background: #e67e22; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; text-align: left;">${breadcrumbHTML}</div>` : ''}
-    `;
+        <!-- Inmatningsformulär -->
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #2c3e50;">Lägg till transaktion</h3>
+            <form id="eco-form" onsubmit="laggTillTransaktion(event)">
+                <div class="form-group">
+                    <label for="datum">Datum:</label>
+                    <input type="date" id="datum" required>
+                </div>
+                <div class="form-group">
+                    <label for="typ">Typ:</label>
+                    <select id="typ" required>
+                        <option value="Inkomst">Inkomst</option>
+                        <option value="Utgift">Utgift</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="kategori">Kategori:</label>
+                    <select id="kategori" required>
+                        <option value="Honungsförsäljning">Honungsförsäljning</option>
+                        <option value="Utrustning & Material">Utrustning & Material</option>
+                        <option value="Foder & Medicin">Foder & Medicin</option>
+                        <option value="Investering">Investering</option>
+                        <option value="Övrigt">Övrigt</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="belopp">Belopp (kr):</label>
+                    <input type="number" id="belopp" step="0.01" required placeholder="T.ex. 500">
+                </div>
+                <div class="form-group">
+                    <label for="anteckning">Anteckning:</label>
+                    <textarea id="anteckning" rows="2" placeholder="Valfri beskrivning..."></textarea>
+                </div>
+                <button type="submit" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara transaktion</button>
+            </form>
+        </div>
 
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
-}
+        <!-- Historiktabell -->
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #2c3e50;">Transaktionshistorik</h3>
+            <div style="overflow-x: auto;">
+                <table class="eco-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Typ</th>
+                            <th>Kategori</th>
+                            <th>Belopp</th>
+                            <th>Anteckning</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eco-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #777;">Laddar data från Google Sheets...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-function toggleSidebar() {
-    const sidebar = document.getElementById("mySidebar");
-    sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
-}
+    </div>
 
-function toggleSettingsMenu() {
-    const modal = document.getElementById("settingsModal");
-    modal.style.display = modal.style.display === "flex" ? "none" : "flex";
-}
+    <script>
+        // Sätt dagens datum som standard vid laddning
+        document.getElementById('datum').valueAsDate = new Date();
 
-function bytUrlSide() {
-    if (confirm("Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.")) {
-        localStorage.removeItem("myBeeApp_url");
-        sessionStorage.clear();
-        window.location.href = "index.html";
-    }
-}
+        // Här ansluter du mot din webblänk till Apps Script (samma princip som övriga appen)
+        const appUrl = localStorage.getItem("myBeeApp_url");
+
+        function hamtaKassabokData() {
+            if (!appUrl) {
+                document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ingen anslutningslänk hittad till Google Sheets.</td></tr>';
+                return;
+            }
+
+            // Exempelstruktur för hämtning (anpassa efter ditt Apps Script-anrop)
+            fetch(`${appUrl}?action=getKassabok`)
+                .then(response => response.json())
+                .then(data => {
+                    // Förväntar sig en array med objekt eller rader
+                    fyllTabellOchSammanfattning(data);
+                })
+                .catch(error => {
+                    console.error("Kunde inte hämta kassabok:", error);
+                    document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Kunde inte läsa data från bladet.</td></tr>';
+                });
+        }
+
+        function laggTillTransaktion(event) {
+            event.preventDefault();
+            
+            const nyTransaktion = {
+                datum: document.getElementById('datum').value,
+                typ: document.getElementById('typ').value,
+                kategori: document.getElementById('kategori').value,
+                belopp: parseFloat(document.getElementById('belopp').value),
+                anteckning: document.getElementById('anteckning').value
+            };
+
+            // Skicka till Apps Script
+            fetch(appUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'addKassabok', ...nyTransaktion })
+            })
+            .then(res => res.json())
+            .then(resultat => {
+                alert("Transaktionen sparad!");
+                document.getElementById('eco-form').reset();
+                document.getElementById('datum').valueAsDate = new Date();
+                hamtaKassabokData(); // Uppdatera listan
+            })
+            .catch(err => {
+                console.error("Fel vid sparande:", err);
+                alert("Kunde inte spara transaktionen.");
+            });
+        }
+
+        function fyllTabellOchSammanfattning(transaktioner) {
+            const tbody = document.getElementById('eco-tbody');
+            tbody.innerHTML = '';
+
+            if (!transaktioner || transaktioner.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777;">Inga transaktioner registrerade än.</td></tr>';
+                return;
+            }
+
+            let totalIn = 0;
+            let totalUt = 0;
+
+            transaktioner.forEach(t => {
+                const beloppNum = Number(t.belopp) || 0;
+                if (t.typ === 'Inkomst') totalIn += beloppNum;
+                else totalUt += beloppNum;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.datum}</td>
+                    <td class="${t.typ === 'Inkomst' ? 'text-income' : 'text-expense'}">${t.typ}</td>
+                    <td>${t.kategori}</td>
+                    <td>${beloppNum.toLocaleString()} kr</td>
+                    <td>${t.anteckning || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('sum-income').innerText = totalIn.toLocaleString() + ' kr';
+            document.getElementById('sum-expense').innerText = totalUt.toLocaleString() + ' kr';
+            
+            const net = totalIn - totalUt;
+            const netElement = document.getElementById('sum-net');
+            netElement.innerText = net.toLocaleString() + ' kr';
+            netElement.style.color = net >= 0 ? '#27ae60' : '#c0392b';
+        }
+
+        // Kör vid sidladdning om länk finns
+        // hamtaKassabokData();
+    </script>
+</body>
+</html>
