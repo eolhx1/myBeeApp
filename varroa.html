@@ -97,7 +97,7 @@
                 });
         }
 
-        function bearbetaOchVisaVarroa(skotselLista) {
+                function bearbetaOchVisaVarroa(skotselLista) {
             const tbody = document.getElementById('varroa-tbody');
             tbody.innerHTML = '';
 
@@ -106,13 +106,10 @@
                 return;
             }
 
-            // Skapa ett objekt för att hålla reda på det SENASTE tillståndet per samhälle
             let samhalleStatus = {};
 
             skotselLista.forEach(item => {
                 const id = item.SamhallsID || item.Samhälle || "Okänt";
-                
-                // Vi vill spara den senaste raden baserat på datum för varje samhälle
                 if (!samhalleStatus[id] || new Date(item.Datum) > new Date(samhalleStatus[id].Datum)) {
                     samhalleStatus[id] = item;
                 }
@@ -120,10 +117,7 @@
 
             const IDag = new Date();
 
-            Object.values(samhalleStatus.forEach || Object.keys(samhalleStatus)).forEach(id => {
-                const s = samhalleStatus[id];
-                
-                // Kontrollera karenstid om det finns angivet
+            Object.values(samhalleStatus).forEach(s => {
                 let karenstidSlut = s.Karenstid || s.KarenstidsDatum || "";
                 let harAktivKarenstid = false;
                 
