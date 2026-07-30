@@ -17,10 +17,16 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             url: "drottningar.html",
             text: "👑 Drottningregister"
         },
-        {
+                {
             url: "foder.html",
-            text: "🍯 Fodring & Vinterfoder"
+            text: "🪣 Fodring & Vinterfoder"
         },
+        {
+            url: "varroa.html",
+            text: "🔬 Varroastatus & Hälsa"
+        },
+
+
         {
             url: "honung.html",
             text: "🍯 Honungsskörd"
