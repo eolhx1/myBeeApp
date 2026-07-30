@@ -121,11 +121,14 @@
             let samhalleNamnMap = {};
             if (Array.isArray(samhalleLista)) {
                 samhalleLista.forEach(s => {
-                    let id = s.SamhallsID || s.ID;
-                    let namn = s.SamhallsNamn || s.Namn || s.Benamning || id;
-                    if (id) samhalleNamnMap[id] = namn;
+                    let id = s.SamhallsID || s.SamhällsID || s.ID || "";
+                    let namn = s.Kupbenamning || s.SamhallsNamn || s.Namn || s.Benamning || "";
+                    if (id) {
+                        samhalleNamnMap[id] = namn || id;
+                    }
                 });
             }
+
 
             let bigardNamnMap = {};
             if (Array.isArray(bigardLista)) {
@@ -157,7 +160,7 @@
 
                 let karenstidSlut = s.Karenstid || s.KarenstidsDatum || "";
                 let harAktivKarenstid = false;
-                
+
                 if (karenstidSlut) {
                     const slutDatum = new Date(karenstidSlut);
                     if (slutDatum >= IDag) {
@@ -167,16 +170,15 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong>${bigardsNamn}</strong></td>
-                    <td>${samhallsNamn}</td>
-                    <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
-                    <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
-                    <td>${karenstidSlut || 'Ingen'}</td>
-                    <td>
-                        ${harAktivKarenstid 
-                            ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>' 
-                            : '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
-                    </td>
+                <td><strong>${bigardsNamn}</strong></td>
+                <td>${samhallsNamn}</td>
+                <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
+                <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
+                <td>${karenstidSlut || 'Ingen'}</td>
+                <td>
+                ${harAktivKarenstid
+                ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>': '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
+                </td>
                 `;
                 tbody.appendChild(tr);
             });
