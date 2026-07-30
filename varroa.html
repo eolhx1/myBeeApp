@@ -85,6 +85,7 @@
     </div>
 
     <script>
+    <script>
         const appUrl = localStorage.getItem("myBeeApp_url");
 
         function hamtaVarroaData() {
@@ -93,20 +94,22 @@
                 return;
             }
 
-            // Hämta direkt från skötselbladet via webbappen
-            fetch(`${appUrl}?sheet=Skotsel`)
-            .then(response => response.json())
-            .then(data => {
-                bearbetaOchVisaVarroa(data);
+            // Vi hämtar skötsel, samhällen och bigårdar samtidigt för att kunna matcha namn
+            Promise.all([
+                fetch(`${appUrl}?sheet=Skotsel`).then(res => res.json()),
+                fetch(`${appUrl}?sheet=Samhallen`).then(res => res.json()).catch(() => []),
+                fetch(`${appUrl}?sheet=Bigardar`).then(res => res.json()).catch(() => [])
+            ])
+            .then(([skotselLista, samhalleLista, bigardLista]) => {
+                bearbetaOchVisaVarroa(skotselLista, samhalleLista, bigardLista);
             })
             .catch(error => {
                 console.error("Kunde inte hämta data:", error);
-                document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa skötseldata.</td></tr>';
+                document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa data från Google Sheets.</td></tr>';
             });
         }
 
-
-        function bearbetaOchVisaVarroa(skotselLista) {
+        function bearbetaOchVisaVarroa(skotselLista, samhalleLista, bigardLista) {
             const tbody = document.getElementById('varroa-tbody');
             tbody.innerHTML = '';
 
@@ -115,10 +118,29 @@
                 return;
             }
 
+            // Skapa uppslagslistor (lookup-tabeller) för namn
+            let samhalleNamnMap = {};
+            if (Array.isArray(samhalleLista)) {
+                samhalleLista.forEach(s => {
+                    let id = s.SamhallsID || s.ID;
+                    let namn = s.SamhallsNamn || s.Namn || s.Benamning || id;
+                    if (id) samhalleNamnMap[id] = namn;
+                });
+            }
+
+            let bigardNamnMap = {};
+            if (Array.isArray(bigardLista)) {
+                bigardLista.forEach(b => {
+                    let id = b.BigardsID || b.ID;
+                    let namn = b.BigardsNamn || b.Namn || b.Benamning || id;
+                    if (id) bigardNamnMap[id] = namn;
+                });
+            }
+
             let samhalleStatus = {};
 
             skotselLista.forEach(item => {
-                const id = item.SamhallsID || item.Samhälle || "Okänt";
+                const id = item.SamhallsID || item.Samhälle || item.SamhällsID || "Okänt";
                 if (!samhalleStatus[id] || new Date(item.Datum) > new Date(samhalleStatus[id].Datum)) {
                     samhalleStatus[id] = item;
                 }
@@ -127,9 +149,16 @@
             const IDag = new Date();
 
             Object.values(samhalleStatus).forEach(s => {
+                let samhallsIdKey = s.SamhallsID || s.Samhälle || s.SamhällsID || "";
+                let bigardsIdKey = s.BigardsID || s.Bigård || "";
+
+                // Hämta riktigt namn om det finns i mappen, annars använd ID eller befintligt fält
+                let samhallsNamn = samhalleNamnMap[samhallsIdKey] || s.SamhallsNamn || samhallsIdKey || '-';
+                let bigardsNamn = bigardNamnMap[bigardsIdKey] || s.BigardsNamn || s.Bigard || '-';
+
                 let karenstidSlut = s.Karenstid || s.KarenstidsDatum || "";
                 let harAktivKarenstid = false;
-
+                
                 if (karenstidSlut) {
                     const slutDatum = new Date(karenstidSlut);
                     if (slutDatum >= IDag) {
@@ -139,15 +168,16 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td><strong>${s.BigardsNamn || s.Bigard || '-'}</strong></td>
-                <td>${s.SamhallsID || s.Samhälle || '-'}</td>
-                <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
-                <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
-                <td>${karenstidSlut || 'Ingen'}</td>
-                <td>
-                ${harAktivKarenstid
-                ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>': '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
-                </td>
+                    <td><strong>${bigardsNamn}</strong></td>
+                    <td>${samhallsNamn}</td>
+                    <td>${s.Kvalsternedfall || s.VarroaNedfall || 'Ej loggat'}</td>
+                    <td>${s.Lakemedel || s.Behandling || 'Ingen angiven'}</td>
+                    <td>${karenstidSlut || 'Ingen'}</td>
+                    <td>
+                        ${harAktivKarenstid 
+                            ? '<span class="status-badge karenstid-aktiv">⚠️ Aktiv karenstid</span>' 
+                            : '<span class="status-badge karenstid-ok">✅ OK / Ingen karenstid</span>'}
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -155,5 +185,6 @@
 
         hamtaVarroaData();
     </script>
+
 </body>
 </html>
