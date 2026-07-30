@@ -1,0 +1,82 @@
+<!-- Filnamn: kalender.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBeeApp - Drag- & Blomningskalender</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .bloom-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            border-left: 5px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🌸 Drag- & Blomningskalender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Kalender</span>');
+    </script>
+
+    <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
+        <div class="card">
+            <h3 style="margin-top: 0; color: #2c3e50;">Säsongens dragväxter</h3>
+            <p style="color: #666; font-size: 0.9rem;">
+                Här ser du när de viktiga dragväxterna brukar blomma i din zon, kopplat till historiska noteringar om när dragen skedde.
+            </p>
+            <div id="blomnings-lista">
+                <p>Laddar blomningsdata...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+
+        async function laddaKalenderData() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                let response = await fetch(WEB_APP_URL);
+                let data = await response.json();
+                visaKalender(data.blomning || []);
+            } catch (error) {
+                console.error("Fel vid laddning:", error);
+                document.getElementById('blomnings-lista').innerHTML = "<p>Kunde inte hämta kalenderdata.</p>";
+            }
+        }
+
+        function visaKalender(blommor) {
+            let listaDiv = document.getElementById('blomnings-lista');
+            listaDiv.innerHTML = "";
+
+            if (blommor.length === 0) {
+                listaDiv.innerHTML = "<p>Inga växter inlagda i kalendern ännu.</p>";
+                return;
+            }
+
+            blommor.forEach(b => {
+                let card = document.createElement('div');
+                card.className = 'bloom-card';
+                card.innerHTML = `
+                    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">🌱 ${b.VäxtNamn || 'Växt'}</h4>
+                    <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Normal blomning:</strong> ${b.NormalTid || 'Ej angivet'}</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #555;"><em>Anteckning / Historik:</em> ${b.Anteckningar || 'Inga anteckningar sparade.'}</p>
+                `;
+                listaDiv.appendChild(card);
+            });
+        }
+
+        laddaKalenderData();
+    </script>
+</body>
+</html>

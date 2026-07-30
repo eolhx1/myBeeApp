@@ -17,7 +17,7 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             url: "drottningar.html",
             text: "👑 Drottningregister"
         },
-                {
+        {
             url: "foder.html",
             text: "🪣 Fodring & Vinterfoder"
         },
@@ -48,6 +48,11 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             url: "odling.html",
             text: "👑 Drottningodling"
         },
+        {
+            url: "kalender.html",
+            text: "🌸 Drag- & Blomningskalender"
+        },
+
         {
             url: "vaxhantering.html",
             text: "🕯️ Vaxhantering"
