@@ -248,13 +248,20 @@ function visaBigardar(data) {
         }
     });
 
-    if (map && markers.length > 0) {
-        let bounds = L.latLngBounds(markers);
-        map.fitBounds(bounds, {
-            padding: [50, 50], maxZoom: 15
-        });
+    if (map) {
+        if (markers.length > 1) {
+            let bounds = L.latLngBounds(markers);
+            map.fitBounds(bounds, {
+                padding: [50, 50], 
+                maxZoom: 15
+            });
+        } else if (markers.length === 1) {
+            // Om det bara finns en enda markör kvar, centrera direkt på den istället
+            map.setView(markers[0], 14);
+        }
     }
 }
+
 
 function redigeraBigard(id) {
     window.location.href = `ny-bigard.html` + (id ? `?id=${id}`: '');
