@@ -1,3 +1,5 @@
+// Filnamn: index.js
+
 let map;
 
 function toggleMenu() {
@@ -179,6 +181,13 @@ function visaBigardar(data) {
 
     if (map) {
         map.invalidateSize();
+        
+        // Rensa bort gamla markörer så de inte dubbelrias eller ligger kvar
+        map.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
     }
 
     let markers = [];
