@@ -5,49 +5,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Översikt</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="utils.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 </head>
+
 <body>
 
-<!-- Generera gemensam header -->
-<script src="header.js"></script>
-<script>
-laddaHeader("🐝 Mina Bigårdar", '<span>🏠 Hem</span>');
-</script>
+    <!-- Generera gemensam header -->
+    <script src="header.js"></script>
+    <script>
+        laddaHeader("🐝 Mina Bigårdar", '<span>🏠 Hem</span>');
+    </script>
 
-<div class="container">
-<!-- Banner för osynkad data -->
-<div id="offline-banner" onclick="synkaOfflineKoe()">
-<span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
-<span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
-</div>
+    <div class="container">
+        <!-- Banner för osynkad data -->
+        <div id="offline-banner" onclick="synkaOfflineKoe()">
+            <span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
+            <span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
+        </div>
 
-<!-- Setup om URL saknas -->
-<div id="setup-screen" style="display: none;">
-<h2>Anslut din app</h2>
-<p>
-Klistra in din Google Apps Script Web App URL nedan:
-</p>
-<input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
-<button onclick="sparaUrl()">Anslut</button>
-</div>
+        <!-- Setup om URL saknas -->
+        <div id="setup-screen" style="display: none;">
+            <h2>Anslut din app</h2>
+            <p>
+                Klistra in din Google Apps Script Web App URL nedan:
+            </p>
+            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button onclick="sparaUrl()">Anslut</button>
+        </div>
 
-<!-- Huvudinnehåll -->
-<div id="main-content" style="display: none;">
-<h3>Karta över bigårdar</h3>
-<div id="map"></div>
+        <!-- Huvudinnehåll -->
+        <div id="main-content" style="display: none;">
+            <h3>Karta över bigårdar</h3>
+            <div id="map"></div>
 
-<h3>Mina bigårdar (Lista)</h3>
-<div id="bigard-list">
-<p>
-Laddar bigårdar...
-</p>
-</div>
-</div>
-</div>
+            <h3>Mina bigårdar (Lista)</h3>
+            <div id="bigard-list">
+                <p>
+                    Laddar bigårdar...
+                </p>
+            </div>
+        </div>
+    </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="index.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
