@@ -14,7 +14,7 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('id');
-        const rubrikText = editId ? "🐝 Redigera bigård": "🐝 Lägg till ny bigård";
+        const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
 
         laddaHeader(rubrikText, '<a href="index.html">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>');
     </script>
@@ -135,14 +135,13 @@
                 document.getElementById('namn').value = found.Namn || "";
                 document.getElementById('typ').value = found.Typ || "Produktionsbigård";
                 document.getElementById('antal').value = found.AntalSamhallen || 0;
-                document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0]: "";
+                document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
 
-                // Extra säkerhetskontroll: Sätt bara in värdet i lat/lon om det inte ser ut som ett datum/tidsstämpel
                 let latVal = String(found.Latitud || "");
                 let lonVal = String(found.Longitud || "");
 
-                document.getElementById('lat').value = (latVal.includes("T") || latVal.length > 15) ? "": latVal;
-                document.getElementById('lon').value = (lonVal.includes("T") || lonVal.length > 15) ? "": lonVal;
+                document.getElementById('lat').value = (latVal.includes("T") || latVal.length > 15) ? "" : latVal;
+                document.getElementById('lon').value = (lonVal.includes("T") || lonVal.length > 15) ? "" : lonVal;
 
                 document.getElementById('anteckningar').value = found.Anteckningar || "";
                 document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
@@ -177,7 +176,6 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-
             if (!navigator.onLine) {
                 sparaTillOfflineKoe(formData);
                 alert("Ingen internettäckning! Ändringen har sparats lokalt på enheten och synkas automatiskt när du är tillbaka online.");
@@ -186,6 +184,7 @@
             }
 
             try {
+                // Skicka både som URL-parameter och i JSON-kroppen för maximal kompatibilitet med Apps Script
                 let targetUrl = `${WEB_APP_URL}?sheet=Bigardar`;
 
                 let response = await fetch(targetUrl, {
@@ -199,6 +198,8 @@
                 let result = await response.json();
 
                 if (result && (result.status === "success" || result.result === "success")) {
+                    // Rensa cache så att index.html laddar om den färska datan direkt
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     alert("Ändringarna har sparats till molnet!");
                     window.location.href = "index.html";
                 } else {
@@ -215,8 +216,7 @@
         function sparaTillOfflineKoe(newItem) {
             let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
             koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe",
-                JSON.stringify(koe));
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
         }
 
         initForm();
