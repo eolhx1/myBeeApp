@@ -44,6 +44,13 @@ function initApp() {
             }).addTo(map);
         }
 
+        // Tvinga kartan att anpassa sig efter att den blivit synlig
+        if (map) {
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
+
         const cachedData = sessionStorage.getItem("myBeeApp_globalData");
         if (cachedData) {
             try {
@@ -207,8 +214,7 @@ function visaBigardar(data) {
             let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
             let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
             if (!isNaN(lat) && !isNaN(lon)) {
-                let latLng = [lat,
-                    lon];
+                let latLng = [lat, lon];
 
                 if (isInaktiv) {
                     let grayIcon = L.icon({
