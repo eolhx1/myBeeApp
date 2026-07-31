@@ -6,283 +6,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Översikt</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- Generera gemensam header -->
-    <script src="header.js"></script>
-    <script>
-        laddaHeader("🐝 Mina Bigårdar", '<span>🏠 Hem</span>');
-    </script>
+<!-- Generera gemensam header -->
+<script src="header.js"></script>
+<script>
+laddaHeader("🐝 Mina Bigårdar", '<span>🏠 Hem</span>');
+</script>
 
-    <div class="container">
-        <!-- Banner för osynkad data (visas dynamiskt) -->
-        <div id="offline-banner" onclick="synkaOfflineKoe()">
-            <span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
-            <span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
-        </div>
+<div class="container">
+<!-- Banner för osynkad data (visas dynamiskt) -->
+<div id="offline-banner" onclick="synkaOfflineKoe()">
+<span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
+<span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
+</div>
 
-        <!-- Setup om URL saknas -->
-        <div id="setup-screen" style="display: none;">
-            <h2>Anslut din app</h2>
-            <p>Klistra in din Google Apps Script Web App URL nedan:</p>
-            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
-            <button onclick="sparaUrl()">Anslut</button>
-        </div>
+<!-- Setup om URL saknas -->
+<div id="setup-screen" style="display: none;">
+<h2>Anslut din app</h2>
+<p>
+Klistra in din Google Apps Script Web App URL nedan:
+</p>
+<input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+<button onclick="sparaUrl()">Anslut</button>
+</div>
 
-        <!-- Huvudinnehåll -->
-        <div id="main-content" style="display: none;">
-            <h3>Karta över bigårdar</h3>
-            <div id="map"></div>
+<!-- Huvudinnehåll -->
+<div id="main-content" style="display: none;">
+<h3>Karta över bigårdar</h3>
+<div id="map"></div>
 
-            <h3>Mina bigårdar (Lista)</h3>
-            <div id="bigard-list">
-                <p>Laddar bigårdar...</p>
-            </div>
-        </div>
-    </div>
+<h3>Mina bigårdar (Lista)</h3>
+<div id="bigard-list">
+<p>
+Laddar bigårdar...
+</p>
+</div>
+</div>
+</div>
 
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script>
-        let map;
+<script>
+let map;
 
-        function toggleMenu() {
-            const menu = document.getElementById("dropdownMenu");
-            menu.classList.toggle("show");
-        }
+function toggleMenu() {
+const menu = document.getElementById("dropdownMenu");
+menu.classList.toggle("show");
+}
 
-        window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
-                const dropdowns = document.getElementsByClassName("dropdown-menu");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    let openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
+window.onclick = function(event) {
+if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
+const dropdowns = document.getElementsByClassName("dropdown-menu");
+for (let i = 0; i < dropdowns.length; i++) {
+let openDropdown = dropdowns[i];
+if (openDropdown.classList.contains('show')) {
+openDropdown.classList.remove('show');
+}
+}
+}
+}
 
-        function visaInstallningar() {
-            localStorage.removeItem("myBeeApp_url");
-            sessionStorage.removeItem("myBeeApp_globalData");
-            sessionStorage.removeItem("myBeeApp_bigardar");
-            initApp();
-        }
+function visaInstallningar() {
+localStorage.removeItem("myBeeApp_url");
+sessionStorage.removeItem("myBeeApp_globalData");
+sessionStorage.removeItem("myBeeApp_bigardar");
+initApp();
+}
 
-        function initApp() {
-            const savedUrl = localStorage.getItem("myBeeApp_url");
-            if (!savedUrl) {
-                document.getElementById("setup-screen").style.display = "block";
-                document.getElementById("main-content").style.display = "none";
-                document.getElementById("offline-banner").style.display = "none";
-            } else {
-                document.getElementById("setup-screen").style.display = "none";
-                document.getElementById("main-content").style.display = "block";
-                
-                // Kontrollera om det finns köad offline-data och uppdatera bannern
-                uppdateraOfflineBanner();
+function initApp() {
+const savedUrl = localStorage.getItem("myBeeApp_url");
+if (!savedUrl) {
+document.getElementById("setup-screen").style.display = "block";
+document.getElementById("main-content").style.display = "none";
+document.getElementById("offline-banner").style.display = "none";
+} else {
+document.getElementById("setup-screen").style.display = "none";
+document.getElementById("main-content").style.display = "block";
 
-                if (!map && typeof L !== 'undefined') {
-                    map = L.map('map').setView([62.0, 15.0], 4);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap'
-                    }).addTo(map);
-                }
+// Kontrollera om det finns köad offline-data och uppdatera bannern
+uppdateraOfflineBanner();
 
-                // 1. Kolla om vi har gemensam global data sparad i cachen för direkt visning
-                const cachedData = sessionStorage.getItem("myBeeApp_globalData");
-                if (cachedData) {
-                    try {
-                        let globalData = JSON.parse(cachedData);
-                        if (globalData.bigardar) {
-                            visaBigardar(globalData.bigardar);
-                        }
-                    } catch (e) {
-                        console.error("Kunde inte läsa cache", e);
-                    }
-                } else {
-                    document.getElementById("bigard-list").innerHTML = "<p>Laddar bigårdar...</p>";
-                }
+if (!map && typeof L !== 'undefined') {
+map = L.map('map').setView([62.0, 15.0], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: 19,
+attribution: '© OpenStreetMap'
+}).addTo(map);
+}
 
-                // 2. Hämta alltid färsk gemensam data i bakgrunden (samt försök synka offline om vi har nät)
-                hamtaAllData();
-                if (navigator.onLine) {
-                    synkaOfflineKoe();
-                }
-            }
-        }
+// 1. Kolla om vi har gemensam global data sparad i cachen för direkt visning
+const cachedData = sessionStorage.getItem("myBeeApp_globalData");
+if (cachedData) {
+try {
+let globalData = JSON.parse(cachedData);
+if (globalData.bigardar) {
+visaBigardar(globalData.bigardar);
+}
+} catch (e) {
+console.error("Kunde inte läsa cache", e);
+}
+} else {
+document.getElementById("bigard-list").innerHTML = "<p>Laddar bigårdar...</p>";
+}
 
-        function uppdateraOfflineBanner() {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            const banner = document.getElementById("offline-banner");
-            const countSpan = document.getElementById("offline-count");
+// 2. Hämta alltid färsk gemensam data i bakgrunden (samt försök synka offline om vi har nät)
+hamtaAllData();
+if (navigator.onLine) {
+synkaOfflineKoe();
+}
+}
+}
 
-            if (koe.length > 0) {
-                countSpan.textContent = `${koe.length} st`;
-                banner.style.display = "flex";
-            } else {
-                banner.style.display = "none";
-            }
-        }
+function uppdateraOfflineBanner() {
+let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+const banner = document.getElementById("offline-banner");
+const countSpan = document.getElementById("offline-count");
 
-        async function synkaOfflineKoe() {
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+if (koe.length > 0) {
+countSpan.textContent = `${koe.length} st`;
+banner.style.display = "flex";
+} else {
+banner.style.display = "none";
+}
+}
 
-            if (koe.length === 0) return;
+async function synkaOfflineKoe() {
+const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
 
-            if (!navigator.onLine) {
-                alert("Ingen internetanslutning tillgänglig just nu. Kan inte synka.");
-                return;
-            }
+if (koe.length === 0) return;
 
-            // Ändra lite text på bannern för att visa att synk pågår
-            const banner = document.getElementById("offline-banner");
-            banner.style.backgroundColor = "#f39c12"; // Orange under synk
-            banner.querySelector("span").textContent = "🔄 Synkar osynkad data med molnet...";
+if (!navigator.onLine) {
+alert("Ingen internetanslutning tillgänglig just nu. Kan inte synka.");
+return;
+}
 
-            let lyckade = 0;
+// Ändra lite text på bannern för att visa att synk pågår
+const banner = document.getElementById("offline-banner");
+banner.style.backgroundColor = "#f39c12"; // Orange under synk
+banner.querySelector("span").textContent = "🔄 Synkar osynkad data med molnet...";
 
-            while (koe.length > 0) {
-                let item = koe[0];
-                try {
-                    let response = await fetch(WEB_APP_URL, {
-                        method: "POST",
-                        body: JSON.stringify(item)
-                    });
-                    let result = await response.json();
-                    
-                    if (result && (result.status === "success" || result.result === "success")) {
-                        koe.shift(); // Ta bort från kön
-                        localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-                        lyckade++;
-                    } else {
-                        break; 
-                    }
-                } catch (e) {
-                    console.error("Synkfel:", e);
-                    break;
-                }
-            }
+let lyckade = 0;
 
-            uppdateraOfflineBanner();
-            banner.style.backgroundColor = "#e74c3c"; // Tillbaka till rött om det är mer kvar
+while (koe.length > 0) {
+let item = koe[0];
+try {
+let response = await fetch(WEB_APP_URL, {
+method: "POST",
+body: JSON.stringify(item)
+});
+let result = await response.json();
 
-            if (lyckade > 0) {
-                alert(`Synkningen klar! ${lyckade} ändring(ar) har skickats till Google Sheets.`);
-                // Hämta färsk data efter lyckad synk
-                hamtaAllData();
-            } else {
-                alert("Kunde inte synka data. Kontrollera din uppkoppling och försök igen.");
-            }
-        }
+if (result && (result.status === "success" || result.result === "success")) {
+koe.shift(); // Ta bort från kön
+localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+lyckade++;
+} else {
+break;
+}
+} catch (e) {
+console.error("Synkfel:", e);
+break;
+}
+}
 
-        function sparaUrl() {
-            const url = document.getElementById("url-input").value.trim();
-            if (url.startsWith("https://script.google.com")) {
-                localStorage.setItem("myBeeApp_url", url);
-                initApp();
-            } else {
-                alert("Ange en giltig Apps Script URL.");
-            }
-        }
+uppdateraOfflineBanner();
+banner.style.backgroundColor = "#e74c3c"; // Tillbaka till rött om det är mer kvar
 
-        async function hamtaAllData() {
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+if (lyckade > 0) {
+alert(`Synkningen klar! ${lyckade} ändring(ar) har skickats till Google Sheets.`);
+// Hämta färsk data efter lyckad synk
+hamtaAllData();
+} else {
+alert("Kunde inte synka data. Kontrollera din uppkoppling och försök igen.");
+}
+}
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
+function sparaUrl() {
+const url = document.getElementById("url-input").value.trim();
+if (url.startsWith("https://script.google.com")) {
+localStorage.setItem("myBeeApp_url", url);
+initApp();
+} else {
+alert("Ange en giltig Apps Script URL.");
+}
+}
 
-                if (data.status === "error") {
-                    console.error("Fel från servern:", data.message);
-                    return;
-                }
+async function hamtaAllData() {
+const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-                if (!data || !data.bigardar) {
-                    document.getElementById("bigard-list").innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
-                    return;
-                }
+try {
+let response = await fetch(WEB_APP_URL);
+let data = await response.json();
 
-                sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                visaBigardar(data.bigardar);
+if (data.status === "error") {
+console.error("Fel från servern:", data.message);
+return;
+}
 
-            } catch (error) {
-                console.error("Kunde inte hämta data från servern:", error);
-                if (!sessionStorage.getItem("myBeeApp_globalData")) {
-                    document.getElementById("bigard-list").innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
-                }
-            }
-        }
+if (!data || !data.bigardar) {
+document.getElementById("bigard-list").innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
+return;
+}
 
-        function visaBigardar(data) {
-            const listContainer = document.getElementById("bigard-list");
-            listContainer.innerHTML = "";
-            
-            if (map) {
-                map.invalidateSize();
-            }
+sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+visaBigardar(data.bigardar);
 
-            let markers = []; 
+} catch (error) {
+console.error("Kunde inte hämta data från servern:", error);
+if (!sessionStorage.getItem("myBeeApp_globalData")) {
+document.getElementById("bigard-list").innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
+}
+}
+}
 
-            data.forEach(b => {
-                const status = b.Status || "Aktiv";
-                const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
-                
-                const card = document.createElement("div");
-                card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
-                
-                card.onclick = () => {
-                    window.location.href = `skotsel.html?id=${encodeURIComponent(b.BigardsID)}`;
-                };
+function visaBigardar(data) {
+const listContainer = document.getElementById("bigard-list");
+listContainer.innerHTML = "";
 
-                card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <h3 style="${isInaktiv ? 'text-decoration: line-through; color: #7f8c8d;' : ''}">${b.Namn || 'Namnlös bigård'}</h3>
-                            <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
-                            <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
-                            <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
-                        </div>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <button onclick="event.stopPropagation(); window.location.href='bigardsstatus.html?id=${b.BigardsID}';" style="background: #27ae60; color: white; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer;" title="Visa bigårdsstatus">📊 Status</button>
-                            <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
-                        </div>
-                    </div>
-                `;
-                listContainer.appendChild(card);
+if (map) {
+map.invalidateSize();
+}
 
-                if (map && b.Latitud && b.Longitud) {
-                    let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
-                    let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        let latLng = [lat, lon];
-                        L.marker(latLng).addTo(map)
-                            .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
-                        
-                        markers.push(latLng);
-                    }
-                }
-            });
+let markers = [];
 
-            if (map && markers.length > 0) {
-                let bounds = L.latLngBounds(markers);
-                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-            }
-        }
+data.forEach(b => {
+const status = b.Status || "Aktiv";
+const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
 
-        function redigeraBigard(id) {
-            window.location.href = `ny-bigard.html` + (id ? `?id=${id}` : '');
-        }
+const card = document.createElement("div");
+card.className = `card ${isInaktiv ? 'inaktiv': ''}`;
 
-        initApp();
-    </script>
+card.onclick = () => {
+window.location.href = `skotsel.html?id=${encodeURIComponent(b.BigardsID)}`;
+};
+
+card.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+<div>
+<h3 style="${isInaktiv ? 'text-decoration: line-through; color: #7f8c8d;': ''}">${b.Namn || 'Namnlös bigård'}</h3>
+<p><strong>Typ:</strong> ${b.Typ || '-'}</p>
+<p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
+<span class="badge ${isInaktiv ? 'inaktiv': ''}">${status}</span>
+</div>
+<div style="display: flex; gap: 8px; align-items: center;">
+<button onclick="event.stopPropagation(); window.location.href='bigardsstatus.html?id=${b.BigardsID}';" style="background: #27ae60; color: white; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer;" title="Visa bigårdsstatus">📊 Status</button>
+<button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
+</div>
+</div>
+`;
+listContainer.appendChild(card);
+
+// Hantera kartmarkörer för både aktiva och inaktiva bigårdar
+if (map && b.Latitud && b.Longitud) {
+let lat = parseFloat(b.Latitud.toString().replace(',', '.'));
+let lon = parseFloat(b.Longitud.toString().replace(',', '.'));
+if (!isNaN(lat) && !isNaN(lon)) {
+let latLng = [lat,
+lon];
+
+if (isInaktiv) {
+// Skapa en grå/nedtonad markör för inaktiva bigårdar
+let grayIcon = L.icon({
+iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+iconSize: [25, 41],
+iconAnchor: [12, 41],
+popupAnchor: [1, -34],
+shadowSize: [41, 41]
+});
+L.marker(latLng, {
+icon: grayIcon
+}).addTo(map)
+.bindPopup(`<b>${b.Namn} (Inaktiv)</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
+} else {
+// Vanlig standardmarkör för aktiva bigårdar
+L.marker(latLng).addTo(map)
+.bindPopup(`<b>${b.Namn}</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
+}
+
+markers.push(latLng);
+}
+}
+});
+
+
+if (map && markers.length > 0) {
+let bounds = L.latLngBounds(markers);
+map.fitBounds(bounds, {
+padding: [50, 50], maxZoom: 15
+});
+}
+}
+
+function redigeraBigard(id) {
+window.location.href = `ny-bigard.html` + (id ? `?id=${id}`: '');
+}
+
+initApp();
+</script>
 
 </body>
 </html>
