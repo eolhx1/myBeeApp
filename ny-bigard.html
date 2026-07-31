@@ -107,7 +107,6 @@
         async function laddaDataForRedigering(webAppUrl, id) {
             let found = null;
 
-            // 1. Försök läsa från den gemensamma cachen först för blixtsnabb visning
             const cachedData = sessionStorage.getItem("myBeeApp_globalData");
             if (cachedData) {
                 try {
@@ -120,7 +119,6 @@
                 }
             }
 
-            // 2. Om den inte fanns i cachen, eller om vi vill säkerhetsställa, fetchar vi
             if (!found && navigator.onLine) {
                 try {
                     let response = await fetch(`${webAppUrl}?sheet=Bigardar`);
@@ -138,10 +136,15 @@
                 document.getElementById('typ').value = found.Typ || "Produktionsbigård";
                 document.getElementById('antal').value = found.AntalSamhallen || 0;
                 document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0]: "";
-                document.getElementById('lat').value = found.Latitud || "";
-                document.getElementById('lon').value = found.Longitud || "";
-                document.getElementById('anteckningar').value = found.Anteckningar || "";
 
+                // Extra säkerhetskontroll: Sätt bara in värdet i lat/lon om det inte ser ut som ett datum/tidsstämpel
+                let latVal = String(found.Latitud || "");
+                let lonVal = String(found.Longitud || "");
+
+                document.getElementById('lat').value = (latVal.includes("T") || latVal.length > 15) ? "": latVal;
+                document.getElementById('lon').value = (lonVal.includes("T") || lonVal.length > 15) ? "": lonVal;
+
+                document.getElementById('anteckningar').value = found.Anteckningar || "";
                 document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
             }
         }
