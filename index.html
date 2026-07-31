@@ -62,7 +62,8 @@
 
         function visaInstallningar() {
             localStorage.removeItem("myBeeApp_url");
-            sessionStorage.removeItem("myBeeApp_bigardar");
+            sessionStorage.removeItem("myBeeApp_globalData");
+            sessionStorage.removeItem("myBeeApp_bigardar"); // Rensa även gammal cache om den finns
             initApp();
         }
 
@@ -83,19 +84,23 @@
                     }).addTo(map);
                 }
 
-                // Kolla om vi har sparad data i sessionen först för direkt visning
-                const cachedBigardar = sessionStorage.getItem("myBeeApp_bigardar");
-                if (cachedBigardar) {
+                // 1. Kolla om vi har gemensam global data sparad i cachen för direkt visning
+                const cachedData = sessionStorage.getItem("myBeeApp_globalData");
+                if (cachedData) {
                     try {
-                        let data = JSON.parse(cachedBigardar);
-                        visaBigardar(data);
+                        let globalData = JSON.parse(cachedData);
+                        if (globalData.bigardar) {
+                            visaBigardar(globalData.bigardar);
+                        }
                     } catch (e) {
                         console.error("Kunde inte läsa cache", e);
                     }
+                } else {
+                    document.getElementById("bigard-list").innerHTML = "<p>Laddar bigårdar...</p>";
                 }
 
-                // Hämta alltid färsk data i bakgrunden (eller direkt om ingen cache fanns)
-                hamtaBigardar(!cachedBigardar);
+                // 2. Hämta alltid färsk gemensam data i bakgrunden
+                hamtaAllData();
             }
         }
 
@@ -109,41 +114,34 @@
             }
         }
 
-        async function hamtaBigardar(visaLaddarText = false) {
+        async function hamtaAllData() {
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-            const listContainer = document.getElementById("bigard-list");
-
-            if (visaLaddarText && !sessionStorage.getItem("myBeeApp_bigardar")) {
-                listContainer.innerHTML = "<p>Laddar bigårdar...</p>";
-            }
 
             try {
-                let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
+                // Hämtar hela datapaketet (inga ?sheet= flikar, utan hela objektet)
+                let response = await fetch(WEB_APP_URL);
                 let data = await response.json();
 
                 if (data.status === "error") {
-                    if (!sessionStorage.getItem("myBeeApp_bigardar")) {
-                        listContainer.innerHTML = `<p style="color:red;">Fel: ${data.message}</p>`;
-                    }
+                    console.error("Fel från servern:", data.message);
                     return;
                 }
 
-                if (!data || data.length === 0) {
-                    listContainer.innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
-                    sessionStorage.removeItem("myBeeApp_bigardar");
+                if (!data || !data.bigardar) {
+                    document.getElementById("bigard-list").innerHTML = "<p>Inga bigårdar tillagda ännu.</p>";
                     return;
                 }
 
-                // Spara ner i cachen
-                sessionStorage.setItem("myBeeApp_bigardar", JSON.stringify(data));
+                // Spara ner all data gemensamt i cachen så alla sidor (inkl. bigardsstatus) når den
+                sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
 
-                // Rita ut listan och kartan med nya datan
-                visaBigardar(data);
+                // Rita ut listan och kartan med den färska datan
+                visaBigardar(data.bigardar);
 
             } catch (error) {
-                console.error(error);
-                if (!sessionStorage.getItem("myBeeApp_bigardar")) {
-                    listContainer.innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
+                console.error("Kunde inte hämta data från servern:", error);
+                if (!sessionStorage.getItem("myBeeApp_globalData")) {
+                    document.getElementById("bigard-list").innerHTML = "<p style='color:red;'>Kunde inte hämta data från servern.</p>";
                 }
             }
         }
@@ -156,7 +154,7 @@
                 map.invalidateSize();
             }
 
-            let markers = []; // <-- Samlar ihop positioner för kartan
+            let markers = []; 
 
             data.forEach(b => {
                 const status = b.Status || "Aktiv";
@@ -179,10 +177,10 @@
                             <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <!-- NY KNAPP TILL BIGÅRDSSTATUS -->
+                            <!-- KNAPP TILL BIGÅRDSSTATUS -->
                             <button onclick="event.stopPropagation(); window.location.href='bigardsstatus.html?id=${b.BigardsID}';" style="background: #27ae60; color: white; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer;" title="Visa bigårdsstatus">📊 Status</button>
                             
-                            <!-- Din befintliga redigeringsknapp -->
+                            <!-- Redigeringsknapp -->
                             <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
                         </div>
                     </div>
@@ -202,14 +200,12 @@
                 }
             });
 
-            // Om vi har hittat några giltiga positioner, zooma så alla syns perfekt
             if (map && markers.length > 0) {
                 let bounds = L.latLngBounds(markers);
                 map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
             }
         }
 
-        // Hjälpfunktion för att nå inställningar/formuläret för bigården via kugghjulet
         function redigeraBigard(id) {
             window.location.href = `ny-bigard.html?id=${id}`;
         }
