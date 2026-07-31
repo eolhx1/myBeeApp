@@ -6,47 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Bigårdsstatus & Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .kupa-card {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-left: 5px solid #27ae60;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .kupa-card h4 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-        .info-row {
-            font-size: 0.9rem;
-            margin-bottom: 6px;
-            color: #444;
-        }
-        .info-row strong {
-            color: #2c3e50;
-        }
-        .latast-händelse {
-            background: #f8f9fa;
-            border-radius: 4px;
-            padding: 8px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #555;
-            border-left: 3px solid #3498db;
-        }
-    </style>
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
@@ -55,10 +16,10 @@
         laddaHeader("📊 Bigårdsstatus", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Bigårdsstatus</span>');
     </script>
 
-    <div class="container">
+    <div class="container" style="max-width: 1000px; margin: 20px auto; padding: 0 15px;">
         <!-- Välj bigård -->
         <div class="card">
-            <h3 style="margin-top: 0;">Välj bigård att granska</h3>
+            <h3 style="margin-top: 0; color: #2c3e50;">Välj bigård att granska</h3>
             <div class="form-group" style="margin-bottom: 0;">
                 <select id="valt-bigard-dashboard" class="form-control" onchange="visaDashboard()">
                     <option value="">-- Välj bigård --</option>
@@ -70,14 +31,18 @@
         <div id="dashboard-container">
             <p style="text-align: center; color: #666; margin-top: 20px;">Välj en bigård ovan för att visa snabbfakta för dess samhällen.</p>
         </div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
+        </div>
     </div>
 
     <script>
         let globalData = {};
 
         function initDashboard() {
-            // 1. Försök läsa all data direkt från sessionStorage (eller localStorage om ni sparar allt där)
-            const cachedData = sessionStorage.getItem("myBeeApp_globalData") || localStorage.getItem("myBeeApp_globalData");
+            // 1. Försök läsa all data direkt från sessionStorage eller localStorage
+            const cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData") || localStorage.getItem("myBeeApp_globalData");
 
             if (cachedData) {
                 try {
@@ -88,7 +53,7 @@
                 }
             }
 
-            // 2. Om ingen cache finns, eller för att uppdatera i bakgrunden, hämtar vi från nätet
+            // 2. Hämta fräsch data i bakgrunden
             hamtaDataBakgrund();
         }
 
@@ -118,9 +83,10 @@
         async function hamtaDataBakgrund() {
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             if (!WEB_APP_URL) {
-                window.location.href = "index.html";
                 return;
             }
+
+            if (!navigator.onLine) return;
 
             try {
                 let response = await fetch(WEB_APP_URL);
@@ -128,10 +94,8 @@
                 
                 if (data && !data.status) {
                     globalData = data;
-                    // Spara ner all data gemensamt så andra sidor kan nå den direkt
                     sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
                     
-                    // Uppdatera gränssnittet om användaren inte aktivt gjort ett val som skrivs över
                     let valtInnan = document.getElementById('valt-bigard-dashboard').value;
                     fyllBigardsDropdown(globalData.bigardar || []);
                     if (valtInnan && !document.getElementById('valt-bigard-dashboard').value) {
@@ -146,13 +110,15 @@
 
         function fyllBigardsDropdown(bigardar) {
             let select = document.getElementById('valt-bigard-dashboard');
-            let nuvarandeVal = select.value; // Spara nuvarande val så det inte nollställs i unödan
+            let nuvarandeVal = select.value;
             
             select.innerHTML = '<option value="">-- Välj bigård --</option>';
             bigardar.forEach(b => {
                 let opt = document.createElement('option');
-                opt.value = b.BigardsID;
-                opt.textContent = b.Bigardsnamn || b.Namn || b.BigardsID;
+                let id = b.BigardsID || b.ID;
+                let namn = b.Bigardsnamn || b.BigardsNamn || b.Namn || id;
+                opt.value = id;
+                opt.textContent = namn;
                 select.appendChild(opt);
             });
 
@@ -171,10 +137,10 @@
                 return;
             }
 
-            let samhallen = (globalData.samhallen || []).filter(s => String(s.BigardsID) === String(valtBigardID));
+            let samhallen = (globalData.samhallen || []).filter(s => String(s.BigardsID || s.Bigård) === String(valtBigardID));
 
             if (samhallen.length === 0) {
-                container.innerHTML = '<div class="card"><p>Inga samhällen registrerade i denna bigård.</p></div>';
+                container.innerHTML = '<div class="card"><p style="color: #777; text-align: center; margin: 0;">Inga samhällen registrerade i denna bigård.</p></div>';
                 return;
             }
 
@@ -184,38 +150,41 @@
             const nuvarandeAr = 2026;
 
             samhallen.forEach(s => {
-                let drottning = (globalData.drottningar || []).find(d => String(d.SamhallsID) === String(s.SamhallsID) && d.Status === "Aktiv i kupa");
+                let samhallsID = s.SamhallsID || s.SamhällsID || s.ID;
+                let drottning = (globalData.drottningar || []).find(d => String(d.SamhallsID || d.SamhällsID) === String(samhallsID) && (d.Status === "Aktiv i kupa" || !d.Status));
                 
                 let drottningText = "Ingen aktiv drottning registrerad";
                 let kortBorderColor = "#e67e22";
 
                 if (drottning) {
-                    let drottningAr = parseInt(drottning.DrottningAr) || nuvarandeAr;
+                    let drottningAr = parseInt(drottning.DrottningAr || drottning.Argang) || nuvarandeAr;
                     let alder = nuvarandeAr - drottningAr;
                     if (alder < 0) alder = 0;
                     let alderStr = alder === 0 ? "Årets (0 år)" : `${alder} år`;
                     
-                    drottningText = `👑 ${drottning.Namn || 'Namnlös'} (${drottning.Ras || 'Okänd ras'})<br>📅 Årgång: ${drottning.DrottningAr} (${alderStr}) | Färg: ${drottning.Farg || '-'}`;
+                    drottningText = `👑 ${drottning.Namn || 'Namnlös'} (${drottning.Ras || 'Okänd ras'})<br>📅 Årgång: ${drottningAr} (${alderStr}) | Färg: ${drottning.Farg || '-'}`;
                     if (alder >= 2) kortBorderColor = "#c0392b";
                 }
 
-                let skotselLoggar = (globalData.skotsel || []).filter(sk => String(sk.SamhallsID) === String(s.SamhallsID));
+                let skotselLoggar = (globalData.skotsel || []).filter(sk => String(sk.SamhallsID || sk.Samhälle || sk.SamhällsID) === String(samhallsID));
                 skotselLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
                 
                 let senasteSkotsel = skotselLoggar.length > 0 ? skotselLoggar[0] : null;
                 let skotselText = "Inga registreringar ännu";
 
                 if (senasteSkotsel) {
-                    let dat = senasteSkotsel.Datum ? senasteSkotsel.Datum.substring(0, 10) : "";
-                    let anteckning = senasteSkotsel.Anteckningar || "Utförd åtgärd";
+                    let dat = senasteSkotsel.Datum ? String(senasteSkotsel.Datum).substring(0, 10) : "";
+                    let anteckning = senasteSkotsel.Anteckningar || senasteSkotsel.Behandling || "Utförd åtgärd";
                     skotselText = `<strong>${dat}:</strong> ${anteckning}`;
                 }
+
+                let kupNamn = s.Kupbenamning || s.SamhallsNamn || s.Namn || samhallsID;
 
                 let card = document.createElement('div');
                 card.className = 'kupa-card';
                 card.style.borderLeftColor = kortBorderColor;
                 card.innerHTML = `
-                    <h4>🏠 ${s.Kupbenamning || s.SamhallsID}</h4>
+                    <h4>🏠 ${kupNamn}</h4>
                     <div class="info-row">${drottningText}</div>
                     <div class="latast-händelse">
                         <div style="font-size: 0.8rem; color: #777; margin-bottom: 2px;">Senaste händelse / koll:</div>
@@ -228,10 +197,7 @@
             container.appendChild(grid);
         }
 
-        // Starta direkt mot cachen
         initDashboard();
     </script>
-
-
 </body>
 </html>

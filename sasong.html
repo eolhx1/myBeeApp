@@ -1,54 +1,13 @@
 <!-- Filnamn: sasong.html -->
 <!DOCTYPE html>
 <html lang="sv">
-<head>
+<<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Säsongsschema & Årshjul</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .season-tabs {
-            display: flex;
-            gap: 5px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            padding-bottom: 5px;
-        }
-        .season-tab {
-            background: #e0e0e0;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            white-space: nowrap;
-            color: #333;
-            font-size: 0.9rem;
-        }
-        .season-tab.active {
-            background: #27ae60;
-            color: white;
-        }
-        .season-section {
-            display: none;
-        }
-        .season-section.active {
-            display: block;
-        }
-        .checklist-item {
-            background: #f9f9f9;
-            border-left: 4px solid #27ae60;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            border-radius: 0 4px 4px 0;
-            font-size: 0.95rem;
-        }
-        .checklist-item.highlight {
-            border-left-color: #e67e22;
-            background: #fdf2e9;
-        }
-    </style>
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
@@ -57,7 +16,7 @@
         laddaHeader("📅 Säsongsschema", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span>');
     </script>
 
-    <div class="container">
+    <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
 
         <!-- Flikmeny för säsonger -->
         <div class="season-tabs">
@@ -141,6 +100,10 @@
             <div class="checklist-item">
                 ✅ <strong>Materialvård:</strong> Rengör och laga ramar, smält ner vax och planera inför nästa säsong.
             </div>
+        </div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
         </div>
 
     </div>

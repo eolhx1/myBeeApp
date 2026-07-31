@@ -105,26 +105,44 @@
         }
 
         async function laddaDataForRedigering(webAppUrl, id) {
-            try {
-                let response = await fetch(`${webAppUrl}?sheet=Bigardar`);
-                let data = await response.json();
-                let found = data.find(b => b.BigardsID == id);
+            let found = null;
 
-                if (found) {
-                    document.getElementById('bigards-id').value = found.BigardsID || "";
-                    document.getElementById('status').value = found.Status || "Aktiv";
-                    document.getElementById('namn').value = found.Namn || "";
-                    document.getElementById('typ').value = found.Typ || "Produktionsbigård";
-                    document.getElementById('antal').value = found.AntalSamhallen || 0;
-                    document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
-                    document.getElementById('lat').value = found.Latitud || "";
-                    document.getElementById('lon').value = found.Longitud || "";
-                    document.getElementById('anteckningar').value = found.Anteckningar || "";
-
-                    document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
+            // 1. Försök läsa från den gemensamma cachen först för blixtsnabb visning
+            const cachedData = sessionStorage.getItem("myBeeApp_globalData");
+            if (cachedData) {
+                try {
+                    let globalData = JSON.parse(cachedData);
+                    if (globalData.bigardar) {
+                        found = globalData.bigardar.find(b => String(b.BigardsID) === String(id));
+                    }
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
                 }
-            } catch (e) {
-                console.error("Kunde inte ladda data för redigering", e);
+            }
+
+            // 2. Om den inte fanns i cachen, eller om vi vill säkerhetsställa, fetchar vi
+            if (!found && navigator.onLine) {
+                try {
+                    let response = await fetch(`${webAppUrl}?sheet=Bigardar`);
+                    let data = await response.json();
+                    found = data.find(b => String(b.BigardsID) === String(id));
+                } catch (e) {
+                    console.error("Kunde inte ladda data via nätverket", e);
+                }
+            }
+
+            if (found) {
+                document.getElementById('bigards-id').value = found.BigardsID || "";
+                document.getElementById('status').value = found.Status || "Aktiv";
+                document.getElementById('namn').value = found.Namn || "";
+                document.getElementById('typ').value = found.Typ || "Produktionsbigård";
+                document.getElementById('antal').value = found.AntalSamhallen || 0;
+                document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
+                document.getElementById('lat').value = found.Latitud || "";
+                document.getElementById('lon').value = found.Longitud || "";
+                document.getElementById('anteckningar').value = found.Anteckningar || "";
+
+                document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
             }
         }
 
@@ -141,9 +159,10 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
+            const currentId = document.getElementById('bigards-id'].value || ("B" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
+                sheet: "Bigardar", // Bra att skicka med vilken flik/typ det gäller i kön
                 BigardsID: currentId,
                 Status: document.getElementById('status').value,
                 Namn: document.getElementById('namn').value,
@@ -154,6 +173,14 @@
                 Longitud: document.getElementById('lon').value,
                 Anteckningar: document.getElementById('anteckningar').value
             };
+
+            // Om vi är offline direkt, eller om anropet misslyckas, lägg i kö
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Ändringen har sparats lokalt på enheten och synkas automatiskt när du är tillbaka online.");
+                window.location.href = "index.html";
+                return;
+            }
 
             try {
                 let targetUrl = `${WEB_APP_URL}?sheet=Bigardar`;
@@ -166,21 +193,25 @@
                 
                 let result = await response.json();
                 
-                if (result.status === "success") {
-                    alert("Ändringarna har sparats!");
+                if (result && (result.status === "success" || result.result === "success")) {
+                    alert("Ändringarna har sparats till molnet!");
                     window.location.href = "index.html";
                 } else {
-                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
+                    throw new Error(result.message || "Okänt fel från servern");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = editId ? "Spara ändringar" : "Spara bigård";
+                console.warn("Kunde inte nå servern, sparar lokalt i kö...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen till molnet. Ändringen är sparad lokalt och synkas senare!");
+                window.location.href = "index.html";
             }
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         initForm();
     </script>

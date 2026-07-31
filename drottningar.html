@@ -134,23 +134,43 @@
     <script>
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        async function laddaDrottningarData() {
+        function laddaDrottningarData() {
             if (!WEB_APP_URL) {
                 window.location.href = "index.html";
                 return;
             }
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
-                fyllDropdownOchLista(data);
-            } catch (error) {
-                console.error("Fel vid laddning av drottningar:", error);
-                document.getElementById('drottning-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    fyllDropdownOchLista(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('drottning-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            }
+
+            if (navigator.onLine) {
+                fetch(WEB_APP_URL)
+                    .then(response => response.json())
+                    .then(data => {
+                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+                        fyllDropdownOchLista(data);
+                    })
+                    .catch(error => {
+                        console.error("Fel vid laddning av drottningar:", error);
+                        if (!cachedData) {
+                            document.getElementById('drottning-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+                        }
+                    });
             }
         }
 
-                function fyllDropdownOchLista(data) {
+        function fyllDropdownOchLista(data) {
             let samhallen = data.samhallen || [];
             let drottningar = data.drottningar || [];
 
@@ -177,15 +197,13 @@
                 let kupaObj = samhallen.find(s => s.SamhallsID === d.SamhallsID);
                 let kupaNamn = kupaObj ? kupaObj.Kupbenamning : "Ej placerad i kupa";
 
-                // Beräkna ålder och kontrollera om det är dags för byte (>= 2 år)
                 let drottningAr = parseInt(d.DrottningAr) || nuvarandeAr;
                 let alder = nuvarandeAr - drottningAr;
                 if (alder < 0) alder = 0;
 
                 let arText = alder === 0 ? "Årets (0 år)" : alder === 1 ? "1 år gammal" : `${alder} år gammal`;
                 
-                // Varningsflagga om drottningen är 2 år eller äldre
-                letVarningHTML = "";
+                let letVarningHTML = "";
                 let kortBorderColor = '#e67e22';
 
                 if (alder >= 2 && d.Status === "Aktiv i kupa") {
@@ -211,8 +229,7 @@
             });
         }
 
-
-        document.getElementById('drottning-form').addEventListener('submit', async function(e) {
+        document.getElementById('drottning-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('drottning-btn');
             btn.disabled = true;
@@ -220,6 +237,7 @@
 
             const autoID = "DR" + Math.floor(1000 + Math.random() * 9000);
             const formData = {
+                sheet: "Drottningar",
                 DrottningsID: autoID,
                 Namn: document.getElementById('namn').value,
                 SamhallsID: document.getElementById('samhalls-koppling').value,
@@ -234,32 +252,52 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            try {
-                let response = await fetch(WEB_APP_URL + "?sheet=Drottningar", {
-                    method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
-                    body: JSON.stringify(formData)
-                });
-                let result = await response.json();
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Drottningen har sparats lokalt och synkas automatiskt senare.");
+                document.getElementById('drottning-form').reset();
+                document.getElementById('drottning-ar').value = "2026";
+                btn.disabled = false;
+                btn.textContent = "Spara drottning";
+                return;
+            }
 
-                if (result.status === "success") {
+            fetch(WEB_APP_URL + "?sheet=Drottningar", {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Drottningen har sparats!");
                     document.getElementById('drottning-form').reset();
                     document.getElementById('drottning-ar').value = "2026";
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     sessionStorage.removeItem("myBeeApp_allData");
                     laddaDrottningarData();
                 } else {
-                    alert("Ett fel uppstod när drottningen skulle sparas.");
+                    throw new Error(result.message || "Okänt fel vid sparande");
                 }
-            } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-            } finally {
+            })
+            .catch(error => {
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Drottningen har sparats lokalt i kö.");
+                document.getElementById('drottning-form').reset();
+                document.getElementById('drottning-ar').value = "2026";
+            })
+            .finally(() => {
                 btn.disabled = false;
                 btn.textContent = "Spara drottning";
-            }
+            });
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         laddaDrottningarData();
     </script>

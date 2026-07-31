@@ -6,17 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Drag- & Blomningskalender</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .bloom-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            border-left: 5px solid #27ae60;
-        }
-    </style>
 </head>
+
 <body>
 
     <script src="header.js"></script>
@@ -31,8 +22,12 @@
                 Här ser du när de viktiga dragväxterna brukar blomma i din zon, kopplat till historiska noteringar om när dragen skedde.
             </p>
             <div id="blomnings-lista">
-                <p>Laddar blomningsdata...</p>
+                <p style="color: #777;">Laddar blomningsdata...</p>
             </div>
+        </div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
         </div>
     </div>
 
@@ -45,13 +40,28 @@
                 return;
             }
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
-                visaKalender(data.blomning || []);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                document.getElementById('blomnings-lista').innerHTML = "<p>Kunde inte hämta kalenderdata.</p>";
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+            if (cachedData) {
+                try {
+                    let data = JSON.parse(cachedData);
+                    visaKalender(data.blomning || []);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            }
+
+            if (navigator.onLine) {
+                try {
+                    let response = await fetch(WEB_APP_URL);
+                    let data = await response.json();
+                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+                    visaKalender(data.blomning || []);
+                } catch (error) {
+                    console.error("Fel vid hämtning från molnet:", error);
+                    if (!cachedData) {
+                        document.getElementById('blomnings-lista').innerHTML = "<p style='color: red;'>Kunde inte hämta kalenderdata.</p>";
+                    }
+                }
             }
         }
 
@@ -59,8 +69,8 @@
             let listaDiv = document.getElementById('blomnings-lista');
             listaDiv.innerHTML = "";
 
-            if (blommor.length === 0) {
-                listaDiv.innerHTML = "<p>Inga växter inlagda i kalendern ännu.</p>";
+            if (!blommor || blommor.length === 0) {
+                listaDiv.innerHTML = "<p style='color: #777;'>Inga växter inlagda i kalendern ännu.</p>";
                 return;
             }
 
@@ -68,7 +78,7 @@
                 let card = document.createElement('div');
                 card.className = 'bloom-card';
                 card.innerHTML = `
-                    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">🌱 ${b.VäxtNamn || 'Växt'}</h4>
+                    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">🌱 ${b.VäxtNamn || b.VaxtNamn || 'Växt'}</h4>
                     <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Normal blomning:</strong> ${b.NormalTid || 'Ej angivet'}</p>
                     <p style="margin: 0; font-size: 0.9rem; color: #555;"><em>Anteckning / Historik:</em> ${b.Anteckningar || 'Inga anteckningar sparade.'}</p>
                 `;

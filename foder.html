@@ -39,19 +39,18 @@
                         <label for="datum">Datum:</label>
                         <input type="date" id="datum" name="Datum" required>
                     </div>
-<div class="form-group">
-    <label for="fodertyp">Fodertyp:</label>
-    <select id="fodertyp" name="Fodertyp">
-        <option value="Sockerlag (60%)">Sockerlag (60%)</option>
-        <option value="Sockerlag (67%)">Sockerlag (67%)</option>
-        <option value="Färdig foderlösning (ApiInvert)">Färdig foderlösning (ApiInvert)</option>
-        <option value="Fruktsocker / Sirap (t.ex. Dulcofruct)">Fruktsocker / Sirap (t.ex. Dulcofruct)</option>
-        <option value="Foderkaka / Apifonda">Foderkaka / Apifonda</option>
-        <option value="Proteintillskott / Pollenkaka">Proteintillskott / Pollenkaka</option>
-        <option value="Honungskaka">Honungskaka</option>
-    </select>
-</div>
-
+                    <div class="form-group">
+                        <label for="fodertyp">Fodertyp:</label>
+                        <select id="fodertyp" name="Fodertyp">
+                            <option value="Sockerlag (60%)">Sockerlag (60%)</option>
+                            <option value="Sockerlag (67%)">Sockerlag (67%)</option>
+                            <option value="Färdig foderlösning (ApiInvert)">Färdig foderlösning (ApiInvert)</option>
+                            <option value="Fruktsocker / Sirap (t.ex. Dulcofruct)">Fruktsocker / Sirap (t.ex. Dulcofruct)</option>
+                            <option value="Foderkaka / Apifonda">Foderkaka / Apifonda</option>
+                            <option value="Proteintillskott / Pollenkaka">Proteintillskott / Pollenkaka</option>
+                            <option value="Honungskaka">Honungskaka</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -83,26 +82,58 @@
         // Sätt dagens datum som standard
         document.getElementById('datum').valueAsDate = new Date();
 
-        async function laddaFoderData() {
+        function laddaFoderData() {
             if (!WEB_APP_URL) {
                 window.location.href = "index.html";
                 return;
             }
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
-                fyllBigardarDropdown(data);
-                visaFoderHistorik(data);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                document.getElementById('foder-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    bearbetaOchVisaData(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('foder-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            }
+
+            if (navigator.onLine) {
+                fetch(WEB_APP_URL)
+                    .then(response => response.json())
+                    .then(data => {
+                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+                        bearbetaOchVisaData(data);
+                    })
+                    .catch(error => {
+                        console.error("Fel vid laddning:", error);
+                        if (!cachedData) {
+                            document.getElementById('foder-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
+                        }
+                    });
+            }
+        }
+
+        function bearbetaOchVisaData(data) {
+            fyllBigardarDropdown(data);
+            visaFoderHistorik(data);
+            
+            // Uppdatera även kup-dropdownen om en bigård redan är vald
+            let valdBigardID = document.getElementById('valt-bigard-foder').value;
+            if (valdBigardID) {
+                uppdateraKuporDropdown(valdBigardID, data);
             }
         }
 
         function fyllBigardarDropdown(data) {
             let bigårdar = data.bigardar || [];
             let select = document.getElementById('valt-bigard-foder');
+            let nuvarandeVal = select.value;
+            
             select.innerHTML = '<option value="">-- Välj bigård --</option>';
 
             bigårdar.forEach(b => {
@@ -111,26 +142,44 @@
                 opt.textContent = b.Namn;
                 select.appendChild(opt);
             });
+
+            if (nuvarandeVal) {
+                select.value = nuvarandeVal;
+            }
         }
 
         document.getElementById('valt-bigard-foder').addEventListener('change', function() {
             let valdtBigardsID = this.value;
-            let samhallenSelect = document.getElementById('valt-samhalle-foder');
-            samhallenSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
-
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
             if (!cachedData) return;
             let data = JSON.parse(cachedData);
-            let samhallen = data.samhallen || [];
+            uppdateraKuporDropdown(valdtBigardsID, data);
+        });
 
-            let minaSamhällen = samhallen.filter(s => s.BigardsID === valdtBigardsID);
+        function uppdateraKuporDropdown(bigardID, data) {
+            let samhallenSelect = document.getElementById('valt-samhalle-foder');
+            let nuvarandeKupa = samhallenSelect.value;
+            samhallenSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
+
+            if (!bigardID) {
+                samhallenSelect.innerHTML = '<option value="">-- Välj bigård först --</option>';
+                return;
+            }
+
+            let samhallen = data.samhallen || [];
+            let minaSamhällen = samhallen.filter(s => s.BigardsID === bigardID);
+            
             minaSamhällen.forEach(s => {
                 let opt = document.createElement('option');
                 opt.value = s.SamhallsID;
                 opt.textContent = s.Kupbenamning;
                 samhallenSelect.appendChild(opt);
             });
-        });
+
+            if (nuvarandeKupa) {
+                samhallenSelect.value = nuvarandeKupa;
+            }
+        }
 
         function visaFoderHistorik(data) {
             let fodringLoggar = data.fodring || [];
@@ -166,7 +215,7 @@
             });
         }
 
-        document.getElementById('foder-form').addEventListener('submit', async function(e) {
+        document.getElementById('foder-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const btn = document.getElementById('foder-btn');
             btn.disabled = true;
@@ -174,6 +223,7 @@
 
             const autoID = "FD" + Math.floor(1000 + Math.random() * 9000);
             const formData = {
+                sheet: "Fodring",
                 FoderID: autoID,
                 BigardsID: document.getElementById('valt-bigard-foder').value,
                 SamhallsID: document.getElementById('valt-samhalle-foder').value,
@@ -183,32 +233,52 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            try {
-                let response = await fetch(WEB_APP_URL + "?sheet=Fodring", {
-                    method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
-                    body: JSON.stringify(formData)
-                });
-                let result = await response.json();
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Fodring har sparats lokalt och synkas automatiskt senare.");
+                document.getElementById('foder-form').reset();
+                document.getElementById('datum').valueAsDate = new Date();
+                btn.disabled = false;
+                btn.textContent = "Spara fodring";
+                return;
+            }
 
-                if (result.status === "success") {
+            fetch(WEB_APP_URL + "?sheet=Fodring", {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Fodring har sparats!");
                     document.getElementById('foder-form').reset();
                     document.getElementById('datum').valueAsDate = new Date();
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     sessionStorage.removeItem("myBeeApp_allData");
                     laddaFoderData();
                 } else {
-                    alert("Ett fel uppstod när fodringen skulle sparas.");
+                    throw new Error(result.message || "Okänt fel vid sparande");
                 }
-            } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-            } finally {
+            })
+            .catch(error => {
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Fodringen har sparats lokalt i kö.");
+                document.getElementById('foder-form').reset();
+                document.getElementById('datum').valueAsDate = new Date();
+            })
+            .finally(() => {
                 btn.disabled = false;
                 btn.textContent = "Spara fodring";
-            }
+            });
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         laddaFoderData();
     </script>

@@ -290,7 +290,7 @@
             }
 
             let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
 
             if (cachedData) {
                 try {
@@ -303,17 +303,19 @@
                 document.getElementById('historik-lista').innerHTML = "<p>Laddar data från molnet...</p>";
             }
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                allData = await response.json();
+            if (navigator.onLine) {
+                try {
+                    let response = await fetch(WEB_APP_URL);
+                    allData = await response.json();
 
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
-                bearbetaOchVisaData(allData);
+                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(allData));
+                    bearbetaOchVisaData(allData);
 
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                if (!cachedData) {
-                    document.getElementById('historik-lista').innerHTML = "<p>Kunde inte ladda historik.</p>";
+                } catch (error) {
+                    console.error("Fel vid laddning:", error);
+                    if (!cachedData) {
+                        document.getElementById('historik-lista').innerHTML = "<p>Kunde inte ladda historik.</p>";
+                    }
                 }
             }
         }
@@ -366,8 +368,8 @@
             if (minaLoggar.length === 0) {
                 historikDiv.innerHTML = "<p>Inga sparade besök för denna bigård ännu.</p>";
             } else {
-                minaLoggar.reverse().forEach(logg => {
-                    let matchadKupa = minaSamhällen.filter(s => s.BigardsID === bigardsId).find(s => s.SamhallsID === logg.SamhallsID);
+                minaLoggar.slice().reverse().forEach(logg => {
+                    let matchadKupa = minaSamhällen.find(s => s.SamhallsID === logg.SamhallsID);
                     let kupaNamn = matchadKupa ? matchadKupa.Kupbenamning: "Gemensam / Okänd kupa";
 
                     let drottningText = logg.Drottningsett || logg.Drottning || "Ej angivet";
@@ -416,7 +418,7 @@
                 return;
             }
 
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
             if (!cachedData) return;
 
             try {
@@ -554,6 +556,7 @@
 
             const autoSamhallsID = "SH" + Math.floor(1000 + Math.random() * 9000);
             const formDataSamhalle = {
+                sheet: "Samhallen",
                 SamhallsID: autoSamhallsID,
                 BigardsID: bigardsId,
                 Kupbenamning: document.getElementById('kupnamn').value,
@@ -561,29 +564,40 @@
                 Anteckningar: document.getElementById('samhalle-anteckningar').value
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formDataSamhalle);
+                alert("Ingen internettäckning! Samhället har sparats lokalt och synkas automatiskt när du får täckning igen.");
+                samhalleBtn.disabled = false;
+                samhalleBtn.textContent = "Spara samhälle";
+                document.getElementById('samhalle-form').reset();
+                document.getElementById('samhalle-form-container').style.display = "none";
+                return;
+            }
+
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Samhallen", {
                     method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(formDataSamhalle)
                 });
                 let result = await response.json();
 
-                if (result.status === "success") {
-                    alert("Samhället har sparats!");
-                    document.getElementById('kupnamn').value = "";
-                    document.getElementById('drottning-ar').value = "";
-                    document.getElementById('samhalle-anteckningar').value = "";
+                if (result && (result.status === "success" || result.result === "success")) {
+                    alert("Samhället har sparats till molnet!");
+                    document.getElementById('samhalle-form').reset();
                     document.getElementById('samhalle-form-container').style.display = "none";
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     sessionStorage.removeItem("myBeeApp_allData");
                     laddaData();
                 } else {
-                    alert("Ett fel uppstod när samhället skulle sparas.");
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
+                console.warn("Kunde inte nå servern, sparar samhället lokalt i kö...", error);
+                sparaTillOfflineKoe(formDataSamhalle);
+                alert("Tappade anslutningen. Samhället är sparat lokalt och synkas senare!");
+                document.getElementById('samhalle-form').reset();
+                document.getElementById('samhalle-form-container').style.display = "none";
             } finally {
                 samhalleBtn.disabled = false;
                 samhalleBtn.textContent = "Spara samhälle";
@@ -600,7 +614,7 @@
             const valtDatum = document.getElementById("datum").value;
 
             let befintligtSkotselID = "";
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
             if (cachedData) {
                 try {
                     let parsedData = JSON.parse(cachedData);
@@ -620,6 +634,7 @@
             const skotselID = befintligtSkotselID || ("S" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
+                sheet: "Skotsel",
                 SkotselID: skotselID,
                 BigardsID: bigardsId,
                 SamhallsID: valtSamhallsID,
@@ -642,43 +657,47 @@
                 Fodermangd: document.getElementById("fodermangd").value
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Besöket har sparats lokalt på enheten och synkas automatiskt när du är online.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara besök";
+                window.location.href = `skotsel.html?id=${bigardsId}`;
+                return;
+            }
+
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
                     method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(formData)
                 });
                 let result = await response.json();
 
-                if (result.status === "success") {
-                    alert(befintligtSkotselID ? "Besöket har uppdaterats!": "Besöket har sparats!");
+                if (result && (result.status === "success" || result.result === "success")) {
+                    alert(befintligtSkotselID ? "Besöket har uppdaterats till molnet!": "Besöket har sparats till molnet!");
 
-                    document.getElementById('anteckningar').value = "";
-                    document.getElementById('lakemedel').value = "";
-                    document.getElementById('diagnos').value = "";
-                    document.getElementById('mangd').value = "";
-                    document.getElementById('tid').value = "";
-                    document.getElementById('leverantor').value = "";
-                    document.getElementById('veterinar').value = "";
-                    document.getElementById('karenstid').value = "";
-                    document.getElementById('kvalsternedfall').value = "";
-                    document.getElementById('sjukdomskontroll').value = "";
-                    document.getElementById('skattadMangd').value = "";
-
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     sessionStorage.removeItem("myBeeApp_allData");
                     laddaData();
                 } else {
-                    alert("Ett fel uppstod när besöket skulle sparas.");
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
+                console.warn("Kunde inte nå servern, sparar besöket lokalt i kö...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen till molnet. Besöket är sparat lokalt och synkas senare!");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Spara besök";
             }
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         laddaData();
     </script>

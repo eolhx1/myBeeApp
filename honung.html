@@ -7,6 +7,7 @@
     <title>MyBeeApp - Honung</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <script src="header.js"></script>
@@ -14,79 +15,107 @@
         laddaHeader("🍯 Honungsskörd", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Honung</span>');
     </script>
 
-    <div class="container">
-        <form id="honung-form">
-            <input type="hidden" id="skorde-id" name="SkördeID">
+    <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #2c3e50;">Registrera honungsskörd</h3>
+            <form id="honung-form">
+                <input type="hidden" id="skorde-id" name="SkördeID">
 
-            <div class="form-group">
-                <label for="datum">Datum för skörd/slungning:</label>
-                <input type="date" id="datum" name="Datum" required>
-            </div>
+                <div class="form-group">
+                    <label for="datum">Datum för skörd/slungning:</label>
+                    <input type="date" id="datum" name="Datum" required>
+                </div>
 
-            <div class="form-group">
-                <label for="bigard">Bigård:</label>
-                <select id="bigard" name="Bigard">
-                    <!-- Fylls i dynamiskt från skriptet -->
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="bigard">Bigård:</label>
+                    <select id="bigard" name="Bigard">
+                        <!-- Fylls i dynamiskt från skriptet -->
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="antal-lodar">Antal skattlådor:</label>
-                <input type="number" id="antal-lodar" name="AntalSkattlodar" min="0" value="1">
-            </div>
+                <div class="form-group">
+                    <label for="antal-lodar">Antal skattlådor:</label>
+                    <input type="number" id="antal-lodar" name="AntalSkattlodar" min="0" value="1">
+                </div>
 
-            <div class="form-group">
-                <label for="vikt">Slungad honung (kg):</label>
-                <input type="number" step="0.1" id="vikt" name="ViktKg" placeholder="T.ex. 45.5" required>
-            </div>
+                <div class="form-group">
+                    <label for="vikt">Slungad honung (kg):</label>
+                    <input type="number" step="0.1" id="vikt" name="ViktKg" placeholder="T.ex. 45.5" required>
+                </div>
 
-            <div class="form-group">
-                <label for="vattenhalt">Vattenhalt (%):</label>
-                <input type="number" step="0.1" id="vattenhalt" name="Vattenhalt" placeholder="T.ex. 17.5">
-            </div>
+                <div class="form-group">
+                    <label for="vattenhalt">Vattenhalt (%):</label>
+                    <input type="number" step="0.1" id="vattenhalt" name="Vattenhalt" placeholder="T.ex. 17.5">
+                </div>
 
-            <div class="form-group">
-                <label for="batch">Batch- / Partinummer:</label>
-                <input type="text" id="batch" name="BatchNummer" placeholder="T.ex. B2026-01">
-            </div>
+                <div class="form-group">
+                    <label for="batch">Batch- / Partinummer:</label>
+                    <input type="text" id="batch" name="BatchNummer" placeholder="T.ex. B2026-01">
+                </div>
 
-            <div class="form-group">
-                <label for="anteckningar">Anteckningar (drag, karaktär m.m.):</label>
-                <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Rapsdrag, snabb kristallisering..."></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="anteckningar">Anteckningar (drag, karaktär m.m.):</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. Rapsdrag, snabb kristallisering..."></textarea>
+                </div>
 
-            <button type="submit" class="btn" id="submit-btn">Spara skörd</button>
-        </form>
+                <button type="submit" class="btn" id="submit-btn" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara skörd</button>
+            </form>
+        </div>
 
-        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
+        </div>
     </div>
 
     <script>
         document.getElementById('datum').valueAsDate = new Date();
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         async function laddaBigardar() {
-            const savedUrl = localStorage.getItem("myBeeApp_url");
-            if (!savedUrl) return;
-            try {
-                let response = await fetch(`${savedUrl}?sheet=Bigardar`);
-                let data = await response.json();
-                let select = document.getElementById('bigard');
-                select.innerHTML = "";
-                data.forEach(b => {
-                    let option = document.createElement('option');
-                    option.value = b.Namn;
-                    option.textContent = b.Namn;
-                    select.appendChild(option);
-                });
-            } catch (e) {
-                console.error("Kunde inte ladda bigårdar", e);
+            if (!WEB_APP_URL) return;
+
+            // Försök läsa från cache först för blixtsnabb laddning
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData");
+            if (cachedData) {
+                try {
+                    let data = JSON.parse(cachedData);
+                    if (data.bigardar) {
+                        fyllBigardarSelect(data.bigardar);
+                    }
+                } catch (e) {
+                    console.error("Kunde inte läsa cache för bigårdar", e);
+                }
             }
+
+            if (navigator.onLine) {
+                try {
+                    let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
+                    let bigardar = await response.json();
+                    fyllBigardarSelect(bigardar);
+                } catch (e) {
+                    console.error("Kunde inte ladda bigårdar från molnet", e);
+                }
+            }
+        }
+
+        function fyllBigardarSelect(bigardar) {
+            let select = document.getElementById('bigard');
+            select.innerHTML = "";
+            if (!bigardar || bigardar.length === 0) {
+                select.innerHTML = '<option value="">Inga bigårdar hittades</option>';
+                return;
+            }
+            bigardar.forEach(b => {
+                let option = document.createElement('option');
+                option.value = b.Namn || b.namn;
+                option.textContent = b.Namn || b.namn;
+                select.appendChild(option);
+            });
         }
 
         document.getElementById('honung-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             if (!WEB_APP_URL) {
                 alert("Ingen anslutningslänk hittades.");
                 return;
@@ -99,6 +128,8 @@
             const currentId = document.getElementById('skorde-id').value || ("H" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
+                sheet: "Honung",
+                action: "addHonung",
                 SkördeID: currentId,
                 Datum: document.getElementById('datum').value,
                 Bigard: document.getElementById('bigard').value,
@@ -109,6 +140,13 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Honungsskörden har sparats lokalt i kö och synkas automatiskt senare.");
+                window.location.href = "index.html";
+                return;
+            }
+
             try {
                 let response = await fetch(`${WEB_APP_URL}?sheet=Honung`, {
                     method: "POST",
@@ -118,21 +156,26 @@
                 
                 let result = await response.json();
                 
-                if (result.status === "success") {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Honungsskörden har sparats!");
+                    sessionStorage.removeItem("myBeeApp_globalData"); // Rensa cache så ny data hämtas
                     window.location.href = "index.html";
                 } else {
-                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara skörd";
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Spara skörd";
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Skörden har sparats lokalt i kö.");
+                window.location.href = "index.html";
             }
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         laddaBigardar();
     </script>

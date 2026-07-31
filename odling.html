@@ -7,6 +7,7 @@
     <title>MyBeeApp - Drottningodling</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <script src="header.js"></script>
@@ -14,66 +15,71 @@
         laddaHeader("👑 Drottningodling", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Odling</span>');
     </script>
 
-    <div class="container">
-        <form id="odling-form">
-            <input type="hidden" id="odlings-id" name="OdlingsID">
+    <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #2c3e50;">Registrera drottningodling</h3>
+            <form id="odling-form">
+                <input type="hidden" id="odlings-id" name="OdlingsID">
 
-            <div class="form-group">
-                <label for="datum-omlarvning">Datum för omlarvning:</label>
-                <input type="date" id="datum-omlarvning" name="DatumOmlarvning" required>
-            </div>
+                <div class="form-group">
+                    <label for="datum-omlarvning">Datum för omlarvning:</label>
+                    <input type="date" id="datum-omlarvning" name="DatumOmlarvning" required>
+                </div>
 
-            <div class="form-group">
-                <label for="mor-koloni">Mor-koloni (Stam):</label>
-                <input type="text" id="mor-koloni" name="MorKoloni" placeholder="T.ex. Avelsdrottning 2025" required>
-            </div>
+                <div class="form-group">
+                    <label for="mor-koloni">Mor-koloni (Stam):</label>
+                    <input type="text" id="mor-koloni" name="MorKoloni" placeholder="T.ex. Avelsdrottning 2025" required>
+                </div>
 
-            <div class="form-group">
-                <label for="antal-startade">Antal startade celler:</label>
-                <input type="number" id="antal-startade" name="AntalStartade" min="1" value="10">
-            </div>
+                <div class="form-group">
+                    <label for="antal-startade">Antal startade celler:</label>
+                    <input type="number" id="antal-startade" name="AntalStartade" min="1" value="10">
+                </div>
 
-            <div class="form-group">
-                <label for="klack-datum">Beräknat kläckdatum (ca 11-12 dgr):</label>
-                <input type="date" id="klack-datum" name="KlacckDatum">
-            </div>
+                <div class="form-group">
+                    <label for="klack-datum">Beräknat kläckdatum (ca 11-12 dgr):</label>
+                    <input type="date" id="klack-datum" name="KlacckDatum">
+                </div>
 
-            <div class="form-group">
-                <label for="parings-kupa">Parningskupa / Nuk:</label>
-                <input type="text" id="parings-kupa" name="ParingsKupa" placeholder="T.ex. Mini-Plus #3">
-            </div>
+                <div class="form-group">
+                    <label for="parings-kupa">Parningskupa / Nuk:</label>
+                    <input type="text" id="parings-kupa" name="ParingsKupa" placeholder="T.ex. Mini-Plus #3">
+                </div>
 
-            <div class="form-group">
-                <label for="status">Status:</label>
-                <select id="status" name="Status">
-                    <option value="Omlarvad">Omlarvad / I startkoloni</option>
-                    <option value="Kläckt">Kläckt</option>
-                    <option value="I parningskupa">I parningskupa</option>
-                    <option value="Äggläggande">Äggläggande / Godkänd</option>
-                    <option value="Kasserad">Kasserad</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" name="Status">
+                        <option value="Omlarvad">Omlarvad / I startkoloni</option>
+                        <option value="Kläckt">Kläckt</option>
+                        <option value="I parningskupa">I parningskupa</option>
+                        <option value="Äggläggande">Äggläggande / Godkänd</option>
+                        <option value="Kasserad">Kasserad</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="markering-farg">Märkningsfärg:</label>
-                <select id="markering-farg" name="MarkeringFarg">
-                    <option value="Vit">Vit (År med 1 eller 6)</option>
-                    <option value="Gul">Gul (År med 2 eller 7)</option>
-                    <option value="Röd">Röd (År med 3 eller 8)</option>
-                    <option value="Grön">Grön (År med 4 eller 9)</option>
-                    <option value="Blå">Blå (År med 5 eller 0)</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="markering-farg">Märkningsfärg:</label>
+                    <select id="markering-farg" name="MarkeringFarg">
+                        <option value="Vit">Vit (År med 1 eller 6)</option>
+                        <option value="Gul">Gul (År med 2 eller 7)</option>
+                        <option value="Röd">Röd (År med 3 eller 8)</option>
+                        <option value="Grön">Grön (År med 4 eller 9)</option>
+                        <option value="Blå">Blå (År med 5 eller 0)</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="anteckningar">Anteckningar:</label>
-                <textarea id="anteckningar" name="Anteckningar" placeholder="Lynne, cellstorlek, parningsresultat..."></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="anteckningar">Anteckningar:</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="Lynne, cellstorlek, parningsresultat..."></textarea>
+                </div>
 
-            <button type="submit" class="btn" id="submit-btn">Spara odlingsparti</button>
-        </form>
+                <button type="submit" class="btn" id="submit-btn" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara odlingsparti</button>
+            </form>
+        </div>
 
-        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
+        </div>
     </div>
 
     <script>
@@ -110,6 +116,8 @@
             const currentId = document.getElementById('odlings-id').value || ("O" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
+                sheet: "Odling",
+                action: "addOdling",
                 OdlingsID: currentId,
                 DatumOmlarvning: document.getElementById('datum-omlarvning').value,
                 MorKoloni: document.getElementById('mor-koloni').value,
@@ -121,6 +129,13 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Odlingspartiet har sparats lokalt i kö och synkas automatiskt senare.");
+                window.location.href = "index.html";
+                return;
+            }
+
             try {
                 let response = await fetch(`${WEB_APP_URL}?sheet=Odling`, {
                     method: "POST",
@@ -130,21 +145,26 @@
                 
                 let result = await response.json();
                 
-                if (result.status === "success") {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Odlingspartiet har sparats!");
+                    sessionStorage.removeItem("myBeeApp_globalData"); // Rensa cache
                     window.location.href = "index.html";
                 } else {
-                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara odlingsparti";
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Spara odlingsparti";
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Odlingspartiet har sparats lokalt i kö.");
+                window.location.href = "index.html";
             }
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
     </script>
 </body>
 </html>

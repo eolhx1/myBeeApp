@@ -6,63 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Inventarielista</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        table.inventory-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-        table.inventory-table th, table.inventory-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        table.inventory-table th {
-            background-color: #2c3e50;
-            color: white;
-        }
-        .total-badge {
-            font-weight: bold;
-            background: #e8f8f5;
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: #117a65;
-        }
-        .btn-action {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-right: 4px;
-        }
-        .btn-edit { background: #f39c12; color: white; }
-        .btn-delete { background: #c0392b; color: white; }
-    </style>
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("📦 Inventarielista", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Inventarie</span>');
+        laddaHeader("📦 Inventarielista", '<a href="index.html">🏠 Hem</a><span> &gt; <span>Inventarie</span>');
     </script>
 
     <div class="container" style="max-width: 900px; margin: 20px auto; padding: 0 15px;">
@@ -132,7 +83,7 @@
                     </thead>
                     <tbody id="inventory-tbody">
                         <tr>
-                            <td colspan="8" style="text-align: center; color: #777;">Laddar inventarie från Google Sheets...</td>
+                            <td colspan="8" style="text-align: center; color: #777;">Laddar inventarie...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -142,32 +93,57 @@
     </div>
 
     <script>
-        const appUrl = localStorage.getItem("myBeeApp_url");
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
         let nuvarandeInventarieData = [];
 
         function hamtaInventarieData() {
-            if (!appUrl) {
+            if (!WEB_APP_URL) {
                 document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Ingen anslutningslänk hittad till Google Sheets.</td></tr>';
                 return;
             }
 
-            fetch(`${appUrl}?action=getInventarie`)
-                .then(response => response.json())
-                .then(data => {
-                    nuvarandeInventarieData = data;
-                    fyllInventarieTabell(data);
-                })
-                .catch(error => {
-                    console.error("Kunde inte hämta inventarie:", error);
-                    document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Kunde inte läsa data från bladet.</td></tr>';
-                });
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    let data = JSON.parse(cachedData);
+                    // Stöd för om inventarie ligger samlat i helhetsdatan eller separat
+                    nuvarandeInventarieData = data.inventarie || [];
+                    fyllInventarieTabell(nuvarandeInventarieData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            }
+
+            if (navigator.onLine) {
+                fetch(WEB_APP_URL)
+                    .then(response => response.json())
+                    .then(data => {
+                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+                        nuvarandeInventarieData = data.inventarie || [];
+                        fyllInventarieTabell(nuvarandeInventarieData);
+                    })
+                    .catch(error => {
+                        console.error("Kunde inte hämta inventarie:", error);
+                        if (!cachedData) {
+                            document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Kunde inte läsa data från molnet.</td></tr>';
+                        }
+                    });
+            }
         }
 
         function sparaArtikel(event) {
             event.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
             
             const rowIndex = document.getElementById('rowIndex').value;
-            const artikelData = {
+            const actionType = rowIndex !== "" ? 'updateInventarie' : 'addInventarie';
+            
+            const formData = {
+                sheet: "Inventarie",
+                action: actionType,
+                rowIndex: rowIndex,
                 artikel: document.getElementById('artikel').value,
                 kategori: document.getElementById('kategori').value,
                 lager: parseInt(document.getElementById('lager').value) || 0,
@@ -176,22 +152,39 @@
                 anteckning: document.getElementById('anteckning').value
             };
 
-            const actionType = rowIndex !== "" ? 'updateInventarie' : 'addInventarie';
-            const payload = rowIndex !== "" ? { action: actionType, rowIndex: rowIndex, ...artikelData } : { action: actionType, ...artikelData };
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Artikeln har sparats lokalt och synkas automatiskt senare.");
+                aterstallFormular();
+                btn.disabled = false;
+                return;
+            }
 
-            fetch(appUrl, {
+            fetch(WEB_APP_URL + "?sheet=Inventarie", {
                 method: 'POST',
-                body: JSON.stringify(payload)
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(formData)
             })
             .then(res => res.json())
             .then(resultat => {
-                alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
-                aterstallFormular();
-                hamtaInventarieData();
+                if (resultat && (resultat.status === "success" || resultat.result === "success")) {
+                    alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
+                    aterstallFormular();
+                    sessionStorage.removeItem("myBeeApp_globalData");
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    hamtaInventarieData();
+                } else {
+                    throw new Error(resultat.message || "Okänt fel vid sparande");
+                }
             })
             .catch(err => {
-                console.error("Fel vid sparande:", err);
-                alert("Kunde inte spara artikeln.");
+                console.warn("Kunde inte nå servern, sparar lokalt...", err);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Artikeln har sparats lokalt i kö.");
+                aterstallFormular();
+            })
+            .finally(() => {
+                btn.disabled = false;
             });
         }
 
@@ -211,8 +204,8 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong>${a.artikel}</strong></td>
-                    <td>${a.kategori}</td>
+                    <td><strong>${a.artikel || ''}</strong></td>
+                    <td>${a.kategori || ''}</td>
                     <td>${lager} st</td>
                     <td>${aktiva} st</td>
                     <td><span class="total-badge">${totalt} st</span></td>
@@ -230,10 +223,10 @@
         function forberedRedigering(index) {
             const a = nuvarandeInventarieData[index];
             document.getElementById('rowIndex').value = index;
-            document.getElementById('artikel').value = a.artikel;
-            document.getElementById('kategori').value = a.kategori;
-            document.getElementById('lager').value = a.lager;
-            document.getElementById('aktiva').value = a.aktiva;
+            document.getElementById('artikel').value = a.artikel || '';
+            document.getElementById('kategori').value = a.kategori || 'Kupmaterial';
+            document.getElementById('lager').value = a.lager || 0;
+            document.getElementById('aktiva').value = a.aktiva || 0;
             document.getElementById('placering').value = a.placering || '';
             document.getElementById('anteckning').value = a.anteckning || '';
 
@@ -255,14 +248,29 @@
             if (!confirm("Är du säker på att du vill ta bort/avyttra denna artikel?")) return;
 
             const a = nuvarandeInventarieData[index];
+            const formData = {
+                sheet: "Inventarie",
+                action: 'deleteInventarie',
+                rowIndex: index,
+                artikel: a.artikel
+            };
 
-            fetch(appUrl, {
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Borttagningen har lagts i offline-kö.");
+                return;
+            }
+
+            fetch(WEB_APP_URL + "?sheet=Inventarie", {
                 method: 'POST',
-                body: JSON.stringify({ action: 'deleteInventarie', rowIndex: index, artikel: a.artikel })
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(formData)
             })
             .then(res => res.json())
             .then(resultat => {
                 alert("Artikel borttagen!");
+                sessionStorage.removeItem("myBeeApp_globalData");
+                sessionStorage.removeItem("myBeeApp_allData");
                 hamtaInventarieData();
             })
             .catch(err => {
@@ -271,7 +279,13 @@
             });
         }
 
-        // hamtaInventarieData();
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
+
+        hamtaInventarieData();
     </script>
 </body>
 </html>

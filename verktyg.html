@@ -6,67 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Biodlarverktyg</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Flik-knappar för verktyg */
-        .tool-tabs {
-            display: flex;
-            gap: 5px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            padding-bottom: 5px;
-        }
-        .tool-tab {
-            background: #e0e0e0;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            white-space: nowrap;
-            color: #333;
-            font-size: 0.9rem;
-        }
-        .tool-tab.active {
-            background: #3498db;
-            color: white;
-        }
-        .tool-section {
-            display: none;
-        }
-        .tool-section.active {
-            display: block;
-        }
-        .instructions {
-            background: #e8f8f5;
-            border-left: 4px solid #1abc9c;
-            padding: 10px 12px;
-            margin-top: 1rem;
-            border-radius: 0 4px 4px 0;
-            font-size: 0.9rem;
-            color: #117a65;
-        }
-        /* Fast resultatbox som inte hoppar */
-        .result-box {
-            background: #fdf2e9;
-            border: 1px solid #f39c12;
-            padding: 0.8rem;
-            border-radius: 4px;
-            margin-top: 0.8rem;
-            font-weight: bold;
-            color: #d35400;
-            min-height: 50px;
-        }
-    </style>
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("🛠️ Biodlarverktyg",'<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span>');;
+        laddaHeader("🛠️ Biodlarverktyg", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Verktyg</span>');
     </script>
 
-    <div class="container">
+    <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
 
         <!-- Flikmeny -->
         <div class="tool-tabs">
@@ -79,7 +29,7 @@
         </div>
 
         <!-- 1. Sockerlagskalkylator -->
-        <div id="sec-socker" class="tool-section active card">
+        <div id="sec-socker" class="tool-section active card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Sockerlagskalkylator (60%)</h3>
             <p style="font-size: 0.9rem; color: #555;">Räkna ut vattenmängd för standardblandning (3 delar socker, 2 delar vatten i vikt).</p>
             
@@ -99,7 +49,7 @@
         </div>
 
         <!-- 2. Oxalsyrakalkylator -->
-        <div id="sec-oxalsyra" class="tool-section card">
+        <div id="sec-oxalsyra" class="tool-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Oxalsyrakalkylator (Dropplösning 3,2%)</h3>
             <p style="font-size: 0.9rem; color: #555;">Standardblandning: 35 g oxalsyredihydratpulver till 1 liter färdig sockerlag (60%).</p>
             
@@ -124,7 +74,7 @@
         </div>
 
         <!-- 3. Myrsyrakalkylator -->
-        <div id="sec-myrsyra" class="tool-section card">
+        <div id="sec-myrsyra" class="tool-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Myrsyra - Utspädning</h3>
             <p style="font-size: 0.9rem; color: #555;">Späd ut stark myrsyra till önskad svagare koncentration.</p>
             <div style="background: #fadbd8; padding: 0.5rem 0.8rem; border-radius: 4px; margin-bottom: 0.8rem; font-size: 0.85rem; color: #78281f;">
@@ -155,7 +105,7 @@
         </div>
 
         <!-- 4. Ympningskalkylator (Ekobi-metoden) -->
-        <div id="sec-ymp" class="tool-section card">
+        <div id="sec-ymp" class="tool-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Ympningskalkylator (Ekobi-metoden)</h3>
             <p style="font-size: 0.9rem; color: #555;">Beräkna den levande ympsatsen (2,5% av totalmängden) uppdelad på 10% finkristalliserad och 90% nyslungad honung.</p>
             
@@ -181,7 +131,7 @@
         </div>
 
         <!-- 5. Beräkning av honungsmängd per ramformat -->
-        <div id="sec-honung" class="tool-section card">
+        <div id="sec-honung" class="tool-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Uppskattad honungsmängd per ramformat</h3>
             <p style="font-size: 0.9rem; color: #555;">Räkna ut uppskattad honungsskörd baserat på ramformat och antal skattramar.</p>
             
@@ -211,7 +161,7 @@
         </div>
 
         <!-- 6. Drottningodling - Schema -->
-        <div id="sec-schema" class="tool-section card">
+        <div id="sec-schema" class="tool-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Drottningodling - Tidsschema</h3>
             <p style="font-size: 0.9rem; color: #555;">Välj datum för ympning av larver för att se viktiga milstolpar.</p>
             
@@ -232,6 +182,10 @@
             <div class="instructions">
                 <strong>Instruktion:</strong> Använd schemat för att planera när celler ska skyddscirkuleras (gärna dag 10 så de inte bits upp) samt när du behöver göra i ordning parningskupor.
             </div>
+        </div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
         </div>
 
     </div>
@@ -341,7 +295,7 @@
             }
 
             let totalKg = antal * faktor;
-            let totalLiter = totalKg / 1.42; // Honung har ungefärlig densitet 1.42 kg/liter
+            let totalLiter = totalKg / 1.42;
 
             resDiv.innerHTML = `🍯 Beräknad honungsskörd: <strong>${totalKg.toFixed(1)} kg</strong> (ca <strong>${totalLiter.toFixed(1)} liter</strong>)`;
         }

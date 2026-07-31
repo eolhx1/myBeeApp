@@ -6,62 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Kassabok</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .summary-card {
-            display: flex;
-            justify-content: space-around;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-        .summary-item h4 {
-            margin: 0 0 5px 0;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        .summary-item p {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        table.eco-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-        table.eco-table th, table.eco-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        table.eco-table th {
-            background-color: #2c3e50;
-            color: white;
-        }
-        .text-income { color: #27ae60; font-weight: bold; }
-        .text-expense { color: #c0392b; font-weight: bold; }
-    </style>
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
@@ -121,7 +67,7 @@
                     <label for="anteckning">Anteckning:</label>
                     <textarea id="anteckning" rows="2" placeholder="Valfri beskrivning..."></textarea>
                 </div>
-                <button type="submit" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara transaktion</button>
+                <button type="submit" id="eco-submit-btn" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara transaktion</button>
             </form>
         </div>
 
@@ -154,32 +100,60 @@
         // Sätt dagens datum som standard vid laddning
         document.getElementById('datum').valueAsDate = new Date();
 
-        // Här ansluter du mot din webblänk till Apps Script (samma princip som övriga appen)
         const appUrl = localStorage.getItem("myBeeApp_url");
 
         function hamtaKassabokData() {
             if (!appUrl) {
-                document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ingen anslutningslänk hittad till Google Sheets.</td></tr>';
+                window.location.href = "index.html";
                 return;
             }
 
-            // Exempelstruktur för hämtning (anpassa efter ditt Apps Script-anrop)
-            fetch(`${appUrl}?action=getKassabok`)
-                .then(response => response.json())
-                .then(data => {
-                    // Förväntar sig en array med objekt eller rader
-                    fyllTabellOchSammanfattning(data);
-                })
-                .catch(error => {
-                    console.error("Kunde inte hämta kassabok:", error);
-                    document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Kunde inte läsa data från bladet.</td></tr>';
-                });
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    bearbetaOchVisaData(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777;">Laddar data från molnet...</td></tr>';
+            }
+
+            if (navigator.onLine) {
+                fetch(appUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
+                        bearbetaOchVisaData(data);
+                    })
+                    .catch(error => {
+                        console.error("Kunde inte hämta kassabok:", error);
+                        if (!cachedData) {
+                            document.getElementById('eco-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Kunde inte läsa data från bladet.</td></tr>';
+                        }
+                    });
+            }
+        }
+
+        function bearbetaOchVisaData(data) {
+            // Förväntar sig att data har en egenskap för ekonomi/kassabok, t.ex. data.ekonomi eller data.kassabok
+            let transaktioner = data.ekonomi || data.kassabok || [];
+            fyllTabellOchSammanfattning(transaktioner);
         }
 
         function laggTillTransaktion(event) {
             event.preventDefault();
             
+            const submitBtn = document.getElementById('eco-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sparar...";
+
             const nyTransaktion = {
+                sheet: "Ekonomi",
+                TransaktionsID: "TR" + Math.floor(1000 + Math.random() * 9000),
                 datum: document.getElementById('datum').value,
                 typ: document.getElementById('typ').value,
                 kategori: document.getElementById('kategori').value,
@@ -187,22 +161,52 @@
                 anteckning: document.getElementById('anteckning').value
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(nyTransaktion);
+                alert("Ingen internettäckning! Transaktionen har sparats lokalt och synkas automatiskt när du får täckning igen.");
+                document.getElementById('eco-form').reset();
+                document.getElementById('datum').valueAsDate = new Date();
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara transaktion";
+                return;
+            }
+
             // Skicka till Apps Script
-            fetch(appUrl, {
+            fetch(appUrl + "?sheet=Ekonomi", {
                 method: 'POST',
-                body: JSON.stringify({ action: 'addKassabok', ...nyTransaktion })
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(nyTransaktion)
             })
             .then(res => res.json())
             .then(resultat => {
-                alert("Transaktionen sparad!");
-                document.getElementById('eco-form').reset();
-                document.getElementById('datum').valueAsDate = new Date();
-                hamtaKassabokData(); // Uppdatera listan
+                if (resultat && (resultat.status === "success" || resultat.result === "success")) {
+                    alert("Transaktionen sparad till molnet!");
+                    document.getElementById('eco-form').reset();
+                    document.getElementById('datum').valueAsDate = new Date();
+                    sessionStorage.removeItem("myBeeApp_globalData");
+                    sessionStorage.removeItem("myBeeApp_allData");
+                    hamtaKassabokData(); // Uppdatera listan
+                } else {
+                    throw new Error(resultat.message || "Okänt fel");
+                }
             })
             .catch(err => {
-                console.error("Fel vid sparande:", err);
-                alert("Kunde inte spara transaktionen.");
+                console.warn("Kunde inte nå servern, sparar transaktionen lokalt i kö...", err);
+                sparaTillOfflineKoe(nyTransaktion);
+                alert("Tappade anslutningen. Transaktionen är sparat lokalt och synkas senare!");
+                document.getElementById('eco-form').reset();
+                document.getElementById('datum').valueAsDate = new Date();
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara transaktion";
             });
+        }
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
         }
 
         function fyllTabellOchSammanfattning(transaktioner) {
@@ -211,20 +215,27 @@
 
             if (!transaktioner || transaktioner.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777;">Inga transaktioner registrerade än.</td></tr>';
+                document.getElementById('sum-income').innerText = '0 kr';
+                document.getElementById('sum-expense').innerText = '0 kr';
+                document.getElementById('sum-net').innerText = '0 kr';
                 return;
             }
 
             let totalIn = 0;
             let totalUt = 0;
 
-            transaktioner.forEach(t => {
+            // Sortera transaktioner efter datum fallande om möjligt
+            let sorterade = transaktioner.slice().sort((a, b) => new Date(b.datum) - new Date(a.datum));
+
+            sorterade.forEach(t => {
                 const beloppNum = Number(t.belopp) || 0;
                 if (t.typ === 'Inkomst') totalIn += beloppNum;
                 else totalUt += beloppNum;
 
                 const tr = document.createElement('tr');
+                let kortDatum = t.datum ? t.datum.substring(0, 10) : "";
                 tr.innerHTML = `
-                    <td>${t.datum}</td>
+                    <td>${kortDatum}</td>
                     <td class="${t.typ === 'Inkomst' ? 'text-income' : 'text-expense'}">${t.typ}</td>
                     <td>${t.kategori}</td>
                     <td>${beloppNum.toLocaleString()} kr</td>
@@ -242,8 +253,8 @@
             netElement.style.color = net >= 0 ? '#27ae60' : '#c0392b';
         }
 
-        // Kör vid sidladdning om länk finns
-        // hamtaKassabokData();
+        // Kör vid sidladdning
+        hamtaKassabokData();
     </script>
 </body>
 </html>

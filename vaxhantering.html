@@ -1,12 +1,6 @@
 <!-- Filnamn: vaxhantering.html -->
 <!DOCTYPE html>
 <html lang="sv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp - Vaxhantering</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 <body>
 
     <script src="header.js"></script>
@@ -14,61 +8,66 @@
         laddaHeader("🕯️ Vaxhantering", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Vaxhantering</span>');
     </script>
 
-    <div class="container">
-        <form id="vax-form">
-            <input type="hidden" id="vax-id" name="VaxID">
+    <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0; color: #2c3e50;">Registrera vaxhändelse</h3>
+            <form id="vax-form">
+                <input type="hidden" id="vax-id" name="VaxID">
 
-            <div class="form-group">
-                <label for="datum">Datum:</label>
-                <input type="date" id="datum" name="Datum" required>
-            </div>
+                <div class="form-group">
+                    <label for="datum">Datum:</label>
+                    <input type="date" id="datum" name="Datum" required>
+                </div>
 
-            <div class="form-group">
-                <label for="typ">Händelsetyp:</label>
-                <select id="typ" name="Typ">
-                    <option value="Utsortering">Utsortering av gamla ramar</option>
-                    <option value="Smältning">Smältning till råvax</option>
-                    <option value="Inbyte">Inbyte mot färdiga vaxkakor</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="typ">Händelsetyp:</label>
+                    <select id="typ" name="Typ">
+                        <option value="Utsortering">Utsortering av gamla ramar</option>
+                        <option value="Smältning">Smältning till råvax</option>
+                        <option value="Inbyte">Inbyte mot färdiga vaxkakor</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="antal-ramar">Antal ramar (om tillämpligt):</label>
-                <input type="number" id="antal-ramar" name="AntalRamar" min="0" value="0">
-            </div>
+                <div class="form-group">
+                    <label for="antal-ramar">Antal ramar (om tillämpligt):</label>
+                    <input type="number" id="antal-ramar" name="AntalRamar" min="0" value="0">
+                </div>
 
-            <div class="form-group">
-                <label for="vikt-kg">Vikt i kg (råvax eller kakor):</label>
-                <input type="number" step="0.1" id="vikt-kg" name="ViktKg" min="0" value="0">
-            </div>
+                <div class="form-group">
+                    <label for="vikt-kg">Vikt i kg (råvax eller kakor):</label>
+                    <input type="number" step="0.1" id="vikt-kg" name="ViktKg" min="0" value="0">
+                </div>
 
-            <div class="form-group">
-                <label for="status">Status / Förvaring:</label>
-                <select id="status" name="Status">
-                    <option value="I lager (Förråd)">I lager (Förråd)</option>
-                    <option value="Skickat till vaxfabrik">Skickat till vaxfabrik</option>
-                    <option value="Kasserat / Skrotvax">Kasserat / Skrotvax</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="status">Status / Förvaring:</label>
+                    <select id="status" name="Status">
+                        <option value="I lager (Förråd)">I lager (Förråd)</option>
+                        <option value="Skickat till vaxfabrik">Skickat till vaxfabrik</option>
+                        <option value="Kasserat / Skrotvax">Kasserat / Skrotvax</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="anteckningar">Anteckningar:</label>
-                <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. 3/4 Langstroth-ramar, mörka vaxkakor från kupa 2..."></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="anteckningar">Anteckningar:</label>
+                    <textarea id="anteckningar" name="Anteckningar" placeholder="T.ex. 3/4 Langstroth-ramar, mörka vaxkakor från kupa 2..."></textarea>
+                </div>
 
-            <button type="submit" class="btn" id="submit-btn">Spara vaxhändelse</button>
-        </form>
+                <button type="submit" class="btn" id="submit-btn" style="background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Spara vaxhändelse</button>
+            </form>
+        </div>
 
-        <a href="index.html" class="back-link">← Tillbaka till översikten</a>
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
+        </div>
     </div>
 
     <script>
         document.getElementById('datum').valueAsDate = new Date();
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         document.getElementById('vax-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             if (!WEB_APP_URL) {
                 alert("Ingen anslutningslänk hittades.");
                 return;
@@ -81,6 +80,8 @@
             const currentId = document.getElementById('vax-id').value || ("V" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
+                sheet: "Vax",
+                action: "addVax",
                 VaxID: currentId,
                 Datum: document.getElementById('datum').value,
                 Typ: document.getElementById('typ').value,
@@ -89,6 +90,13 @@
                 Status: document.getElementById('status').value,
                 Anteckningar: document.getElementById('anteckningar').value
             };
+
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Vaxhändelsen har sparats lokalt i kö och synkas automatiskt senare.");
+                window.location.href = "index.html";
+                return;
+            }
 
             try {
                 let response = await fetch(`${WEB_APP_URL}?sheet=Vax`, {
@@ -99,21 +107,26 @@
                 
                 let result = await response.json();
                 
-                if (result.status === "success") {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Vaxhändelsen har sparats!");
+                    sessionStorage.removeItem("myBeeApp_globalData"); // Rensa cache
                     window.location.href = "index.html";
                 } else {
-                    alert("Ett fel uppstod: " + (result.message || "Okänt fel"));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara vaxhändelse";
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Spara vaxhändelse";
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Vaxhändelsen har sparats lokalt i kö.");
+                window.location.href = "index.html";
             }
         });
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
     </script>
 </body>
 </html>

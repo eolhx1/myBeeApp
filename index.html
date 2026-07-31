@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <!-- Generera gemensam header -->
@@ -17,6 +18,12 @@
     </script>
 
     <div class="container">
+        <!-- Banner för osynkad data (visas dynamiskt) -->
+        <div id="offline-banner" onclick="synkaOfflineKoe()">
+            <span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
+            <span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
+        </div>
+
         <!-- Setup om URL saknas -->
         <div id="setup-screen" style="display: none;">
             <h2>Anslut din app</h2>
@@ -63,7 +70,7 @@
         function visaInstallningar() {
             localStorage.removeItem("myBeeApp_url");
             sessionStorage.removeItem("myBeeApp_globalData");
-            sessionStorage.removeItem("myBeeApp_bigardar"); // Rensa även gammal cache om den finns
+            sessionStorage.removeItem("myBeeApp_bigardar");
             initApp();
         }
 
@@ -72,10 +79,14 @@
             if (!savedUrl) {
                 document.getElementById("setup-screen").style.display = "block";
                 document.getElementById("main-content").style.display = "none";
+                document.getElementById("offline-banner").style.display = "none";
             } else {
                 document.getElementById("setup-screen").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
                 
+                // Kontrollera om det finns köad offline-data och uppdatera bannern
+                uppdateraOfflineBanner();
+
                 if (!map && typeof L !== 'undefined') {
                     map = L.map('map').setView([62.0, 15.0], 4);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -99,8 +110,76 @@
                     document.getElementById("bigard-list").innerHTML = "<p>Laddar bigårdar...</p>";
                 }
 
-                // 2. Hämta alltid färsk gemensam data i bakgrunden
+                // 2. Hämta alltid färsk gemensam data i bakgrunden (samt försök synka offline om vi har nät)
                 hamtaAllData();
+                if (navigator.onLine) {
+                    synkaOfflineKoe();
+                }
+            }
+        }
+
+        function uppdateraOfflineBanner() {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            const banner = document.getElementById("offline-banner");
+            const countSpan = document.getElementById("offline-count");
+
+            if (koe.length > 0) {
+                countSpan.textContent = `${koe.length} st`;
+                banner.style.display = "flex";
+            } else {
+                banner.style.display = "none";
+            }
+        }
+
+        async function synkaOfflineKoe() {
+            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+
+            if (koe.length === 0) return;
+
+            if (!navigator.onLine) {
+                alert("Ingen internetanslutning tillgänglig just nu. Kan inte synka.");
+                return;
+            }
+
+            // Ändra lite text på bannern för att visa att synk pågår
+            const banner = document.getElementById("offline-banner");
+            banner.style.backgroundColor = "#f39c12"; // Orange under synk
+            banner.querySelector("span").textContent = "🔄 Synkar osynkad data med molnet...";
+
+            let lyckade = 0;
+
+            while (koe.length > 0) {
+                let item = koe[0];
+                try {
+                    let response = await fetch(WEB_APP_URL, {
+                        method: "POST",
+                        body: JSON.stringify(item)
+                    });
+                    let result = await response.json();
+                    
+                    if (result && (result.status === "success" || result.result === "success")) {
+                        koe.shift(); // Ta bort från kön
+                        localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+                        lyckade++;
+                    } else {
+                        break; 
+                    }
+                } catch (e) {
+                    console.error("Synkfel:", e);
+                    break;
+                }
+            }
+
+            uppdateraOfflineBanner();
+            banner.style.backgroundColor = "#e74c3c"; // Tillbaka till rött om det är mer kvar
+
+            if (lyckade > 0) {
+                alert(`Synkningen klar! ${lyckade} ändring(ar) har skickats till Google Sheets.`);
+                // Hämta färsk data efter lyckad synk
+                hamtaAllData();
+            } else {
+                alert("Kunde inte synka data. Kontrollera din uppkoppling och försök igen.");
             }
         }
 
@@ -118,7 +197,6 @@
             const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
             try {
-                // Hämtar hela datapaketet (inga ?sheet= flikar, utan hela objektet)
                 let response = await fetch(WEB_APP_URL);
                 let data = await response.json();
 
@@ -132,10 +210,7 @@
                     return;
                 }
 
-                // Spara ner all data gemensamt i cachen så alla sidor (inkl. bigardsstatus) når den
                 sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-
-                // Rita ut listan och kartan med den färska datan
                 visaBigardar(data.bigardar);
 
             } catch (error) {
@@ -163,7 +238,6 @@
                 const card = document.createElement("div");
                 card.className = `card ${isInaktiv ? 'inaktiv' : ''}`;
                 
-                // HUVUDKLICK: Tar dig direkt till skötselsidan för denna bigård
                 card.onclick = () => {
                     window.location.href = `skotsel.html?id=${encodeURIComponent(b.BigardsID)}`;
                 };
@@ -177,10 +251,7 @@
                             <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <!-- KNAPP TILL BIGÅRDSSTATUS -->
                             <button onclick="event.stopPropagation(); window.location.href='bigardsstatus.html?id=${b.BigardsID}';" style="background: #27ae60; color: white; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer;" title="Visa bigårdsstatus">📊 Status</button>
-                            
-                            <!-- Redigeringsknapp -->
                             <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
                         </div>
                     </div>
@@ -207,7 +278,7 @@
         }
 
         function redigeraBigard(id) {
-            window.location.href = `ny-bigard.html?id=${id}`;
+            window.location.href = `ny-bigard.html` + (id ? `?id=${id}` : '');
         }
 
         initApp();

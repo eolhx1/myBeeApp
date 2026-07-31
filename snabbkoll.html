@@ -6,31 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Snabbkoll i bigård</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .chip-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .tag-btn {
-            background: #ecf0f1;
-            border: 2px solid #bdc3c7;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            color: #2c3e50;
-        }
-        .tag-btn.active {
-            background: #e8f8f5;
-            border-color: #27ae60;
-            color: #117a65;
-        }
-    </style>
 </head>
+
 <body>
 
     <script src="header.js"></script>
@@ -39,7 +16,7 @@
     </script>
 
     <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
-        <div class="card">
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="margin-top: 0; color: #2c3e50;">Välj bigård & samhälle</h3>
             
             <div class="form-group">
@@ -71,7 +48,11 @@
                 <textarea id="extra-anteckning" rows="3" placeholder="Tryck på mikrofonen på tangentbordet för att diktera..."></textarea>
             </div>
 
-            <button type="button" class="btn" id="spara-btn" style="background-color: #27ae60; width: 100%; padding: 12px; font-size: 1.1rem;" onclick="sparaSnabbkoll()">Spara snabbkoll</button>
+            <button type="button" class="btn" id="spara-btn" style="background-color: #27ae60; color: white; border: none; width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="sparaSnabbkoll()">Spara snabbkoll</button>
+        </div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
         </div>
     </div>
 
@@ -95,25 +76,40 @@
                 return;
             }
 
-            try {
-                let response = await fetch(WEB_APP_URL);
-                globalData = await response.json();
-                fyllBigardar(globalData.bigardar || []);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                alert("Kunde inte hämta data från molnet.");
+            // Kolla sessionstank (cache) först för blixtsnabb laddning
+            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+            if (cachedData) {
+                try {
+                    globalData = JSON.parse(cachedData);
+                    fyllBigardar(globalData.bigardar || []);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            }
+
+            if (navigator.onLine) {
+                try {
+                    let response = await fetch(WEB_APP_URL);
+                    globalData = await response.json();
+                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(globalData));
+                    fyllBigardar(globalData.bigardar || []);
+                } catch (error) {
+                    console.error("Fel vid hämtning från molnet:", error);
+                }
             }
         }
 
         function fyllBigardar(bigardar) {
             let select = document.getElementById('bigard-val');
+            let currentVal = select.value;
             select.innerHTML = '<option value="">-- Välj bigård --</option>';
             bigardar.forEach(b => {
                 let opt = document.createElement('option');
-                opt.value = b.BigardsID;
-                opt.textContent = b.Bigardsnamn || b.Namn || b.BigardsID;
+                opt.value = b.BigardsID || b.ID;
+                opt.textContent = b.Bigardsnamn || b.BigardsNamn || b.Namn || b.BigardsID;
                 select.appendChild(opt);
             });
+            if (currentVal) select.value = currentVal;
         }
 
         function filterSamhallen() {
@@ -122,17 +118,17 @@
             samhallenSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
 
             let samhallen = globalData.samhallen || [];
-            let filtrerade = samhallen.filter(s => String(s.BigardsID) === String(valtBigardID));
+            let filtrerade = samhallen.filter(s => String(s.BigardsID || s.Bigård) === String(valtBigardID));
 
             filtrerade.forEach(s => {
                 let opt = document.createElement('option');
-                opt.value = s.SamhallsID;
-                opt.textContent = s.Kupbenamning || s.SamhallsID;
+                opt.value = s.SamhallsID || s.SamhällsID || s.ID;
+                opt.textContent = s.Kupbenamning || s.SamhallsNamn || s.Namn || s.SamhallsID;
                 samhallenSelect.appendChild(opt);
             });
         }
 
-                async function sparaSnabbkoll() {
+        async function sparaSnabbkoll() {
             let bigardsID = document.getElementById('bigard-val').value;
             let samhallsID = document.getElementById('samhalle-val').value;
             
@@ -163,41 +159,60 @@
             let autoID = "SK" + Math.floor(1000 + Math.random() * 9000);
 
             let formData = {
+                sheet: "Skotsel",
+                action: "addSkotsel",
                 SkotselID: autoID,
-                BigardsID: bigardsID, // <--- Nu följer BigardsID med till kolumn B!
+                BigardsID: bigardsID,
                 SamhallsID: samhallsID,
                 Datum: datumStr,
                 Anteckningar: samladeAnteckningar
             };
 
+            if (!navigator.onLine) {
+                sparaTillOfflineKoe(formData);
+                alert("Ingen internettäckning! Snabbkollen har sparats lokalt i kö och synkas automatiskt senare.");
+                aterstallFormular();
+                return;
+            }
+
             try {
                 let response = await fetch(WEB_APP_URL + "?sheet=Skotsel", {
                     method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(formData)
                 });
                 let result = await response.json();
 
-                if (result.status === "success") {
+                if (result && (result.status === "success" || result.result === "success")) {
                     alert("Snabbkollen har sparats!");
-                    // Återställ formuläret
-                    document.getElementById('extra-anteckning').value = "";
-                    document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-                    aktivaVal = [];
+                    sessionStorage.removeItem("myBeeApp_globalData");
                     sessionStorage.removeItem("myBeeApp_allData");
+                    aterstallFormular();
                 } else {
-                    alert("Ett fel uppstod när kollen skulle sparas.");
+                    throw new Error(result.message || "Okänt fel");
                 }
             } catch (error) {
-                console.error("Fel:", error);
-                alert("Kunde inte nå servern.");
+                console.warn("Kunde inte nå servern, sparar lokalt...", error);
+                sparaTillOfflineKoe(formData);
+                alert("Tappade anslutningen. Snabbkollen har sparats lokalt i kö.");
+                aterstallFormular();
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Spara snabbkoll";
             }
         }
 
+        function aterstallFormular() {
+            document.getElementById('extra-anteckning').value = "";
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+            aktivaVal = [];
+        }
+
+        function sparaTillOfflineKoe(newItem) {
+            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
+            koe.push(newItem);
+            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+        }
 
         laddaData();
     </script>
