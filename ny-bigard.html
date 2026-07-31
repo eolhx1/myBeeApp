@@ -137,11 +137,9 @@
                 document.getElementById('antal').value = found.AntalSamhallen || 0;
                 document.getElementById('datum').value = found.Etableringsdatum ? found.Etableringsdatum.split('T')[0] : "";
 
-                let latVal = String(found.Latitud || "");
-                let lonVal = String(found.Longitud || "");
+                document.getElementById('lat').value = found.Latitud || "";
+                document.getElementById('lon').value = found.Longitud || "";
 
-                document.getElementById('lat').value = (latVal.includes("T") || latVal.length > 15) ? "" : latVal;
-                document.getElementById('lon').value = (lonVal.includes("T") || lonVal.length > 15) ? "" : lonVal;
 
                 document.getElementById('anteckningar').value = found.Anteckningar || "";
                 document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
