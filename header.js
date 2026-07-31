@@ -107,6 +107,10 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
     </div>
 
     <button onclick="bytUrlSide()" style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Byt anslutningslänk</button>
+    
+    <button onclick="rensaAllLokalData()" style="background: #c0392b; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">🗑️ Rensa all lokal data</button>
+    
+    
     </div>
     </div>
     </div>
