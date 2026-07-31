@@ -73,10 +73,50 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
         let globalData = {};
 
-        async function laddaDashboardData() {
+        function initDashboard() {
+            // 1. Försök läsa all data direkt från sessionStorage (eller localStorage om ni sparar allt där)
+            const cachedData = sessionStorage.getItem("myBeeApp_globalData") || localStorage.getItem("myBeeApp_globalData");
+
+            if (cachedData) {
+                try {
+                    globalData = JSON.parse(cachedData);
+                    fyllDashboardDirekt();
+                } catch (e) {
+                    console.error("Kunde inte läsa cache:", e);
+                }
+            }
+
+            // 2. Om ingen cache finns, eller för att uppdatera i bakgrunden, hämtar vi från nätet
+            hamtaDataBakgrund();
+        }
+
+        function fyllDashboardDirekt() {
+            if (!globalData.bigardar) return;
+
+            fyllBigardsDropdown(globalData.bigardar);
+
+            // Kolla om det skickats med ett ID i webbadressen (t.ex. ?id=...)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlBigardID = urlParams.get('id') || urlParams.get('BigardsID');
+
+            if (urlBigardID) {
+                let select = document.getElementById('valt-bigard-dashboard');
+                for (let option of select.options) {
+                    if (option.value.toLowerCase() === urlBigardID.toLowerCase()) {
+                        select.value = option.value;
+                        break;
+                    }
+                }
+                if (select.value) {
+                    visaDashboard();
+                }
+            }
+        }
+
+        async function hamtaDataBakgrund() {
+            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
             if (!WEB_APP_URL) {
                 window.location.href = "index.html";
                 return;
@@ -84,41 +124,30 @@
 
             try {
                 let response = await fetch(WEB_APP_URL);
-                globalData = await response.json();
-                fyllBigardsDropdown(globalData.bigardar || []);
-
-                // Kontrollera om det skickats med ett ID (stöder både ?id= och ?BigardsID=)
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlBigardID = urlParams.get('id') || urlParams.get('BigardsID');
-
-                if (urlBigardID) {
-                    let select = document.getElementById('valt-bigard-dashboard');
-                    select.value = urlBigardID;
+                let data = await response.json();
+                
+                if (data && !data.status) {
+                    globalData = data;
+                    // Spara ner all data gemensamt så andra sidor kan nå den direkt
+                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
                     
-                    // Om värdet inte sattes direkt (t.ex. om ID-formatet skiljer sig något), 
-                    // kollar vi om det finns en matchande option
-                    if (!select.value && urlBigardID) {
-                        for (let option of select.options) {
-                            if (option.value.toLowerCase() === urlBigardID.toLowerCase()) {
-                                select.value = option.value;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Kör igång visningen direkt om en bigård hittades
-                    if (select.value) {
+                    // Uppdatera gränssnittet om användaren inte aktivt gjort ett val som skrivs över
+                    let valtInnan = document.getElementById('valt-bigard-dashboard').value;
+                    fyllBigardsDropdown(globalData.bigardar || []);
+                    if (valtInnan && !document.getElementById('valt-bigard-dashboard').value) {
+                        document.getElementById('valt-bigard-dashboard').value = valtInnan;
                         visaDashboard();
                     }
                 }
             } catch (error) {
-                console.error("Fel vid laddning:", error);
-                document.getElementById('dashboard-container').innerHTML = "<p style='color: red;'>Kunde inte hämta data från molnet.</p>";
+                console.error("Kunde inte hämta färsk data i bakgrunden:", error);
             }
         }
 
         function fyllBigardsDropdown(bigardar) {
             let select = document.getElementById('valt-bigard-dashboard');
+            let nuvarandeVal = select.value; // Spara nuvarande val så det inte nollställs i unödan
+            
             select.innerHTML = '<option value="">-- Välj bigård --</option>';
             bigardar.forEach(b => {
                 let opt = document.createElement('option');
@@ -126,6 +155,10 @@
                 opt.textContent = b.Bigardsnamn || b.Namn || b.BigardsID;
                 select.appendChild(opt);
             });
+
+            if (nuvarandeVal) {
+                select.value = nuvarandeVal;
+            }
         }
 
         function visaDashboard() {
@@ -195,8 +228,10 @@
             container.appendChild(grid);
         }
 
-        laddaDashboardData();
+        // Starta direkt mot cachen
+        initDashboard();
     </script>
+
 
 </body>
 </html>
