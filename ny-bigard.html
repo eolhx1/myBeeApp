@@ -159,10 +159,10 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('bigards-id'].value || ("B" + Math.floor(1000 + Math.random() * 9000));
+            const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
-                sheet: "Bigardar", // Bra att skicka med vilken flik/typ det gäller i kön
+                sheet: "Bigardar",
                 BigardsID: currentId,
                 Status: document.getElementById('status').value,
                 Namn: document.getElementById('namn').value,
@@ -174,7 +174,6 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            // Om vi är offline direkt, eller om anropet misslyckas, lägg i kö
             if (!navigator.onLine) {
                 sparaTillOfflineKoe(formData);
                 alert("Ingen internettäckning! Ändringen har sparats lokalt på enheten och synkas automatiskt när du är tillbaka online.");
