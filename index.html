@@ -1,8 +1,3 @@
-
-
-
-
-
 <!-- Filnamn: index.html -->
 <!DOCTYPE html>
 <html lang="sv">
@@ -153,7 +148,7 @@
             }
         }
 
-                function visaBigardar(data) {
+        function visaBigardar(data) {
             const listContainer = document.getElementById("bigard-list");
             listContainer.innerHTML = "";
             
@@ -178,12 +173,18 @@
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                            <h3>${b.Namn || 'Namnlös bigård'}</h3>
+                            <h3 style="${isInaktiv ? 'text-decoration: line-through; color: #7f8c8d;' : ''}">${b.Namn || 'Namnlös bigård'}</h3>
                             <p><strong>Typ:</strong> ${b.Typ || '-'}</p>
                             <p><strong>Samhällen:</strong> ${b.AntalSamhallen || 0}</p>
                             <span class="badge ${isInaktiv ? 'inaktiv' : ''}">${status}</span>
                         </div>
-                        <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" title="Ändra bigård" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <!-- NY KNAPP TILL BIGÅRDSSTATUS -->
+                            <button onclick="event.stopPropagation(); window.location.href='bigardsstatus.html?id=${b.BigardsID}';" style="background: #27ae60; color: white; border: none; border-radius: 4px; padding: 0.5rem; cursor: pointer;" title="Visa bigårdsstatus">📊 Status</button>
+                            
+                            <!-- Din befintliga redigeringsknapp -->
+                            <button onclick="event.stopPropagation(); redigeraBigard('${b.BigardsID}');" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem;" aria-label="Ändra bigård">⚙️</button>
+                        </div>
                     </div>
                 `;
                 listContainer.appendChild(card);
@@ -196,7 +197,7 @@
                         L.marker(latLng).addTo(map)
                             .bindPopup(`<b>${b.Namn}</b><br>${b.Typ}<br><a href="skotsel.html?id=${encodeURIComponent(b.BigardsID)}">Öppna skötselkort</a>`);
                         
-                        markers.push(latLng); // <-- Lägg till koordinaten i listan
+                        markers.push(latLng);
                     }
                 }
             });
@@ -208,12 +209,10 @@
             }
         }
 
-
         // Hjälpfunktion för att nå inställningar/formuläret för bigården via kugghjulet
         function redigeraBigard(id) {
             window.location.href = `ny-bigard.html?id=${id}`;
         }
-
 
         initApp();
     </script>

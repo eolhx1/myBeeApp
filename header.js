@@ -14,6 +14,11 @@ function laddaHeader(titelTekst, breadcrumbHTML = '') {
             text: "⚡ Snabbkoll i bigård" // <--- Ny rad här!
         },
         {
+            url: "bigardsstatus.html",
+            text: "📊 Bigårdsstatus"
+        },
+
+        {
             url: "historik.html",
             text: "📈 Historik & Trender"
         },
