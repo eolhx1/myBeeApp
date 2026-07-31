@@ -86,6 +86,31 @@
                 let response = await fetch(WEB_APP_URL);
                 globalData = await response.json();
                 fyllBigardsDropdown(globalData.bigardar || []);
+
+                // Kontrollera om det skickats med ett ID (stöder både ?id= och ?BigardsID=)
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlBigardID = urlParams.get('id') || urlParams.get('BigardsID');
+
+                if (urlBigardID) {
+                    let select = document.getElementById('valt-bigard-dashboard');
+                    select.value = urlBigardID;
+                    
+                    // Om värdet inte sattes direkt (t.ex. om ID-formatet skiljer sig något), 
+                    // kollar vi om det finns en matchande option
+                    if (!select.value && urlBigardID) {
+                        for (let option of select.options) {
+                            if (option.value.toLowerCase() === urlBigardID.toLowerCase()) {
+                                select.value = option.value;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Kör igång visningen direkt om en bigård hittades
+                    if (select.value) {
+                        visaDashboard();
+                    }
+                }
             } catch (error) {
                 console.error("Fel vid laddning:", error);
                 document.getElementById('dashboard-container').innerHTML = "<p style='color: red;'>Kunde inte hämta data från molnet.</p>";
@@ -126,7 +151,6 @@
             const nuvarandeAr = 2026;
 
             samhallen.forEach(s => {
-                // Hitta aktiv drottning för detta samhälle
                 let drottning = (globalData.drottningar || []).find(d => String(d.SamhallsID) === String(s.SamhallsID) && d.Status === "Aktiv i kupa");
                 
                 let drottningText = "Ingen aktiv drottning registrerad";
@@ -139,10 +163,9 @@
                     let alderStr = alder === 0 ? "Årets (0 år)" : `${alder} år`;
                     
                     drottningText = `👑 ${drottning.Namn || 'Namnlös'} (${drottning.Ras || 'Okänd ras'})<br>📅 Årgång: ${drottning.DrottningAr} (${alderStr}) | Färg: ${drottning.Farg || '-'}`;
-                    if (alder >= 2) kortBorderColor = "#c0392b"; // Rödmarkerad om drottningen är äldre
+                    if (alder >= 2) kortBorderColor = "#c0392b";
                 }
 
-                // Hitta senaste skötselhändelsen / snabbkollen för detta samhälle
                 let skotselLoggar = (globalData.skotsel || []).filter(sk => String(sk.SamhallsID) === String(s.SamhallsID));
                 skotselLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
                 
@@ -174,5 +197,6 @@
 
         laddaDashboardData();
     </script>
+
 </body>
 </html>
