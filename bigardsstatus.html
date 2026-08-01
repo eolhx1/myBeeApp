@@ -4,214 +4,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBeeApp - Bigårdsstatus & Dashboard</title>
+    <title>MyBeeApp - Bigårdsstatus</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Bigårdsstatus</span></div>';
+        // Lagt till info-knappen här i slutet av brödsmulorna
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Bigårdsstatus</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
 
-        // Informationstext till modalen som skapas automatiskt av header.js
+        // Informationstext till modalen
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
-                Denna vy ger dig en snabb överblick (dashboard) över alla samhällen och kupor i en vald bigård.
+                Här får du en snabb och samlad överblick över statusen för alla dina samhällen i en vald bigård.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
-                <li><strong>Välj bigård:</strong> Välj den bigård du vill granska i rullistan ovanför.</li>
-                <li><strong>Drottningsstatus:</strong> Visar aktuell drottning, ras, årgång samt beräknad ålder. Äldre drottningar markeras med röd kantlinje.</li>
-                <li><strong>Senaste händelse:</strong> Visar en snabbtitt på den senast registrerade skötselåtgärden eller anteckningen för respektive kupa.</li>
+                <li><strong>Översikt:</strong> Välj vilken bigård du vill granska i listan högst upp.</li>
+                <li><strong>Samhällskort:</strong> Varje kupa visas som ett eget kort med information om drottning, ålder och den senaste händelsen eller skötselkontrollen.</li>
             </ul>
         `;
 
+        // Skickar med info-parametrar hit
         laddaHeader("📊 Bigårdsstatus", breadcrumbs, "Om Bigårdsstatus", infoInnehall);
     </script>
 
-    <div class="container" style="max-width: 1000px; margin: 20px auto; padding: 0 15px;">
+    <div class="container">
         <!-- Välj bigård -->
         <div class="card">
-            <h3 style="margin-top: 0; color: #2c3e50;">Välj bigård att granska</h3>
+            <h3>Välj bigård att granska</h3>
             <div class="form-group" style="margin-bottom: 0;">
-                <select id="valt-bigard-dashboard" class="form-control" onchange="visaDashboard()">
-                    <option value="">-- Välj bigård --</option>
+                <select id="valt-bigard-status" name="BigardsID">
+                    <option value="">Laddar bigårdar...</option>
                 </select>
             </div>
         </div>
 
-        <!-- Resultat-container för kupkorten -->
-        <div id="dashboard-container">
-            <p style="text-align: center; color: #666; margin-top: 20px;">Välj en bigård ovan för att visa snabbfakta för dess samhällen.</p>
+        <!-- Behållare för samhällskort -->
+        <div id="samhallen-lista" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Fylls dynamiskt av JS -->
         </div>
 
-        <div style="margin-top: 15px; text-align: center;">
-            <a href="index.html" class="back-link" style="color: #2c3e50; text-decoration: none;">← Tillbaka till översikten</a>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="index.html" style="color: #34495e; text-decoration: none; font-size: 0.9rem;">← Tillbaka till översikten</a>
         </div>
     </div>
 
     <script>
-        let globalData = {};
+        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        function initDashboard() {
-            // 1. Försök läsa all data direkt från sessionStorage eller localStorage
-            const cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData") || localStorage.getItem("myBeeApp_globalData");
+        async function init() {
+            if (!WEB_APP_URL) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
 
             if (cachedData) {
                 try {
-                    globalData = JSON.parse(cachedData);
-                    fyllDashboardDirekt();
+                    allData = JSON.parse(cachedData);
+                    fyllBigardarDropdown(allData);
                 } catch (e) {
-                    console.error("Kunde inte läsa cache:", e);
+                    console.error("Kunde inte läsa cache", e);
                 }
+            } else {
+                document.getElementById('samhallen-lista').innerHTML = "<p>Laddar data från molnet...</p>";
             }
-
-            // 2. Hämta fräsch data i bakgrunden
-            hamtaDataBakgrund();
-        }
-
-        function fyllDashboardDirekt() {
-            if (!globalData.bigardar) return;
-
-            fyllBigardsDropdown(globalData.bigardar);
-
-            // Kolla om det skickats med ett ID i webbadressen (t.ex. ?id=...)
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlBigardID = urlParams.get('id') || urlParams.get('BigardsID');
-
-            if (urlBigardID) {
-                let select = document.getElementById('valt-bigard-dashboard');
-                for (let option of select.options) {
-                    if (option.value.toLowerCase() === urlBigardID.toLowerCase()) {
-                        select.value = option.value;
-                        break;
-                    }
-                }
-                if (select.value) {
-                    visaDashboard();
-                }
-            }
-        }
-
-        async function hamtaDataBakgrund() {
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-            if (!WEB_APP_URL) {
-                return;
-            }
-
-            if (!navigator.onLine) return;
 
             try {
                 let response = await fetch(WEB_APP_URL);
-                let data = await response.json();
-                
-                if (data && !data.status) {
-                    globalData = data;
-                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                    
-                    let valtInnan = document.getElementById('valt-bigard-dashboard').value;
-                    fyllBigardsDropdown(globalData.bigardar || []);
-                    if (valtInnan && !document.getElementById('valt-bigard-dashboard').value) {
-                        document.getElementById('valt-bigard-dashboard').value = valtInnan;
-                        visaDashboard();
-                    }
-                }
+                allData = await response.json();
+                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+                fyllBigardarDropdown(allData);
             } catch (error) {
-                console.error("Kunde inte hämta färsk data i bakgrunden:", error);
+                console.error("Fel vid laddning:", error);
+                if (!cachedData) {
+                    document.getElementById('samhallen-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
+                }
             }
         }
 
-        function fyllBigardsDropdown(bigardar) {
-            let select = document.getElementById('valt-bigard-dashboard');
-            let nuvarandeVal = select.value;
+        function fyllBigardarDropdown(data) {
+            let bigårdar = data.bigardar || [];
+            let bigardSelect = document.getElementById('valt-bigard-status');
             
-            select.innerHTML = '<option value="">-- Välj bigård --</option>';
-            bigardar.forEach(b => {
+            bigardSelect.innerHTML = '<option value="">-- Välj bigård --</option>';
+
+            if (bigårdar.length === 0) {
+                bigardSelect.innerHTML = '<option value="">Inga bigårdar inlagda</option>';
+                return;
+            }
+
+            bigårdar.forEach(b => {
                 let opt = document.createElement('option');
-                let id = b.BigardsID || b.ID;
-                let namn = b.Bigardsnamn || b.BigardsNamn || b.Namn || id;
-                opt.value = id;
-                opt.textContent = namn;
-                select.appendChild(opt);
+                opt.value = b.BigardsID;
+                opt.textContent = b.Namn;
+                bigardSelect.appendChild(opt);
             });
 
-            if (nuvarandeVal) {
-                select.value = nuvarandeVal;
+            let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardStatus");
+            if (valtBigardID && bigårdar.some(b => String(b.BigardsID) === String(valtBigardID))) {
+                bigardSelect.value = valtBigardID;
+            } else if (bigårdar.length > 0) {
+                bigardSelect.value = bigårdar[0].BigardsID;
             }
+
+            visaSamhällen(data);
         }
 
-        function visaDashboard() {
-            let valtBigardID = document.getElementById('valt-bigard-dashboard').value;
-            let container = document.getElementById('dashboard-container');
-            container.innerHTML = "";
+        function visaSamhällen(dataProvided = null) {
+            const valtBigardsID = document.getElementById('valt-bigard-status').value;
+            sessionStorage.setItem("myBeeApp_valdBigardStatus", valtBigardsID);
 
-            if (!valtBigardID) {
-                container.innerHTML = '<p style="text-align: center; color: #666; margin-top: 20px;">Välj en bigård ovan för att visa snabbfakta för dess samhällen.</p>';
+            let allData = dataProvided;
+            if (!allData) {
+                let cachedData = sessionStorage.getItem("myBeeApp_allData");
+                if (cachedData) allData = JSON.parse(cachedData);
+            }
+
+            letlistaDiv = document.getElementById('samhallen-lista');
+            listajDiv.innerHTML = "";
+
+            if (!valtBigardsID || !allData) {
+                listajDiv.innerHTML = "<p>Välj en bigård ovan för att se status.</p>";
                 return;
             }
 
-            let samhallen = (globalData.samhallen || []).filter(s => String(s.BigardsID || s.Bigård) === String(valtBigardID));
+            let allaSamhällen = allData.samhallen || [];
+            let skotselLoggar = allData.skotsel || [];
+            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID) === String(valtBigardsID));
 
-            if (samhallen.length === 0) {
-                container.innerHTML = '<div class="card"><p style="color: #777; text-align: center; margin: 0;">Inga samhällen registrerade i denna bigård.</p></div>';
+            if (minaSamhällen.length === 0) {
+                listajDiv.innerHTML = "<p>Inga kupor/samhällen registrerade i denna bigård.</p>";
                 return;
             }
 
-            let grid = document.createElement('div');
-            grid.className = 'dashboard-grid';
+            minaSamhällen.forEach(samhälle => {
+                let minaLoggar = skotselLoggar.filter(l => String(l.SamhallsID) === String(samhälle.SamhallsID));
+                minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+                let senasteLogg = minaLoggar.length > 0 ? minaLoggar[0] : null;
 
-            const nuvarandeAr = 2026;
-
-            samhallen.forEach(s => {
-                let samhallsID = s.SamhallsID || s.SamhällsID || s.ID;
-                let drottning = (globalData.drottningar || []).find(d => String(d.SamhallsID || d.SamhällsID) === String(samhallsID) && (d.Status === "Aktiv i kupa" || !d.Status));
-                
                 let drottningText = "Ingen aktiv drottning registrerad";
-                let kortBorderColor = "#e67e22";
+                if (samhälle.DrottningAr || samhälle.DrottningFarg || samhälle.DrottningRas) {
+                    let ras = samhälle.DrottningRas ? `(${samhälle.DrottningRas})` : '';
+                    let färg = samhälle.DrottningFarg ? `Färg: ${samhälle.DrottningFarg}` : 'Färg: Ej märkt';
+                    let årgång = samhälle.DrottningAr ? `Årgång: ${samhälle.DrottningAr}` : '';
+                    drottningText = `👑 Drottning ${samhälle.DrottningNamn || ''} ${ras}<br>📅 ${årgång} | 🎨 ${färg}`;
+                }
 
-                if (drottning) {
-                    let drottningAr = parseInt(drottning.DrottningAr || drottning.Argang) || nuvarandeAr;
-                    let alder = nuvarandeAr - drottningAr;
-                    if (alder < 0) alder = 0;
-                    let alderStr = alder === 0 ? "Årets (0 år)" : `${alder} år`;
+                let händelseText = "Inga händelser registrerade ännu.";
+                if (senasteLogg) {
+                    let kortDatum = senasteLogg.Datum ? senasteLogg.Datum.substring(0, 10) : "";
+                    let delar = [];
+                    if (senasteLogg.Drottningsett) delar.push(`👑 ${senasteLogg.Drottningsett}`);
+                    if (senasteLogg.Svarmlystnad) delar.push(`🐝 Svärmlystnad: ${senasteLogg.Svarmlystnad}`);
+                    if (senasteLogg.Temperament) delar.push(` Humör: ${senasteLogg.Temperament}`);
+                    if (senasteLogg.SkattadMangd) delar.push(`🍯 Skörd: ${senasteLogg.SkattadMangd}`);
+                    if (senasteLogg.Anteckningar) delar.push(`<em>"${senasteLogg.Anteckningar}"</em>`);
                     
-                    drottningText = `👑 ${drottning.Namn || 'Namnlös'} (${drottning.Ras || 'Okänd ras'})<br>📅 Årgång: ${drottningAr} (${alderStr}) | Färg: ${drottning.Farg || '-'}`;
-                    if (alder >= 2) kortBorderColor = "#c0392b";
+                    händelseText = `<strong>${kortDatum}:</strong> ${delar.join(' | ') || 'Skötselbesök utfört'}`;
                 }
 
-                let skotselLoggar = (globalData.skotsel || []).filter(sk => String(sk.SamhallsID || sk.Samhälle || sk.SamhällsID) === String(samhallsID));
-                skotselLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
-                
-                let senasteSkotsel = skotselLoggar.length > 0 ? skotselLoggar[0] : null;
-                let skotselText = "Inga registreringar ännu";
-
-                if (senasteSkotsel) {
-                    let dat = senasteSkotsel.Datum ? String(senasteSkotsel.Datum).substring(0, 10) : "";
-                    let anteckning = senasteSkotsel.Anteckningar || senasteSkotsel.Behandling || "Utförd åtgärd";
-                    skotselText = `<strong>${dat}:</strong> ${anteckning}`;
-                }
-
-                let kupNamn = s.Kupbenamning || s.SamhallsNamn || s.Namn || samhallsID;
-
-                let card = document.createElement('div');
-                card.className = 'kupa-card';
-                card.style.borderLeftColor = kortBorderColor;
-                card.innerHTML = `
-                    <h4>🏠 ${kupNamn}</h4>
-                    <div class="info-row">${drottningText}</div>
-                    <div class="latast-händelse">
-                        <div style="font-size: 0.8rem; color: #777; margin-bottom: 2px;">Senaste händelse / koll:</div>
-                        ${skotselText}
+                let kort = document.createElement('div');
+                kort.className = 'card';
+                kort.style.borderLeft = '5px solid #e67e22';
+                kort.innerHTML = `
+                    <h3 style="margin-top: 0; color: #2c3e50; display: flex; justify-content: space-between; align-items: center;">
+                        <span>🏠 ${samhälle.Kupbenamning || 'Kupa'}</span>
+                    </h3>
+                    <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #34495e;">${drottningText}</p>
+                    <div style="background: #f8f9f9; padding: 0.6rem; border-radius: 6px; border: 1px solid #e5e7e9; margin-top: 0.6rem; font-size: 0.9rem;">
+                        <span style="font-size: 0.75rem; color: #7f8c8d; display: block; margin-bottom: 0.2rem;">SENASTE HÄNDELSE / KOLL</span>
+                        ${händelseText}
                     </div>
                 `;
-                grid.appendChild(card);
+                listajDiv.appendChild(kort);
             });
-
-            container.appendChild(grid);
         }
 
-        initDashboard();
+        document.getElementById('valt-bigard-status').addEventListener('change', () => visaSamhällen(null));
+
+        init();
     </script>
 </body>
 </html>
