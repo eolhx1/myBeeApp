@@ -13,10 +13,10 @@
             color: #2980b9;
             border: 1px solid #2980b9;
             border-radius: 50%;
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -63,10 +63,10 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header med brödsmulor och diskret blått i -->
     <script src="header.js"></script>
     <script>
-        let breadcrumbs = '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>' +
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span>' +
                           '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
         laddaHeader("📈 Historik & Trender", breadcrumbs);
     </script>
