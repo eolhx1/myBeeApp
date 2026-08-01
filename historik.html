@@ -9,20 +9,16 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och diskret blått i -->
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <script src="header.js"></script>
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span>' +
-                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-        laddaHeader("📈 Historik & Trender", breadcrumbs);
-    </script>
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div>';
 
-    <!-- Info Modal -->
-    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
-        <div class="modal-content">
-            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
-            <h3 style="margin-top: 0; color: #2c3e50;">Om Historik & Trender</h3>
-            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+        // Informationstext till modalen som skapas automatiskt av header.js
+        let infoInnehall = `
+            <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Denna sida är till för att följa utvecklingen och händelsehistoriken för dina enskilda bisamhällen och kupor över tid.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
@@ -30,8 +26,11 @@
                 <li><strong>Steg 2:</strong> Välj det specifika samhället/kupan för att se en summerad statistik (antal besök, total skörd, drottningens ålder).</li>
                 <li><strong>Tidslinje:</strong> Visar alla sparade skötselloggar i kronologisk ordning med anteckningar, behandlingar och varroanedfall.</li>
             </ul>
-        </div>
-    </div>
+        `;
+
+        laddaHeader("📈 Historik & Trender", breadcrumbs, "Om Historik & Trender", infoInnehall);
+    </script>
+
 
     <div class="container">
         <!-- Steg 1: Välj bigård -->
@@ -107,19 +106,6 @@
     </div>
 
     <script>
-        // Funktioner för Info-modalen
-        function oppnaInfoModal() {
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-        function stangInfoModal() {
-            document.getElementById('info-modal').style.display = 'none';
-        }
-        function stangInfoModalKlickUtanför(event) {
-            if (event.target.id === 'info-modal') {
-                stangInfoModal();
-            }
-        }
-
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         async function init() {
