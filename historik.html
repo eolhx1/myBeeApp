@@ -12,7 +12,7 @@
     <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
 
         // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
