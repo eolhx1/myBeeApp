@@ -1,3 +1,4 @@
+<!-- Filnamn: historik.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -5,14 +6,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Kupa & Historik</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Stil för info-knapp och modal */
+        .info-btn {
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            float: right;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: -5px;
+        }
+        .info-btn:hover { background: #2471a3; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+    </style>
 </head>
 <body>
 
     <!-- Generera gemensam header -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>');
+        // Vi skickar med en info-knapp i HTML efter brödsmulorna
+        let extraHeaderHTML = '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>', extraHeaderHTML);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Historik & Trender</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Denna sida är till för att följa utvecklingen och händelsehistoriken för dina enskilda bisamhällen och kupor över tid.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>Steg 1:</strong> Välj vilken bigård du vill titta på. Grundläggande uppgifter om bigården visas direkt.</li>
+                <li><strong>Steg 2:</strong> Välj det specifika samhället/kupan för att se en summerad statistik (antal besök, total skörd, drottningens ålder).</li>
+                <li><strong>Tidslinje:</strong> Visar alla sparade skötselloggar i kronologisk ordning med anteckningar, behandlingar och varroanedfall.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container">
         <!-- Steg 1: Välj bigård -->
@@ -88,6 +157,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         async function init() {
