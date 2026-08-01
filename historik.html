@@ -90,7 +90,6 @@
     <script>
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        // Huvudfunktion som körs när sidan laddas
         async function init() {
             if (!WEB_APP_URL) {
                 window.location.href = "index.html";
@@ -137,7 +136,7 @@
 
             bigårdar.forEach(b => {
                 let opt = document.createElement('option');
-                // Trimma bort eventuella osynliga mellanslag från ID och Namn
+                // Tvinga trim på ID och namn för att undvika strul med dolda mellanslag
                 opt.value = String(b.BigardsID || "").trim();
                 opt.textContent = String(b.Namn || "").trim();
                 bigardSelect.appendChild(opt);
@@ -202,7 +201,6 @@
                 infoCard.style.display = 'none';
             }
 
-            // Filtrera samhällen med strikt trimning av ID-kolumnerna
             let allaSamhällen = allData.samhallen || [];
             let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID || "").trim() === valtBigardsID);
 
@@ -262,7 +260,11 @@
             let skotselLoggar = allData.skotsel || [];
 
             let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
-            let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
+            let minaLoggar = skotselLoggar.filter(s => String(s.BigardsID || "").trim() === document.getElementById('valt-bigard-historia').value.trim() && String(s.SamhallsID || "").trim() === valtSamhallsID);
+            // (Om du vill filtrera rent på SamhallsID räcker oftast s.SamhallsID)
+            if (minaLoggar.length === 0) {
+                minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
+            }
 
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
@@ -324,7 +326,6 @@
             });
         }
 
-        // Eventlyssnare
         document.getElementById('valt-bigard-historia').addEventListener('change', () => {
             sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
             tommFaltOchStatistik();
@@ -333,10 +334,7 @@
         
         document.getElementById('valt-samhalle-historia').addEventListener('change', () => visaHistorikForKupa(null));
 
-        // Starta
         init();
     </script>
-
-
 </body>
 </html>
