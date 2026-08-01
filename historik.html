@@ -91,43 +91,49 @@
     <script>
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
-        async function laddaData() {
+        // Huvudfunktion som körs när sidan laddas
+        async function init() {
             if (!WEB_APP_URL) {
                 window.location.href = "index.html";
                 return;
             }
 
-            document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            let allData = null;
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
 
+            // Om vi har cache, använd den direkt för snabb laddning
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    fyllBigardarDropdown(allData);
+                } catch (e) {
+                    console.error("Kunde inte läsa cache", e);
+                }
+            } else {
+                document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
+            }
+
+            // Hämta alltid färsk data i bakgrunden för att hålla cachen uppdaterad
             try {
                 let response = await fetch(WEB_APP_URL);
-                let allData = await response.json();
-                
-                // Spara färsk data i cachen
+                allData = await response.json();
                 sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
-                
                 fyllBigardarDropdown(allData);
             } catch (error) {
                 console.error("Fel vid laddning:", error);
-                
-                // Fallback till cache om nätverket misslyckas
-                let cachedData = sessionStorage.getItem("myBeeApp_allData");
-                if (cachedData) {
-                    try {
-                        let allData = JSON.parse(cachedData);
-                        fyllBigardarDropdown(allData);
-                        return;
-                    } catch (e) {
-                        console.error("Kunde inte läsa cache", e);
-                    }
+                if (!cachedData) {
+                    document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
                 }
-                document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
             }
         }
 
         function fyllBigardarDropdown(data) {
             let bigårdar = data.bigardar || [];
             let bigardSelect = document.getElementById('valt-bigard-historia');
+            
+            // Spara nuvarande val om det finns
+            let nuvarandeVal = bigardSelect.value;
+            
             bigardSelect.innerHTML = '<option value="">-- Välj bigård --</option>';
 
             if (bigårdar.length === 0) {
@@ -142,15 +148,25 @@
                 bigardSelect.appendChild(opt);
             });
 
-            // Återställ tidigare val eller välj standard
+            // Återställ tidigare val från sessionStorage eller behåll om möjligt
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
             if (valtBigardID && bigårdar.some(b => String(b.BigardsID).trim() === String(valtBigardID).trim())) {
                 bigardSelect.value = valtBigardID;
-            } else if (bigårdar.length > 0) {
+            } else if (bigårdar.length > 0 && !bigardSelect.value) {
                 bigardSelect.value = bigårdar[0].BigardsID;
             }
 
+            // Uppdatera beroende fält baserat på det aktiva valet
             uppdateraKuporDropdown(data);
+        }
+
+        function tommFaltOchStatistik() {
+            // Töm och dölj beroende fält när bigård ändras
+            document.getElementById('bigard-info-card').style.display = 'none';
+            document.getElementById('steg2-card').style.display = 'none';
+            document.getElementById('statistik-card').style.display = 'none';
+            document.getElementById('valt-samhalle-historia').innerHTML = '<option value="">-- Välj kupa --</option>';
+            document.getElementById('tidslinje-lista').innerHTML = '<p>Välj bigård och kupa ovan för att se historik.</p>';
         }
 
         function uppdateraKuporDropdown(dataProvided = null) {
@@ -168,14 +184,11 @@
             let samhalleSelect = document.getElementById('valt-samhalle-historia');
 
             if (!valtBigardsID || !allData) {
-                steg2Card.style.display = 'none';
-                infoCard.style.display = 'none';
-                document.getElementById('statistik-card').style.display = 'none';
-                document.getElementById('tidslinje-lista').innerHTML = '<p>Välj bigård och kupa ovan för att se historik.</p>';
+                tommFaltOchStatistik();
                 return;
             }
 
-            // Hitta vald bigård
+            // Hitta vald bigård och fyll dess info
             let allaBigårdar = allData.bigardar || [];
             let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID).trim() === valtBigardsID);
 
@@ -198,7 +211,7 @@
                 infoCard.style.display = 'none';
             }
 
-            // Filtrera samhällen med säkerhetsmarginal (trim)
+            // Filtrera samhällen för denna bigård
             let allaSamhällen = allData.samhallen || [];
             let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID).trim() === valtBigardsID);
 
@@ -221,7 +234,7 @@
 
             steg2Card.style.display = 'block';
 
-            // Kolla om kupa sedan tidigare var vald
+            // Kontrollera om en kupa sedan tidigare var vald och matchar
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
                 let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID).trim() === String(valtSamhallsID).trim());
@@ -321,15 +334,19 @@
             });
         }
 
+        // Eventlyssnare
         document.getElementById('valt-bigard-historia').addEventListener('change', () => {
             sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
+            tommFaltOchStatistik();
             uppdateraKuporDropdown(null);
         });
         
         document.getElementById('valt-samhalle-historia').addEventListener('change', () => visaHistorikForKupa(null));
 
-        laddaData();
+        // Starta
+        init();
     </script>
+
 
 </body>
 </html>
