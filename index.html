@@ -6,27 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Översikt</title>
     <link rel="stylesheet" href="style.css">
-    <script src="utils.js"></script>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
-    <script>
-        let breadcrumbs = '<span>🏠 Hem</span>' +
-                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-        laddaHeader("🐝 Mina Bigårdar", breadcrumbs);
-    </script>
+    <script src="api.js"></script>
+    <script src="utils.js"></script>
 
-    <!-- Info Modal -->
-    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
-        <div class="modal-content">
-            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
-            <h3 style="margin-top: 0; color: #2c3e50;">Om Mina Bigårdar</h3>
-            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+    <script>
+        // Brödsmulor
+let breadcrumbs = '<span>🏠 Hem</span> <button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+
+        // Informationstext till modalen som skapas automatiskt av header.js
+        let infoInnehall = `
+            <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Detta är appens startsida och översikt över dina platser och bigårdar.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
@@ -34,13 +30,16 @@
                 <li><strong>Listan:</strong> Visar alla dina bigårdar som kort. Klicka på ett kort för att komma direkt till skötselkortet.</li>
                 <li><strong>Statusknappar:</strong> Via knapparna på korten kan du nå snabbstatus eller ändra bigårdens uppgifter.</li>
             </ul>
-        </div>
-    </div>
+        `;
+
+        // Anropa laddaHeader med titel, brödsmulor, rubrik och info-innehåll
+        laddaHeader("🐝 Mina Bigårdar", breadcrumbs, "Om Mina Bigårdar", infoInnehall);
+    </script>
 
     <div class="container">
         <!-- Banner för osynkad data -->
         <div id="offline-banner" onclick="synkaOfflineKoe()">
-            <span>⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!</span>
+            ⚠️ Du har osynkad data som väntar på att skickas. Klicka här för att synka nu!
             <span id="offline-count" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">0 st</span>
         </div>
 
@@ -67,21 +66,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Funktioner för Info-modalen
-        function oppnaInfoModal() {
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-        function stangInfoModal() {
-            document.getElementById('info-modal').style.display = 'none';
-        }
-        function stangInfoModalKlickUtanför(event) {
-            if (event.target.id === 'info-modal') {
-                stangInfoModal();
-            }
-        }
-    </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="index.js"></script>

@@ -586,28 +586,51 @@ table.inventory-table th {
     border-left: 3px solid #3498db;
 }
 
+
 /* --- Info-knapp och Modal (Gemensam stil för alla sidor) --- */
-/* --- Info-knapp och Modal (Gemensam stil för alla sidor) --- */
-.info-btn {
-    background: rgba(255, 255, 255, 0.2);
+/* --- Info-knapp i brödsmulraden --- */
+.nav-bar {
+    background-color: #e67e22;
     color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-bar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-bar a:hover {
+    text-decoration: underline;
+}
+
+.info-btn {
+    background: white;
+    color: #2980b9;
     border: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .info-btn:hover { 
-    background: rgba(255, 255, 255, 0.4); 
+    background: #f1f1f1; 
 }
 
+/* --- Modal (Gemensam stil för alla sidor) --- */
 .modal-overlay {
     display: none;
     position: fixed;
