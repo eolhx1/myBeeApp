@@ -192,7 +192,13 @@ function visaBigardar(data) {
 
     let markers = [];
 
-    data.forEach(b => {
+    // Filtrera bort avvecklade bigårdar från karta och lista
+    const aktivaOchInaktivaBigardar = data.filter(b => {
+        const status = b.Status || "Aktiv";
+        return status !== "Avvecklad" && !status.includes("Avvecklad");
+    });
+
+    aktivaOchInaktivaBigardar.forEach(b => {
         const status = b.Status || "Aktiv";
         const isInaktiv = status === "Inaktiv" || status.includes("Inaktiv");
 
@@ -256,11 +262,11 @@ function visaBigardar(data) {
                 maxZoom: 15
             });
         } else if (markers.length === 1) {
-            // Om det bara finns en enda markör kvar, centrera direkt på den istället
             map.setView(markers[0], 14);
         }
     }
 }
+
 
 
 function redigeraBigard(id) {
