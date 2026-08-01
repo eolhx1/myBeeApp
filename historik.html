@@ -97,30 +97,31 @@
                 return;
             }
 
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    fyllBigardarDropdown(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            } else {
-                document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
-            }
+            document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
 
             try {
                 let response = await fetch(WEB_APP_URL);
-                allData = await response.json();
+                let allData = await response.json();
+                
+                // Spara färsk data i cachen
                 sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+                
                 fyllBigardarDropdown(allData);
             } catch (error) {
                 console.error("Fel vid laddning:", error);
-                if (!cachedData) {
-                    document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
+                
+                // Fallback till cache om nätverket misslyckas
+                let cachedData = sessionStorage.getItem("myBeeApp_allData");
+                if (cachedData) {
+                    try {
+                        let allData = JSON.parse(cachedData);
+                        fyllBigardarDropdown(allData);
+                        return;
+                    } catch (e) {
+                        console.error("Kunde inte läsa cache", e);
+                    }
                 }
+                document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
             }
         }
 
@@ -141,12 +142,11 @@
                 bigardSelect.appendChild(opt);
             });
 
-            // Återställ tidigare val eller välj standard om det finns
+            // Återställ tidigare val eller välj standard
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
-            if (valtBigardID) {
+            if (valtBigardID && bigårdar.some(b => String(b.BigardsID).trim() === String(valtBigardID).trim())) {
                 bigardSelect.value = valtBigardID;
             } else if (bigårdar.length > 0) {
-                // Om inget är valt men det finns bigårdar, välj den första automatiskt
                 bigardSelect.value = bigårdar[0].BigardsID;
             }
 
@@ -154,7 +154,7 @@
         }
 
         function uppdateraKuporDropdown(dataProvided = null) {
-            const valtBigardsID = document.getElementById('valt-bigard-historia').value;
+            const valtBigardsID = document.getElementById('valt-bigard-historia').value.trim();
             sessionStorage.setItem("myBeeApp_valdBigardHistoria", valtBigardsID);
 
             let allData = dataProvided;
@@ -175,9 +175,9 @@
                 return;
             }
 
-            // Hitta vald bigård för att visa dess historik/info
+            // Hitta vald bigård
             let allaBigårdar = allData.bigardar || [];
-            let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
+            let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID).trim() === valtBigardsID);
 
             if (valdBigardObjekt) {
                 document.getElementById('info-typ').textContent = valdBigardObjekt.Typ || '-';
@@ -198,8 +198,9 @@
                 infoCard.style.display = 'none';
             }
 
+            // Filtrera samhällen med säkerhetsmarginal (trim)
             let allaSamhällen = allData.samhallen || [];
-            let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
+            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID).trim() === valtBigardsID);
 
             samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
 
@@ -223,7 +224,7 @@
             // Kolla om kupa sedan tidigare var vald
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
-                let finnsKupan = minaSamhällen.some(s => s.SamhallsID === valtSamhallsID);
+                let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID).trim() === String(valtSamhallsID).trim());
                 if (finnsKupan) {
                     samhalleSelect.value = valtSamhallsID;
                     visaHistorikForKupa(allData);
@@ -232,11 +233,14 @@
                     document.getElementById('statistik-card').style.display = 'none';
                     document.getElementById('tidslinje-lista').innerHTML = '<p>Välj en kupa ovan för att se historik.</p>';
                 }
+            } else {
+                document.getElementById('statistik-card').style.display = 'none';
+                document.getElementById('tidslinje-lista').innerHTML = '<p>Välj en kupa ovan för att se historik.</p>';
             }
         }
 
         function visaHistorikForKupa(dataProvided = null) {
-            const valtSamhallsID = document.getElementById('valt-samhalle-historia').value;
+            const valtSamhallsID = document.getElementById('valt-samhalle-historia').value.trim();
             sessionStorage.setItem("myBeeApp_valdKupaHistoria", valtSamhallsID);
 
             let allData = dataProvided;
@@ -254,8 +258,8 @@
             let allaSamhällen = allData.samhallen || [];
             let skotselLoggar = allData.skotsel || [];
 
-            let aktivKupa = allaSamhällen.find(s => s.SamhallsID === valtSamhallsID);
-            let minaLoggar = skotselLoggar.filter(s => s.SamhallsID === valtSamhallsID);
+            let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID).trim() === valtSamhallsID);
+            let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID).trim() === valtSamhallsID);
 
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
@@ -326,5 +330,6 @@
 
         laddaData();
     </script>
+
 </body>
 </html>
