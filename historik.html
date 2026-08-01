@@ -136,15 +136,14 @@
 
             bigårdar.forEach(b => {
                 let opt = document.createElement('option');
-                // Tvinga trim på ID och namn för att undvika strul med dolda mellanslag
-                opt.value = String(b.BigardsID || "").trim();
-                opt.textContent = String(b.Namn || "").trim();
+                opt.value = b.BigardsID;
+                opt.textContent = b.Namn;
                 bigardSelect.appendChild(opt);
             });
 
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
-            if (valtBigardID && bigårdar.some(b => String(b.BigardsID || "").trim() === String(valtBigardID).trim())) {
-                bigardSelect.value = valtBigardID.trim();
+            if (valtBigardID && bigårdar.some(b => b.BigardsID === valtBigardID)) {
+                bigardSelect.value = valtBigardID;
             } else {
                 bigardSelect.value = "";
             }
@@ -161,7 +160,7 @@
         }
 
         function uppdateraKuporDropdown(dataProvided = null) {
-            const valtBigardsID = document.getElementById('valt-bigard-historia').value.trim();
+            const valtBigardsID = document.getElementById('valt-bigard-historia').value;
             sessionStorage.setItem("myBeeApp_valdBigardHistoria", valtBigardsID);
 
             let allData = dataProvided;
@@ -180,7 +179,7 @@
             }
 
             let allaBigårdar = allData.bigardar || [];
-            let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID || "").trim() === valtBigardsID);
+            let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
 
             if (valdBigardObjekt) {
                 document.getElementById('info-typ').textContent = valdBigardObjekt.Typ || '-';
@@ -202,7 +201,7 @@
             }
 
             let allaSamhällen = allData.samhallen || [];
-            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID || "").trim() === valtBigardsID);
+            let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
 
             samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
 
@@ -216,7 +215,7 @@
 
             minaSamhällen.forEach(s => {
                 let opt = document.createElement('option');
-                opt.value = String(s.SamhallsID || "").trim();
+                opt.value = s.SamhallsID;
                 opt.textContent = `${s.Kupbenamning || 'Kupa'} ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}`;
                 samhalleSelect.appendChild(opt);
             });
@@ -225,9 +224,9 @@
 
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
-                let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID || "").trim() === String(valtSamhallsID).trim());
+                let finnsKupan = minaSamhällen.some(s => s.SamhallsID === valtSamhallsID);
                 if (finnsKupan) {
-                    samhalleSelect.value = valtSamhallsID.trim();
+                    samhalleSelect.value = valtSamhallsID;
                     visaHistorikForKupa(allData);
                 } else {
                     sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
@@ -241,7 +240,7 @@
         }
 
         function visaHistorikForKupa(dataProvided = null) {
-            const valtSamhallsID = document.getElementById('valt-samhalle-historia').value.trim();
+            const valtSamhallsID = document.getElementById('valt-samhalle-historia').value;
             sessionStorage.setItem("myBeeApp_valdKupaHistoria", valtSamhallsID);
 
             let allData = dataProvided;
@@ -259,12 +258,8 @@
             let allaSamhällen = allData.samhallen || [];
             let skotselLoggar = allData.skotsel || [];
 
-            let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
-            let minaLoggar = skotselLoggar.filter(s => String(s.BigardsID || "").trim() === document.getElementById('valt-bigard-historia').value.trim() && String(s.SamhallsID || "").trim() === valtSamhallsID);
-            // (Om du vill filtrera rent på SamhallsID räcker oftast s.SamhallsID)
-            if (minaLoggar.length === 0) {
-                minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
-            }
+            let aktivKupa = allaSamhällen.find(s => s.SamhallsID === valtSamhallsID);
+            let minaLoggar = skotselLoggar.filter(s => s.SamhallsID === valtSamhallsID);
 
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
