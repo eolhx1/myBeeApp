@@ -18,7 +18,7 @@
         const editId = urlParams.get('id');
         const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
 
-let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>';
+let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
 
         // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
