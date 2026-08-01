@@ -161,6 +161,13 @@
 
             const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
 
+                       let latVal = document.getElementById('lat').value.trim();
+            let lonVal = document.getElementById('lon').value.trim();
+
+            // Tvinga till textformat i Google Sheets genom att sätta ' framför om det saknas
+            if (latVal && !latVal.startsWith("'")) latVal = "'" + latVal;
+            if (lonVal && !lonVal.startsWith("'")) lonVal = "'" + lonVal;
+
             const formData = {
                 sheet: "Bigardar",
                 BigardsID: currentId,
@@ -169,10 +176,11 @@
                 Typ: document.getElementById('typ').value,
                 AntalSamhallen: document.getElementById('antal').value,
                 Etableringsdatum: document.getElementById('datum').value,
-                Latitud: document.getElementById('lat').value,
-                Longitud: document.getElementById('lon').value,
+                Latitud: latVal,
+                Longitud: lonVal,
                 Anteckningar: document.getElementById('anteckningar').value
             };
+
 
             if (!navigator.onLine) {
                 sparaTillOfflineKoe(formData);
