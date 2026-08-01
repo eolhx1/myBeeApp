@@ -27,6 +27,28 @@
             </div>
         </div>
 
+        <!-- Bigårdsinformation & Historik (visas när bigård är vald) -->
+        <div class="card" id="bigard-info-card" style="display: none;">
+            <h3>🏡 Om bigården</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
+                <div style="background: #f8f9f9; padding: 0.6rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.75rem; color: #7f8c8d; display: block;">Typ</span>
+                    <strong id="info-typ" style="font-size: 0.95rem; color: #2c3e50;">-</strong>
+                </div>
+                <div style="background: #f8f9f9; padding: 0.6rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.75rem; color: #7f8c8d; display: block;">Status</span>
+                    <strong id="info-status" style="font-size: 0.95rem; color: #2c3e50;">-</strong>
+                </div>
+                <div style="background: #f8f9f9; padding: 0.6rem; border-radius: 6px; border: 1px solid #e5e7e9;">
+                    <span style="font-size: 0.75rem; color: #7f8c8d; display: block;">Etablerad</span>
+                    <strong id="info-datum" style="font-size: 0.95rem; color: #2c3e50;">-</strong>
+                </div>
+            </div>
+            <div id="info-anteckningar-wrapper" style="font-size: 0.9rem; color: #555; background: #fdfefe; padding: 0.6rem; border-radius: 6px; border: 1px dashed #d5dbdb; display: none;">
+                <strong>Anteckningar:</strong> <span id="info-anteckningar"></span>
+            </div>
+        </div>
+
         <!-- Steg 2: Välj kupa (dold tills bigård är vald) -->
         <div class="card" id="steg2-card" style="display: none;">
             <h3>Steg 2: Välj kupa</h3>
@@ -138,13 +160,38 @@
             }
 
             let steg2Card = document.getElementById('steg2-card');
+            let infoCard = document.getElementById('bigard-info-card');
             let samhalleSelect = document.getElementById('valt-samhalle-historia');
 
             if (!valtBigardsID || !allData) {
                 steg2Card.style.display = 'none';
+                infoCard.style.display = 'none';
                 document.getElementById('statistik-card').style.display = 'none';
                 document.getElementById('tidslinje-lista').innerHTML = '<p>Välj bigård och kupa ovan för att se historik.</p>';
                 return;
+            }
+
+            // Hitta vald bigård för att visa dess historik/info
+            let allaBigårdar = allData.bigardar || [];
+            let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
+
+            if (valdBigardObjekt) {
+                document.getElementById('info-typ').textContent = valdBigardObjekt.Typ || '-';
+                document.getElementById('info-status').textContent = valdBigardObjekt.Status || 'Aktiv';
+                document.getElementById('info-datum').textContent = valdBigardObjekt.Etableringsdatum ? valdBigardObjekt.Etableringsdatum.split('T')[0] : '-';
+                
+                let anteckningarWrapper = document.getElementById('info-anteckningar-wrapper');
+                let anteckningarSpan = document.getElementById('info-anteckningar');
+                if (valdBigardObjekt.Anteckningar && valdBigardObjekt.Anteckningar.trim() !== "") {
+                    anteckningarSpan.textContent = valdBigardObjekt.Anteckningar;
+                    anteckningarWrapper.style.display = 'block';
+                } else {
+                    anteckningarWrapper.style.display = 'none';
+                }
+
+                infoCard.style.display = 'block';
+            } else {
+                infoCard.style.display = 'none';
             }
 
             let allaSamhällen = allData.samhallen || [];
@@ -172,7 +219,6 @@
             // Kolla om kupa sedan tidigare var vald
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
-                // Kontrollera att kupan tillhör denna bigård
                 let finnsKupan = minaSamhällen.some(s => s.SamhallsID === valtSamhallsID);
                 if (finnsKupan) {
                     samhalleSelect.value = valtSamhallsID;
@@ -207,10 +253,8 @@
             let aktivKupa = allaSamhällen.find(s => s.SamhallsID === valtSamhallsID);
             let minaLoggar = skotselLoggar.filter(s => s.SamhallsID === valtSamhallsID);
 
-            // Sortera loggar kronologiskt (nyast överst)
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
-            // Räkna ut statistik
             let antalBesök = minaLoggar.length;
             document.getElementById('stat-besok').textContent = antalBesök;
             document.getElementById('stat-drottning').textContent = aktivKupa && aktivKupa.DrottningAr ? aktivKupa.DrottningAr : "-";
@@ -227,7 +271,6 @@
             document.getElementById('stat-skord').textContent = totalSkördKilo > 0 ? `${totalSkördKilo} kg` : "0 kg";
             document.getElementById('statistik-card').style.display = 'block';
 
-            // Bygg tidslinjen
             let tidslinjeDiv = document.getElementById('tidslinje-lista');
             tidslinjeDiv.innerHTML = "";
 
