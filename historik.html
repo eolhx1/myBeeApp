@@ -18,12 +18,12 @@
             font-weight: bold;
             font-size: 0.9rem;
             cursor: pointer;
-            float: right;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: -5px;
+            float: right;
+            margin-top: -2px;
         }
         .info-btn:hover { background: #2471a3; }
 
@@ -55,6 +55,11 @@
             cursor: pointer;
             color: #7f8c8d;
         }
+        .breadcrumb-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -62,10 +67,20 @@
     <!-- Generera gemensam header -->
     <script src="header.js"></script>
     <script>
-        // Vi skickar med en info-knapp i HTML efter brödsmulorna
-        let extraHeaderHTML = '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>', extraHeaderHTML);
+        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>');
     </script>
+
+    <!-- Extra rad för brödsmulor + Info-knapp -->
+    <div style="background: #e67e22; color: white; padding: 6px 15px; font-size: 0.9rem;">
+        <div class="breadcrumb-container" style="max-width: 1200px; margin: 0 auto;">
+            <div>
+                <a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a> 
+                <span> &gt; </span> 
+                <span>Historik</span>
+            </div>
+            <button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>
+        </div>
+    </div>
 
     <!-- Info Modal -->
     <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
@@ -224,7 +239,7 @@
             });
 
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
-            if (valtBigardID && bigårdar.some(b => b.BigardsID === valtBigardID)) {
+            if (valtBigardID && bigårdar.some(b => String(b.BigardsID) === String(valtBigardID))) {
                 bigardSelect.value = valtBigardID;
             } else {
                 bigardSelect.value = "";
@@ -261,7 +276,7 @@
             }
 
             let allaBigårdar = allData.bigardar || [];
-            let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
+            let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID) === String(valtBigardsID));
 
             if (valdBigardObjekt) {
                 document.getElementById('info-typ').textContent = valdBigardObjekt.Typ || '-';
@@ -283,7 +298,7 @@
             }
 
             let allaSamhällen = allData.samhallen || [];
-            let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
+            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID) === String(valtBigardsID));
 
             samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
 
@@ -306,7 +321,7 @@
 
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
-                let finnsKupan = minaSamhällen.some(s => s.SamhallsID === valtSamhallsID);
+                let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID) === String(valtSamhallsID));
                 if (finnsKupan) {
                     samhalleSelect.value = valtSamhallsID;
                     visaHistorikForKupa(allData);
@@ -340,8 +355,8 @@
             let allaSamhällen = allData.samhallen || [];
             let skotselLoggar = allData.skotsel || [];
 
-            let aktivKupa = allaSamhällen.find(s => s.SamhallsID === valtSamhallsID);
-            let minaLoggar = skotselLoggar.filter(s => s.SamhallsID === valtSamhallsID);
+            let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID) === String(valtSamhallsID));
+            let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID) === String(valtSamhallsID));
 
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
