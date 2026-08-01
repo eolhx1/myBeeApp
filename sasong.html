@@ -1,7 +1,7 @@
 <!-- Filnamn: sasong.html -->
 <!DOCTYPE html>
 <html lang="sv">
-<<head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Säsongsschema & Årshjul</title>
@@ -10,11 +10,29 @@
 
 <body>
 
-    <!-- Generera gemensam header -->
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("📅 Säsongsschema", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span>');
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("📅 Säsongsschema", breadcrumbs);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Säsongsschema & Årshjul</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Ett digitalt årshjul som guidar dig genom biodlingsårets alla faser, från tidig vårstart till vinterns vila.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>Säsongsflikar:</strong> Klicka dig enkelt mellan vår, försommar, sommar, höst och vinter för att se aktuella åtgärder.</li>
+                <li><strong>Checklistor:</strong> Håll koll på viktiga moment som svärmkontroll, drönarutskärning, skattning och invintring.</li>
+                <li><strong>Beprövade metoder:</strong> Innehåller påminnelser om dina egna rutiner för vaxbyte och skötsel.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
 
@@ -109,6 +127,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         // Enkel funktion för att växla mellan säsongs-flikarna
         function bytSasong(sasongNamn) {
             document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));

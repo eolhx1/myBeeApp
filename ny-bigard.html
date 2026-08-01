@@ -9,15 +9,33 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header och dynamisk rubrik -->
+    <!-- Generera gemensam header och dynamisk rubrik med info-knapp -->
     <script src="header.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('id');
         const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
 
-        laddaHeader(rubrikText, '<a href="index.html">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>');
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader(rubrikText, breadcrumbs);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Bigårdshantering</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Här lägger du till nya bigårdar eller redigerar befintliga platser där du har dina bikupor.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>GPS & Koordinater:</strong> Latitud och longitud sparas säkert som textformat i Google Sheets för att undvika avrundningsfel.</li>
+                <li><strong>Typer & Status:</strong> Håll reda på om det är en produktions-, avels- eller avläggarbigård.</li>
+                <li><strong>Molnsynk & Offline:</strong> Sparas direkt i molnet eller köas upp automatiskt om du saknar internettäckning i fält.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container">
         <div id="setup-screen" style="display: none;">
@@ -86,6 +104,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         if (!editId) {
             document.getElementById('datum').valueAsDate = new Date();
             document.getElementById('submit-btn').textContent = "Spara bigård";

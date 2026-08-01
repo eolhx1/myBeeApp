@@ -10,10 +10,29 @@
 
 <body>
 
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("⚡ Snabbkoll i bigård", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span>');
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("⚡ Snabbkoll i bigård", breadcrumbs);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Snabbkoll</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Detta verktyg är gjort för att du snabbt ska kunna registrera en enklare tillsyn direkt ute i bigården utan att behöva fylla i långa formulär.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>Välj bigård & kupa:</strong> Välj vart besöket gäller.</li>
+                <li><strong>Snabbval (chips):</strong> Klicka på de knappar som stämmer överens med kupans status (t.ex. ägg ses, gott om mat). Du kan välja flera samtidigt.</li>
+                <li><strong>Röstanteckning / Text:</strong> Använd gärna mikrofonknappen på ditt mobila tangentbord för att diktera egna anteckningar.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
         <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -57,6 +76,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
         let globalData = {};
         let aktivaVal = [];

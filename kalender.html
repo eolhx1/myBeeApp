@@ -10,10 +10,29 @@
 
 <body>
 
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("🌸 Drag- & Blomningskalender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Kalender</span>');
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Kalender</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("🌸 Drag- & Blomningskalender", breadcrumbs);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Drag- & Blomningskalendern</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Här följer du säsongens växtlighet och ser när de viktigaste dragväxterna för bin brukar blomma i din zon.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>Normal blomningstid:</strong> Få koll på när draget sätter igång för sälg, raps, fruktträd, mjölkört med flera.</li>
+                <li><strong>Historiska noteringar:</strong> Jämför årets säsong med tidigare noteringar om när dragen faktiskt inträffade.</li>
+                <li><strong>Molnsynk:</strong> Hämtar uppdaterad blomningsdata direkt från Google Sheets och fungerar sömlöst med appens cachning.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
         <div class="card">
@@ -32,6 +51,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         async function laddaKalenderData() {

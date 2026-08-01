@@ -10,11 +10,29 @@
 
 <body>
 
-    <!-- Generera gemensam header -->
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("🛠️ Biodlarverktyg", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Verktyg</span>');
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Verktyg</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("🛠️ Biodlarverktyg", breadcrumbs);
     </script>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
+            <h3 style="margin-top: 0; color: #2c3e50;">Om Biodlarverktyg</h3>
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                Här hittar du praktiska kalkylatorer och hjälpmedel för den dagliga skötseln i bigården.
+            </p>
+            <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+                <li><strong>Sockerlag & Syror:</strong> Snabb hjälp med att räkna ut rätt proportioner för foderblandningar och varroabehandlingar.</li>
+                <li><strong>Ympning & Skörd:</strong> Beräkna ympsatser för krämig honung samt uppskatta skörden utifrån ramformat.</li>
+                <li><strong>Drottningodling:</strong> Ett färdigt tidsschema som håller koll på utvecklingsdagarna från ympning till äggläggning.</li>
+            </ul>
+        </div>
+    </div>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
 
@@ -191,6 +209,19 @@
     </div>
 
     <script>
+        // Funktioner för Info-modalen
+        function oppnaInfoModal() {
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+        function stangInfoModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+        function stangInfoModalKlickUtanför(event) {
+            if (event.target.id === 'info-modal') {
+                stangInfoModal();
+            }
+        }
+
         // Hantera flikbyte
         function bytFlik(flikNamn) {
             document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
