@@ -9,24 +9,20 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header och dynamisk rubrik med info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('id');
         const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
 
-        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>' +
-                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-        laddaHeader(rubrikText, breadcrumbs);
-    </script>
+        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span>';
 
-    <!-- Info Modal -->
-    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
-        <div class="modal-content">
-            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
-            <h3 style="margin-top: 0; color: #2c3e50;">Om Bigårdshantering</h3>
-            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+        // Informationstext till modalen som skapas automatiskt av header.js
+        let infoInnehall = `
+            <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här lägger du till nya bigårdar eller redigerar befintliga platser där du har dina bikupor.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
@@ -34,8 +30,10 @@
                 <li><strong>Typer & Status:</strong> Håll reda på om det är en produktions-, avels- eller avläggarbigård.</li>
                 <li><strong>Molnsynk & Offline:</strong> Sparas direkt i molnet eller köas upp automatiskt om du saknar internettäckning i fält.</li>
             </ul>
-        </div>
-    </div>
+        `;
+
+        laddaHeader(rubrikText, breadcrumbs, "Om Bigårdshantering", infoInnehall);
+    </script>
 
     <div class="container">
         <div id="setup-screen" style="display: none;">
@@ -104,26 +102,13 @@
     </div>
 
     <script>
-        // Funktioner för Info-modalen
-        function oppnaInfoModal() {
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-        function stangInfoModal() {
-            document.getElementById('info-modal').style.display = 'none';
-        }
-        function stangInfoModalKlickUtanför(event) {
-            if (event.target.id === 'info-modal') {
-                stangInfoModal();
-            }
-        }
-
         if (!editId) {
             document.getElementById('datum').valueAsDate = new Date();
             document.getElementById('submit-btn').textContent = "Spara bigård";
         }
 
         function initForm() {
-            const savedUrl = localStorage.getItem("myBeeApp_url");
+            const savedUrl = hamtaAppUrl();
             if (!savedUrl) {
                 document.getElementById("setup-screen").style.display = "block";
                 document.getElementById("bigard-form").style.display = "none";
@@ -171,7 +156,6 @@
 
                 let latVal = String(found.Latitud || "");
                 let lonVal = String(found.Longitud || "");
-                // Ta bort eventuell inledande apostrof när den läses in i formuläret
                 if (latVal.startsWith("'")) latVal = latVal.substring(1);
                 if (lonVal.startsWith("'")) lonVal = lonVal.substring(1);
 
@@ -183,14 +167,9 @@
             }
         }
 
+        // När formuläret skickas använder vi nu den centrala funktionen från api.js!
         document.getElementById('bigard-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-            if (!WEB_APP_URL) {
-                alert("Ingen anslutningslänk hittades.");
-                return;
-            }
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
@@ -201,7 +180,6 @@
             let latVal = document.getElementById('lat').value.trim();
             let lonVal = document.getElementById('lon').value.trim();
 
-            // Tvinga till textformat i Google Sheets genom att sätta ' framför om det saknas
             if (latVal && !latVal.startsWith("'")) latVal = "'" + latVal;
             if (lonVal && !lonVal.startsWith("'")) lonVal = "'" + lonVal;
 
@@ -218,46 +196,9 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Ändringen har sparats lokalt på enheten och synkas automatiskt när du är tillbaka online.");
-                window.location.href = "index.html";
-                return;
-            }
-
-            try {
-                let targetUrl = `${WEB_APP_URL}?sheet=Bigardar`;
-
-                let response = await fetch(targetUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                let result = await response.json();
-
-                if (result && (result.status === "success" || result.result === "success")) {
-                    sessionStorage.removeItem("myBeeApp_globalData");
-                    alert("Ändringarna har sparats till molnet!");
-                    window.location.href = "index.html";
-                } else {
-                    throw new Error(result.message || "Okänt fel från servern");
-                }
-            } catch (error) {
-                console.warn("Kunde inte nå servern, sparar lokalt i kö...", error);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen till molnet. Ändringen är sparad lokalt och synkas senare!");
-                window.location.href = "index.html";
-            }
+            // Anropa den centraliserade funktionen i api.js (sköter både online, offline-kö och felhantering)
+            await skickaDataTillMolnet("Bigardar", formData, "index.html");
         });
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-        }
 
         initForm();
     </script>
