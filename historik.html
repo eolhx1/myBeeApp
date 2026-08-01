@@ -1,4 +1,3 @@
-<!-- Filnamn: historik.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -21,7 +20,7 @@
             <h3>Steg 1: Välj bigård</h3>
             <div class="form-group" style="margin-bottom: 0;">
                 <label for="valt-bigard-historia">Bigård:</label>
-                <select id="valt-bigard-historia" name="BigardsID">
+                <select id="valt-bigard-historia" name="BigardsID" autocomplete="off">
                     <option value="">Laddar bigårdar...</option>
                 </select>
             </div>
@@ -131,9 +130,6 @@
             let bigårdar = data.bigardar || [];
             let bigardSelect = document.getElementById('valt-bigard-historia');
             
-            // Spara nuvarande val om det finns
-            let nuvarandeVal = bigardSelect.value;
-            
             bigardSelect.innerHTML = '<option value="">-- Välj bigård --</option>';
 
             if (bigårdar.length === 0) {
@@ -148,12 +144,12 @@
                 bigardSelect.appendChild(opt);
             });
 
-            // Återställ tidigare val från sessionStorage eller behåll om möjligt
+            // Återställ tidigare val från sessionStorage om det finns
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
             if (valtBigardID && bigårdar.some(b => String(b.BigardsID).trim() === String(valtBigardID).trim())) {
                 bigardSelect.value = valtBigardID;
-            } else if (bigårdar.length > 0 && !bigardSelect.value) {
-                bigardSelect.value = bigårdar[0].BigardsID;
+            } else {
+                bigardSelect.value = "";
             }
 
             // Uppdatera beroende fält baserat på det aktiva valet
@@ -346,7 +342,6 @@
         // Starta
         init();
     </script>
-
 
 </body>
 </html>
