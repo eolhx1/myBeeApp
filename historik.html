@@ -100,7 +100,6 @@
             let allData = null;
             let cachedData = sessionStorage.getItem("myBeeApp_allData");
 
-            // Om vi har cache, använd den direkt för snabb laddning
             if (cachedData) {
                 try {
                     allData = JSON.parse(cachedData);
@@ -112,7 +111,6 @@
                 document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
             }
 
-            // Hämta alltid färsk data i bakgrunden för att hålla cachen uppdaterad
             try {
                 let response = await fetch(WEB_APP_URL);
                 allData = await response.json();
@@ -139,25 +137,23 @@
 
             bigårdar.forEach(b => {
                 let opt = document.createElement('option');
-                opt.value = b.BigardsID;
-                opt.textContent = b.Namn;
+                // Trimma bort eventuella osynliga mellanslag från ID och Namn
+                opt.value = String(b.BigardsID || "").trim();
+                opt.textContent = String(b.Namn || "").trim();
                 bigardSelect.appendChild(opt);
             });
 
-            // Återställ tidigare val från sessionStorage om det finns
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
-            if (valtBigardID && bigårdar.some(b => String(b.BigardsID).trim() === String(valtBigardID).trim())) {
-                bigardSelect.value = valtBigardID;
+            if (valtBigardID && bigårdar.some(b => String(b.BigardsID || "").trim() === String(valtBigardID).trim())) {
+                bigardSelect.value = valtBigardID.trim();
             } else {
                 bigardSelect.value = "";
             }
 
-            // Uppdatera beroende fält baserat på det aktiva valet
             uppdateraKuporDropdown(data);
         }
 
         function tommFaltOchStatistik() {
-            // Töm och dölj beroende fält när bigård ändras
             document.getElementById('bigard-info-card').style.display = 'none';
             document.getElementById('steg2-card').style.display = 'none';
             document.getElementById('statistik-card').style.display = 'none';
@@ -184,9 +180,8 @@
                 return;
             }
 
-            // Hitta vald bigård och fyll dess info
             let allaBigårdar = allData.bigardar || [];
-            let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID).trim() === valtBigardsID);
+            let valdBigardObjekt = allaBigårdar.find(b => String(b.BigardsID || "").trim() === valtBigardsID);
 
             if (valdBigardObjekt) {
                 document.getElementById('info-typ').textContent = valdBigardObjekt.Typ || '-';
@@ -207,9 +202,9 @@
                 infoCard.style.display = 'none';
             }
 
-            // Filtrera samhällen för denna bigård
+            // Filtrera samhällen med strikt trimning av ID-kolumnerna
             let allaSamhällen = allData.samhallen || [];
-            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID).trim() === valtBigardsID);
+            let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID || "").trim() === valtBigardsID);
 
             samhalleSelect.innerHTML = '<option value="">-- Välj kupa --</option>';
 
@@ -223,19 +218,18 @@
 
             minaSamhällen.forEach(s => {
                 let opt = document.createElement('option');
-                opt.value = s.SamhallsID;
-                opt.textContent = `${s.Kupbenamning} ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}`;
+                opt.value = String(s.SamhallsID || "").trim();
+                opt.textContent = `${s.Kupbenamning || 'Kupa'} ${s.DrottningAr ? `(Drottning år: ${s.DrottningAr})` : ''}`;
                 samhalleSelect.appendChild(opt);
             });
 
             steg2Card.style.display = 'block';
 
-            // Kontrollera om en kupa sedan tidigare var vald och matchar
             let valtSamhallsID = sessionStorage.getItem("myBeeApp_valdKupaHistoria");
             if (valtSamhallsID) {
-                let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID).trim() === String(valtSamhallsID).trim());
+                let finnsKupan = minaSamhällen.some(s => String(s.SamhallsID || "").trim() === String(valtSamhallsID).trim());
                 if (finnsKupan) {
-                    samhalleSelect.value = valtSamhallsID;
+                    samhalleSelect.value = valtSamhallsID.trim();
                     visaHistorikForKupa(allData);
                 } else {
                     sessionStorage.removeItem("myBeeApp_valdKupaHistoria");
@@ -267,8 +261,8 @@
             let allaSamhällen = allData.samhallen || [];
             let skotselLoggar = allData.skotsel || [];
 
-            let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID).trim() === valtSamhallsID);
-            let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID).trim() === valtSamhallsID);
+            let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
+            let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID || "").trim() === valtSamhallsID);
 
             minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
@@ -342,6 +336,7 @@
         // Starta
         init();
     </script>
+
 
 </body>
 </html>
