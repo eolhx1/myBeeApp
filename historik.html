@@ -171,7 +171,7 @@
                 return;
             }
 
-            // Hitta vald bigård för att visa dess historik/info
+            // Fyll i bigårdsinformationen i den nya rutan
             let allaBigårdar = allData.bigardar || [];
             let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
 
@@ -194,6 +194,7 @@
                 infoCard.style.display = 'none';
             }
 
+            // Hämta och filtrera samhällen precis som i den ursprungliga koden
             let allaSamhällen = allData.samhallen || [];
             let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
 
