@@ -7,29 +7,28 @@
     <title>MyBeeApp - Kupa & Historik</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Stil för diskret info-knapp och modal */
+        /* Diskret vit info-knapp med blått "i" och ram */
         .info-btn {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: #ffffff;
+            color: #2980b9;
+            border: 1px solid #2980b9;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-weight: normal;
-            font-size: 0.8rem;
+            width: 26px;
+            height: 26px;
+            font-weight: bold;
+            font-size: 0.85rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             float: right;
-            margin-top: -1px;
-            opacity: 0.8;
-            transition: opacity 0.2s, border-color 0.2s;
+            margin-top: -2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: background 0.2s, color 0.2s;
         }
         .info-btn:hover { 
-            opacity: 1; 
-            border-color: white;
-            background: rgba(255, 255, 255, 0.1);
+            background: #2980b9; 
+            color: white;
         }
 
         .modal-overlay {
@@ -60,32 +59,17 @@
             cursor: pointer;
             color: #7f8c8d;
         }
-        .breadcrumb-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Generera gemensam header -->
+    <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        laddaHeader("📈 Historik & Trender", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>');
+        let breadcrumbs = '<a href="index.html">🏠 Hem</a><span> &gt; </span><span>Historik</span>' +
+                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        laddaHeader("📈 Historik & Trender", breadcrumbs);
     </script>
-
-    <!-- Endast en rad för brödsmulor + diskret Info-knapp -->
-    <div style="background: #e67e22; color: white; padding: 6px 15px; font-size: 0.9rem;">
-        <div class="breadcrumb-container" style="max-width: 1200px; margin: 0 auto;">
-            <div>
-                <a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a> 
-                <span> &gt; </span> 
-                <span>Historik</span>
-            </div>
-            <button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>
-        </div>
-    </div>
 
     <!-- Info Modal -->
     <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
@@ -385,7 +369,7 @@
             tidslinjeDiv.innerHTML = "";
 
             if (minaLoggar.length === 0) {
-                tidslinjeDiv.innerHTML = "<p>Imga sparade besök registrerade för denna kupa ännu.</p>";
+                tidslinjeDiv.innerHTML = "<p>Inga sparade besök registrerade för denna kupa ännu.</p>";
                 return;
             }
 
