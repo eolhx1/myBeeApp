@@ -141,12 +141,16 @@
                 bigardSelect.appendChild(opt);
             });
 
-            // Återställ tidigare val om det finns sparat
+            // Återställ tidigare val eller välj standard om det finns
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
             if (valtBigardID) {
                 bigardSelect.value = valtBigardID;
-                uppdateraKuporDropdown(data);
+            } else if (bigårdar.length > 0) {
+                // Om inget är valt men det finns bigårdar, välj den första automatiskt
+                bigardSelect.value = bigårdar[0].BigardsID;
             }
+
+            uppdateraKuporDropdown(data);
         }
 
         function uppdateraKuporDropdown(dataProvided = null) {
@@ -171,7 +175,7 @@
                 return;
             }
 
-            // Fyll i bigårdsinformationen i den nya rutan
+            // Hitta vald bigård för att visa dess historik/info
             let allaBigårdar = allData.bigardar || [];
             let valdBigardObjekt = allaBigårdar.find(b => b.BigardsID === valtBigardsID);
 
@@ -194,7 +198,6 @@
                 infoCard.style.display = 'none';
             }
 
-            // Hämta och filtrera samhällen precis som i den ursprungliga koden
             let allaSamhällen = allData.samhallen || [];
             let minaSamhällen = allaSamhällen.filter(s => s.BigardsID === valtBigardsID);
 
