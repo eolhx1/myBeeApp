@@ -599,6 +599,15 @@ table.inventory-table th {
     align-items: center;
 }
 
+/* Ser till att brödsmulstexten alltid ligger samlad till vänster */
+.nav-bar > span:first-child, 
+.nav-bar > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+
 .nav-bar a {
     color: white;
     text-decoration: none;
