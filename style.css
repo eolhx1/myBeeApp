@@ -587,28 +587,25 @@ table.inventory-table th {
 }
 
 /* --- Info-knapp och Modal (Gemensam stil för alla sidor) --- */
+/* --- Info-knapp och Modal (Gemensam stil för alla sidor) --- */
 .info-btn {
-    background: #ffffff;
-    color: #2980b9;
-    border: 1px solid #2980b9;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 1rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    float: right;
-    margin-top: -2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s;
 }
 
 .info-btn:hover { 
-    background: #2980b9; 
-    color: white;
+    background: rgba(255, 255, 255, 0.4); 
 }
 
 .modal-overlay {

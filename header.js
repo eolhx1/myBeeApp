@@ -78,7 +78,7 @@ function laddaHeader(titelTekst, breadcrumbHTML = '', infoRubrik = '', infoTextH
         <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
         <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
         <div style="display: flex; align-items: center; gap: 10px;">
-            ${infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 1rem;" aria-label="Information">i</button>' : ''}
+            ${infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan" aria-label="Information">i</button>' : ''}
             <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
         </div>
     </header>
