@@ -135,18 +135,83 @@ function stangInfoModalKlickUtanför(event) {
 }
 
 function bytUrlSide() {
-    if (confirm("Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.")) {
-        localStorage.removeItem("myBeeApp_url");
-        sessionStorage.clear();
-        window.location.href = "index.html";
-    }
+    visaBekraftelse("Byt anslutningslänk", "Vill du byta anslutningslänk? Appen kommer att nollställa aktuell koppling.", (bekraftat) => {
+        if (bekraftat) {
+            localStorage.removeItem("myBeeApp_url");
+            sessionStorage.clear();
+            window.location.href = "index.html";
+        }
+    });
 }
 
 function rensaAllLokalData() {
-    if (confirm("Vill du rensa all lokal data? Detta tar bort sparade inställningar och offline-kö.")) {
-        localStorage.clear();
-        sessionStorage.clear();
-        alert("All lokal data har rensats.");
-        window.location.href = "index.html";
+    visaBekraftelse("Rensa data", "Vill du rensa all lokal data? Detta tar bort sparade inställningar och offline-kö.", (bekraftat) => {
+        if (bekraftat) {
+            localStorage.clear();
+            sessionStorage.clear();
+            visaMeddelande("Rensat", "All lokal data har rensats.", () => {
+                window.location.href = "index.html";
+            });
+        }
+    });
+}
+
+
+// ==========================================
+// CENTRAL MODAL-MOTOR (DRY-principen)
+// ==========================================
+
+function visaAppModal(titel, meddelande, typ = 'alert', bekräftelseCallback = null) {
+    let gammalModal = document.getElementById('app-custom-modal');
+    if (gammalModal) gammalModal.remove();
+
+    let knapparHtml = '';
+    if (typ === 'confirm') {
+        knapparHtml = `
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem;">
+                <button id="modal-avbryt-btn" style="background: #95a5a6; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Avbryt</button>
+                <button id="modal-bekräfta-btn" style="background: #e67e22; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
+            </div>
+        `;
+    } else {
+        knapparHtml = `
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                <button id="modal-bekräfta-btn" style="background: #f39c12; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
+            </div>
+        `;
     }
+
+    const modalHtml = `
+        <div id="app-custom-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 1rem;">
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333;">
+                <h3 style="margin-top: 0; color: #2c3e50; font-size: 1.2rem; border-bottom: 2px solid #f39c12; padding-bottom: 0.5rem;">${titel}</h3>
+                <p style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 1rem 0;">${meddelande}</p>
+                ${knapparHtml}
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    document.getElementById('modal-bekräfta-btn').onclick = function() {
+        document.getElementById('app-custom-modal').remove();
+        if (bekräftelseCallback) bekräftelseCallback(true);
+    };
+
+    let avbrytBtn = document.getElementById('modal-avbryt-btn');
+    if (avbrytBtn) {
+        avbrytBtn.onclick = function() {
+            document.getElementById('app-custom-modal').remove();
+            if (bekräftelseCallback) bekräftelseCallback(false);
+        };
+    }
+}
+
+// Enkla genvägar (wrappers) för att göra koden superren i andra filer
+function visaMeddelande(titel, text, stangCallback = null) {
+    visaAppModal(titel, text, 'alert', stangCallback);
+}
+
+function visaBekraftelse(titel, text, callback) {
+    visaAppModal(titel, text, 'confirm', callback);
 }

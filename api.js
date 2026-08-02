@@ -4,7 +4,6 @@
 // 1. ANSLUTNING & KONFIGURATION
 // ==========================================
 
-// Hämtar sparad webbapp-länk (Google Apps Script URL) från lokal lagring
 function hamtaAppUrl() {
     return localStorage.getItem("myBeeApp_url");
 }
@@ -14,13 +13,11 @@ function hamtaAppUrl() {
 // 2. OFFLINE-KÖ & LAGRING
 // ==========================================
 
-// Sparar ner data i den lokala kön om enheten är offline eller om anslutningen misslyckas
 function sparaTillOfflineKoe(newItem) {
     let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
     koe.push(newItem);
     localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
     
-    // Uppdatera synk-indikatorn direkt när något läggs till i kön
     if (typeof uppdateraSynkIndikator === 'function') {
         uppdateraSynkIndikator();
     }
@@ -31,20 +28,31 @@ function sparaTillOfflineKoe(newItem) {
 // 3. MOLNANROP & SPARANDE
 // ==========================================
 
-// Skickar data till molnet (Google Sheets) eller lägger i offline-kö vid avbrott
 async function skickaDataTillMolnet(sheetNamn, formData, efterFolgandeUrl = "index.html") {
     const WEB_APP_URL = hamtaAppUrl();
     
     if (!WEB_APP_URL) {
-        alert("Ingen anslutningslänk hittades.");
+        if (typeof visaAppModal === 'function') {
+            visaAppModal("Saknas anslutning", "Ingen anslutningslänk hittades.");
+        } else {
+            alert("Ingen anslutningslänk hittades.");
+        }
         return false;
     }
 
-    // Kontrollera om enheten är offline direkt innan anrop
     if (!navigator.onLine) {
         sparaTillOfflineKoe(formData);
-        alert("Ingen internettäckning! Informationen har sparats lokalt i kö och synkas automatiskt senare.");
-        window.location.href = efterFolgandeUrl;
+        
+        // Använder snygg app-modal istället för standard alert
+        let meddelande = "Ingen internettäckning! Informationen har sparats lokalt i kö och synkas automatiskt senare.";
+        if (typeof visaAppModal === 'function') {
+            visaAppModal("Offline-läge", meddelande, 'alert', () => {
+                window.location.href = efterFolgandeUrl;
+            });
+        } else {
+            alert(meddelande);
+            window.location.href = efterFolgandeUrl;
+        }
         return true;
     }
 
@@ -59,8 +67,17 @@ async function skickaDataTillMolnet(sheetNamn, formData, efterFolgandeUrl = "ind
         
         if (result && (result.status === "success" || result.result === "success")) {
             sessionStorage.removeItem("myBeeApp_globalData");
-            alert("Ändringarna har sparats till molnet!");
-            window.location.href = efterFolgandeUrl;
+            
+            // Snygg bekräftelseruta vid lyckad sparad data
+            let meddelande = "Ändringarna har sparats till molnet!";
+            if (typeof visaAppModal === 'function') {
+                visaAppModal("Klart!", meddelande, 'alert', () => {
+                    window.location.href = efterFolgandeUrl;
+                });
+            } else {
+                alert(meddelande);
+                window.location.href = efterFolgandeUrl;
+            }
             return true;
         } else {
             throw new Error(result.message || "Okänt fel från servern");
@@ -68,8 +85,16 @@ async function skickaDataTillMolnet(sheetNamn, formData, efterFolgandeUrl = "ind
     } catch (error) {
         console.warn("Kunde inte nå servern, sparar lokalt i kö...", error);
         sparaTillOfflineKoe(formData);
-        alert("Tappade anslutningen till molnet. Informationen är sparad lokalt i kö och synkas senare!");
-        window.location.href = efterFolgandeUrl;
+        
+        let meddelande = "Tappade anslutningen till molnet. Informationen är sparad lokalt i kö och synkas senare!";
+        if (typeof visaAppModal === 'function') {
+            visaAppModal("Anslutningsproblem", meddelande, 'alert', () => {
+                window.location.href = efterFolgandeUrl;
+            });
+        } else {
+            alert(meddelande);
+            window.location.href = efterFolgandeUrl;
+        }
         return true;
     }
 }
@@ -79,7 +104,6 @@ async function skickaDataTillMolnet(sheetNamn, formData, efterFolgandeUrl = "ind
 // 4. GRÄNSSNITT & SYNK-INDIKATOR
 // ==========================================
 
-// Uppdaterar synk-räknaren i sidhuvudet baserat på hur många poster som ligger i kön
 function uppdateraSynkIndikator() {
     let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
     let indikator = document.getElementById("sync-indicator");
@@ -100,7 +124,6 @@ function uppdateraSynkIndikator() {
 // 5. AUTOMATISK SYNK VID ÅTERUPPKOPPLING
 // ==========================================
 
-// Lyssnar av om enheten återigen får internetanslutning och tömmer i så fall kön automatiskt
 window.addEventListener('online', async () => {
     let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
     if (koe.length === 0) return;
@@ -108,7 +131,6 @@ window.addEventListener('online', async () => {
     const WEB_APP_URL = hamtaAppUrl();
     if (!WEB_APP_URL) return;
 
-    // Skicka köad data i bakgrunden till servern
     try {
         let response = await fetch(`${WEB_APP_URL}?action=syncQueue`, {
             method: "POST",
@@ -132,5 +154,4 @@ window.addEventListener('online', async () => {
 // 6. INITIALISERING
 // ==========================================
 
-// Kör en kontroll direkt när scriptet och DOM har laddats in
 document.addEventListener("DOMContentLoaded", uppdateraSynkIndikator);
