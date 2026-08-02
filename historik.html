@@ -9,20 +9,20 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div>';
 
-        // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Denna sida är till för att följa utvecklingen och händelsehistoriken för dina enskilda bisamhällen och kupor över tid.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>Steg 1:</strong> Välj vilken bigård du vill titta på. Grundläggande uppgifter om bigården visas direkt.</li>
-                <li><strong>Steg 2:</strong> Välj det specifika samhället/kupan för att se en summerad statistik (antal besök, total skörd, drottningens ålder).</li>
-                <li><strong>Tidslinje:</strong> Visar alla sparade skötselloggar i kronologisk ordning med anteckningar, behandlingar och varroanedfall.</li>
+                <li><strong>Steg 2:</strong> Välj det specifika samhället/kupan för att se en summerad statistik.</li>
+                <li><strong>Tidslinje:</strong> Visar alla sparade skötselloggar i kronologisk ordning.</li>
             </ul>
         `;
 
@@ -41,7 +41,7 @@
             </div>
         </div>
 
-        <!-- Bigårdsinformation & Historik (visas när bigård är vald) -->
+        <!-- Bigårdsinformation & Historik -->
         <div class="card" id="bigard-info-card" style="display: none;">
             <h3>🏡 Om bigården</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <!-- Steg 2: Välj kupa (dold tills bigård är vald) -->
+        <!-- Steg 2: Välj kupa -->
         <div class="card" id="steg2-card" style="display: none;">
             <h3>Steg 2: Välj kupa</h3>
             <div class="form-group" style="margin-bottom: 0;">
@@ -74,7 +74,7 @@
             </div>
         </div>
 
-        <!-- Snabb-statistik / Nyckeltal -->
+        <!-- Snabb-statistik -->
         <div class="card" id="statistik-card" style="display: none;">
             <h3>📊 Sammanställning för kupa</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; text-align: center;">
@@ -103,38 +103,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
         async function init() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    fyllBigardarDropdown(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            } else {
-                document.getElementById('tidslinje-lista').innerHTML = "<p>Laddar data från molnet...</p>";
-            }
-
-            try {
-                let response = await fetch(WEB_APP_URL);
-                allData = await response.json();
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+            let allData = await hamtaData();
+            if (allData) {
                 fyllBigardarDropdown(allData);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                if (!cachedData) {
-                    document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
-                }
+            } else {
+                document.getElementById('tidslinje-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
             }
         }
 
@@ -159,8 +133,6 @@
             let valtBigardID = sessionStorage.getItem("myBeeApp_valdBigardHistoria");
             if (valtBigardID && bigårdar.some(b => String(b.BigardsID) === String(valtBigardID))) {
                 bigardSelect.value = valtBigardID;
-            } else {
-                bigardSelect.value = "";
             }
 
             uppdateraKuporDropdown(data);

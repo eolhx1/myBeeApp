@@ -6,17 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Vaxhantering</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Ladda in din centrala api.js -->
-    <script src="api.js"></script>
 </head>
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Vaxhantering</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Vaxhantering</span></div>';
 
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
@@ -110,8 +108,14 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            // Använder din centrala funktion från api.js!
-            await skickaDataTillMolnet("Vax", formData, "index.html");
+            let success = await sparaDataMedKoe(formData);
+            if (success) {
+                alert("Vaxhändelsen har sparats!");
+                window.location.href = "index.html";
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara vaxhändelse";
+            }
         });
     </script>
 </body>

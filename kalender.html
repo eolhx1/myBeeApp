@@ -10,11 +10,11 @@
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Kalender</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Kalender</span></div>';
 
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
@@ -32,7 +32,7 @@
     </script>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
-        <div class="card">
+        <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="margin-top: 0; color: #2c3e50;">Säsongens dragväxter</h3>
             <p style="color: #666; font-size: 0.9rem;">
                 Här ser du när de viktiga dragväxterna brukar blomma i din zon, kopplat till historiska noteringar om när dragen skedde.
@@ -48,36 +48,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
         async function laddaKalenderData() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
-            if (cachedData) {
-                try {
-                    let data = JSON.parse(cachedData);
-                    visaKalender(data.blomning || []);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            }
-
-            if (navigator.onLine) {
-                try {
-                    let response = await fetch(WEB_APP_URL);
-                    let data = await response.json();
-                    sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                    visaKalender(data.blomning || []);
-                } catch (error) {
-                    console.error("Fel vid hämtning från molnet:", error);
-                    if (!cachedData) {
-                        document.getElementById('blomnings-lista').innerHTML = "<p style='color: red;'>Kunde inte hämta kalenderdata.</p>";
-                    }
-                }
+            let allData = await hamtaData();
+            if (allData) {
+                visaKalender(allData.blomning || []);
+            } else {
+                document.getElementById('blomnings-lista').innerHTML = "<p style='color: red;'>Kunde inte hämta kalenderdata från molnet.</p>";
             }
         }
 
@@ -93,6 +69,7 @@
             blommor.forEach(b => {
                 let card = document.createElement('div');
                 card.className = 'bloom-card';
+                card.style.cssText = "border-bottom: 1px solid #eee; padding: 10px 0;";
                 card.innerHTML = `
                     <h4 style="margin: 0 0 5px 0; color: #2c3e50;">🌱 ${b.VäxtNamn || b.VaxtNamn || 'Växt'}</h4>
                     <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Normal blomning:</strong> ${b.NormalTid || 'Ej angivet'}</p>

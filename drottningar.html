@@ -9,21 +9,20 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span></div>';
 
-        // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här håller du ordning på alla bigårdens drottningar, deras härstamning, avelsvärden och ålder.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>Registrera / Koppla:</strong> Fyll i uppgifter och koppla drottningen till ett specifikt samhälle/kupa.</li>
-                <li><strong>Ålder & Färg:</strong> Appen beräknar ålder automatiskt. Drottningar som är 2 år eller äldre markeras med röd varningsram som en påminnelse om planerat byte.</li>
-                <li><strong>Avelsvärden:</strong> Bedöm egenskaper som svärmtröghet, temperament, honungsprestanda och yngelsättning för avelsurval.</li>
+                <li><strong>Ålder & Färg:</strong> Appen beräknar ålder automatiskt.</li>
+                <li><strong>Avelsvärden:</strong> Bedöm egenskaper som svärmtröghet, temperament och honungsprestanda.</li>
             </ul>
         `;
 
@@ -147,41 +146,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
-        function laddaDrottningarData() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    fyllDropdownOchLista(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
+        async function laddaDrottningarData() {
+            let allData = await hamtaData();
+            if (allData) {
+                fyllDropdownOchLista(allData);
             } else {
-                document.getElementById('drottning-lista').innerHTML = "<p>Laddar data från molnet...</p>";
-            }
-
-            if (navigator.onLine) {
-                fetch(WEB_APP_URL)
-                    .then(response => response.json())
-                    .then(data => {
-                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                        fyllDropdownOchLista(data);
-                    })
-                    .catch(error => {
-                        console.error("Fel vid laddning av drottningar:", error);
-                        if (!cachedData) {
-                            document.getElementById('drottning-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
-                        }
-                    });
+                document.getElementById('drottning-lista').innerHTML = "<p>Kunde inte hämta data.</p>";
             }
         }
 
@@ -244,7 +214,7 @@
             });
         }
 
-        document.getElementById('drottning-form').addEventListener('submit', function(e) {
+        document.getElementById('drottning-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('drottning-btn');
             btn.disabled = true;
@@ -267,52 +237,12 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Drottningen har sparats lokalt och synkas automatiskt senare.");
-                document.getElementById('drottning-form').reset();
-                document.getElementById('drottning-ar').value = "2026";
-                btn.disabled = false;
-                btn.textContent = "Spara drottning";
-                return;
-            }
-
-            fetch(WEB_APP_URL + "?sheet=Drottningar", {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(formData)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result && (result.status === "success" || result.result === "success")) {
-                    alert("Drottningen har sparats!");
-                    document.getElementById('drottning-form').reset();
-                    document.getElementById('drottning-ar').value = "2026";
-                    sessionStorage.removeItem("myBeeApp_globalData");
-                    sessionStorage.removeItem("myBeeApp_allData");
-                    laddaDrottningarData();
-                } else {
-                    throw new Error(result.message || "Okänt fel vid sparande");
-                }
-            })
-            .catch(error => {
-                console.warn("Kunde inte nå servern, sparar lokalt...", error);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen. Drottningen har sparats lokalt i kö.");
-                document.getElementById('drottning-form').reset();
-                document.getElementById('drottning-ar').value = "2026";
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = "Spara drottning";
-            });
+            await skickaDataTillMolnet("Drottningar", formData, "drottningar.html");
+            document.getElementById('drottning-form').reset();
+            document.getElementById('drottning-ar').value = "2026";
+            btn.disabled = false;
+            btn.textContent = "Spara drottning";
         });
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-        }
 
         laddaDrottningarData();
     </script>

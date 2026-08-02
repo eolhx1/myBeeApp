@@ -9,25 +9,23 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Lagt till info-knappen här i slutet av brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span></div>';
 
-        // Informationstext till modalen
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Använd snabbkollen för att göra en snabb och effektiv anteckning direkt vid kuporna utan att behöva fylla i onödiga detaljer.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>1. Välj bigård & kupa:</strong> Markera vart besöket har skett.</li>
-                <li><strong>2. Checklista:</strong> Bocka av det viktigaste (t.ex. om drottningen setts eller om det finns mat).</li>
+                <li><strong>2. Checklista:</strong> Bocka av det viktigaste.</li>
                 <li><strong>3. Spara:</strong> Skickas direkt till molnet och sparas i historiken.</li>
             </ul>
         `;
 
-        // Skickar med info-parametrar hit
         laddaHeader("⚡ Snabbkoll", breadcrumbs, "Om Snabbkoll", infoInnehall);
     </script>
 
@@ -111,36 +109,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
         async function init() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    fyllBigardarDropdown(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            }
-
-            try {
-                let response = await fetch(WEB_APP_URL);
-                allData = await response.json();
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+            let allData = await hamtaData();
+            if (allData) {
                 fyllBigardarDropdown(allData);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                if (!cachedData) {
-                    document.getElementById('snabb-bigard').innerHTML = '<option value="">Kunde inte ladda data</option>';
-                }
+            } else {
+                document.getElementById('snabb-bigard').innerHTML = '<option value="">Kunde inte ladda data</option>';
             }
         }
 
@@ -213,7 +187,8 @@
             let formData = new FormData(this);
             let data = Object.fromEntries(formData.entries());
 
-            data.Aktion = "skotsel";
+            data.sheet = "Skotsel";
+            data.SkotselID = "SK" + Math.floor(1000 + Math.random() * 9000);
             data.Datum = new Date().toISOString().split('T')[0];
 
             let extraAnteckningar = [];
@@ -222,28 +197,7 @@
             data.Anteckningar = extraAnteckningar.join(' - ');
             delete data.AllmanStatus;
 
-            try {
-                let response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-                let result = await response.json();
-
-                if (result.status === "success" || result.result === "success") {
-                    alert("Snabbkoll sparad!");
-                    sessionStorage.removeItem("myBeeApp_allData");
-                    window.location.href = "historik.html";
-                } else {
-                    alert("Kunde inte spara: " + (result.message || "Okänt fel"));
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Spara snabbkoll";
-                }
-            } catch (error) {
-                console.error("Fel:", error);
-                alert("Ett nätverksfel uppstod vid sparandet.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Spara snabbkoll";
-            }
+            await skickaDataTillMolnet("Skotsel", data, "historik.html");
         });
 
         init();

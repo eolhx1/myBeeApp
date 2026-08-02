@@ -9,24 +9,22 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Lagt till info-knappen här i slutet av brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Bigårdsstatus</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Bigårdsstatus</span></div>';
 
-        // Informationstext till modalen
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här får du en snabb och samlad överblick över statusen för alla dina samhällen i en vald bigård.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>Översikt:</strong> Välj vilken bigård du vill granska i listan högst upp.</li>
-                <li><strong>Samhällskort:</strong> Varje kupa visas som ett eget kort med information om drottning, ålder och den senaste händelsen eller skötselkontrollen.</li>
+                <li><strong>Samhällskort:</strong> Varje kupa visas som ett eget kort med information om drottning, ålder och den senaste händelsen.</li>
             </ul>
         `;
 
-        // Skickar med info-parametrar hit
         laddaHeader("📊 Bigårdsstatus", breadcrumbs, "Om Bigårdsstatus", infoInnehall);
     </script>
 
@@ -52,38 +50,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
         async function init() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    fyllBigardarDropdown(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            } else {
-                document.getElementById('samhallen-lista').innerHTML = "<p>Laddar data från molnet...</p>";
-            }
-
-            try {
-                let response = await fetch(WEB_APP_URL);
-                allData = await response.json();
-                sessionStorage.setItem("myBeeApp_allData", JSON.stringify(allData));
+            let allData = await hamtaData();
+            if (allData) {
                 fyllBigardarDropdown(allData);
-            } catch (error) {
-                console.error("Fel vid laddning:", error);
-                if (!cachedData) {
-                    document.getElementById('samhallen-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
-                }
+            } else {
+                document.getElementById('samhallen-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
             }
         }
 
@@ -125,11 +97,11 @@
                 if (cachedData) allData = JSON.parse(cachedData);
             }
 
-            letlistaDiv = document.getElementById('samhallen-lista');
-            listajDiv.innerHTML = "";
+            let listaDiv = document.getElementById('samhallen-lista');
+            listaDiv.innerHTML = "";
 
             if (!valtBigardsID || !allData) {
-                listajDiv.innerHTML = "<p>Välj en bigård ovan för att se status.</p>";
+                listaDiv.innerHTML = "<p>Välj en bigård ovan för att se status.</p>";
                 return;
             }
 
@@ -138,7 +110,7 @@
             let minaSamhällen = allaSamhällen.filter(s => String(s.BigardsID) === String(valtBigardsID));
 
             if (minaSamhällen.length === 0) {
-                listajDiv.innerHTML = "<p>Inga kupor/samhällen registrerade i denna bigård.</p>";
+                listaDiv.innerHTML = "<p>Inga kupor/samhällen registrerade i denna bigård.</p>";
                 return;
             }
 
@@ -181,7 +153,7 @@
                         ${händelseText}
                     </div>
                 `;
-                listajDiv.appendChild(kort);
+                listaDiv.appendChild(kort);
             });
         }
 

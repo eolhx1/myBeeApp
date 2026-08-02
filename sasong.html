@@ -10,11 +10,11 @@
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Säsongsschema</span></div>';
 
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
@@ -34,7 +34,7 @@
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
 
         <!-- Flikmeny för säsonger -->
-        <div class="season-tabs">
+        <div class="season-tabs" style="display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto;">
             <button class="season-tab active" onclick="bytSasong('var')">🌱 Vår (Start)</button>
             <button class="season-tab" onclick="bytSasong('forsommar')">☀️ Försommar & Drönare</button>
             <button class="season-tab" onclick="bytSasong('sommar')">🍯 Skörd & Sensommar</button>
@@ -43,76 +43,76 @@
         </div>
 
         <!-- 1. VÅR -->
-        <div id="sec-var" class="season-section active card">
+        <div id="sec-var" class="season-section active card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <h3 style="color: #2c3e50; margin-top: 0;">Våren – Uppstart & Utveckling</h3>
             <p style="font-size: 0.9rem; color: #555;">När naturen vaknar och samhällena börjar bygga ut.</p>
             
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Första flygningen / Resurskoll:</strong> Kontrollera att det finns foder så inte samhället svälter på vårvintern.
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Vårstädning:</strong> Skrapa golvbrädor och byt ut eventuella skadade ramar.
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Utökning:</strong> Sätt på en låda med ramar som varit i skattlådorna (enligt din beprövade metod!).
             </div>
         </div>
 
         <!-- 2. FÖRSOMMAR & DRÖNARE -->
-        <div id="sec-forsommar" class="season-section card">
+        <div id="sec-forsommar" class="season-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
             <h3 style="color: #2c3e50; margin-top: 0;">Försommar – Tillväxt & Drönarutskärning</h3>
             <p style="font-size: 0.9rem; color: #555;">Den mest intensiva perioden med svärmkontroller och biologisk varroabekämpning.</p>
             
-            <div class="checklist-item highlight">
+            <div class="checklist-item highlight" style="margin-bottom: 10px; background: #fef9e7; padding: 10px; border-left: 4px solid #f1c40f;">
                 🐝 <strong>Drönarutskärning (Viktig varroakontroll):</strong> 
                 Sätt in en tom ram eller drönarram i yngelrummet tidigt. När bina bygger ut den med drönarceller och drottningen har lagt ägg (och cellerna är täckta, men innan de kläcks efter ca 3 veckor) skär du bort drönarvaxet. Det tar bort en stor mängd varroakvalster naturligt!
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Svärmkontroll:</strong> Gör regelbundna tillsyn var 7–9:e dag för att leta efter svärmceller.
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Skattlådor:</strong> Sätt på skattlådor med rent vax i god tid innan dragen sätter igång.
             </div>
         </div>
 
         <!-- 3. SOMMAR -->
-        <div id="sec-sommar" class="season-section card">
+        <div id="sec-sommar" class="season-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
             <h3 style="color: #2c3e50; margin-top: 0;">Sommar – Skörd & Slungning</h3>
             <p style="font-size: 0.9rem; color: #555;">När draget är som störst och honungen ska bärgas.</p>
             
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Skattning:</strong> Ta av fulla skattlådor med täckt honung.
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Slungning & Ympning:</strong> Slunga honungen och använd verktygssidans Ekobi-metod för att få perfekt krämighet.
             </div>
         </div>
 
         <!-- 4. HÖST -->
-        <div id="sec-host" class="season-section card">
+        <div id="sec-host" class="season-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
             <h3 style="color: #2c3e50; margin-top: 0;">Höst – Invintring & Vaxbyte</h3>
             <p style="font-size: 0.9rem; color: #555;">Att säkra samhällets överlevnad inför vintern.</p>
             
-            <div class="checklist-item highlight">
+            <div class="checklist-item highlight" style="margin-bottom: 10px; background: #fef9e7; padding: 10px; border-left: 4px solid #f1c40f;">
                 📦 <strong>Vaxbyte vid invintring:</strong> Enligt din metod – ta bort den understa äldsta yngellådan (den som varit med i 3 år) när du krymper ner till 2 lådor för vintern.
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Varroabehandling:</strong> Genomför höstbehandling (t.ex. myrsyra eller oxalsyra beroende på metod).
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Infodring:</strong> Ge vinterfoder (sockerlag / fruktsocker) så att de klarar vintern.
             </div>
         </div>
 
         <!-- 5. VINTER -->
-        <div id="sec-vinter" class="season-section card">
+        <div id="sec-vinter" class="season-section card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: none;">
             <h3 style="color: #2c3e50; margin-top: 0;">Vinter – Vila & Planering</h3>
             <p style="font-size: 0.9rem; color: #555;">Lugn period i bigården.</p>
             
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Oxalsyradroppning:</strong> Behandla yngelfria samhällen mitt i vintern (december/januari).
             </div>
-            <div class="checklist-item">
+            <div class="checklist-item" style="margin-bottom: 10px;">
                 ✅ <strong>Materialvård:</strong> Rengör och laga ramar, smält ner vax och planera inför nästa säsong.
             </div>
         </div>
@@ -124,27 +124,20 @@
     </div>
 
     <script>
-        // Enkel funktion för att växla mellan säsongs-flikarna
         function bytSasong(sasongNamn) {
             document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.season-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.season-section').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
+            });
             
-            if (sasongNamn === 'var') {
-                document.querySelector('[onclick="bytSasong(\'var\')"]').classList.add('active');
-                document.getElementById('sec-var').classList.add('active');
-            } else if (sasongNamn === 'forsommar') {
-                document.querySelector('[onclick="bytSasong(\'forsommar\')"]').classList.add('active');
-                document.getElementById('sec-forsommar').classList.add('active');
-            } else if (sasongNamn === 'sommar') {
-                document.querySelector('[onclick="bytSasong(\'sommar\')"]').classList.add('active');
-                document.getElementById('sec-sommar').classList.add('active');
-            } else if (sasongNamn === 'host') {
-                document.querySelector('[onclick="bytSasong(\'host\')"]').classList.add('active');
-                document.getElementById('sec-host').classList.add('active');
-            } else if (sasongNamn === 'vinter') {
-                document.querySelector('[onclick="bytSasong(\'vinter\')"]').classList.add('active');
-                document.getElementById('sec-vinter').classList.add('active');
+            let aktivSeffekt = document.getElementById('sec-' + sasongNamn);
+            if (aktivSeffekt) {
+                aktivSeffekt.classList.add('active');
+                aktivSeffekt.style.display = 'block';
             }
+            
+            event.currentTarget.classList.add('active');
         }
     </script>
 </body>

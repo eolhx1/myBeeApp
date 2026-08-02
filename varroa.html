@@ -10,13 +10,13 @@
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Varroa</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Varroa</span></div>';
 
-        // Informationstext till modalen som genereras av header.js
+        // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Denna vy sammanställer hälsoläget och varroakontrollen för dina bigårdar och samhällen baserat på de senaste skötselanteckningarna.
@@ -63,38 +63,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
-        function hamtaVarroaData() {
-            if (!WEB_APP_URL) {
-                document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Ingen anslutningslänk hittad.</td></tr>';
-                return;
-            }
-
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    let data = JSON.parse(cachedData);
-                    bearbetaOchVisaVarroa(data.skotsel || [], data.samhallen || [], data.bigardar || []);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            }
-
-            if (navigator.onLine) {
-                fetch(WEB_APP_URL)
-                    .then(res => res.json())
-                    .then(data => {
-                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                        bearbetaOchVisaVarroa(data.skotsel || [], data.samhallen || [], data.bigardar || []);
-                    })
-                    .catch(error => {
-                        console.error("Kunde inte hämta data:", error);
-                        if (!cachedData) {
-                            document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa data från molnet.</td></tr>';
-                        }
-                    });
+        async function hamtaVarroaData() {
+            let allData = await hamtaData();
+            if (allData) {
+                bearbetaOchVisaVarroa(allData.skotsel || [], allData.samhallen || [], allData.bigardar || []);
+            } else {
+                document.getElementById('varroa-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Kunde inte läsa data från molnet.</td></tr>';
             }
         }
 

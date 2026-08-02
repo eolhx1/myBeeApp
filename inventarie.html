@@ -10,11 +10,11 @@
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Inventarie</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Inventarie</span></div>';
 
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
@@ -24,7 +24,7 @@
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>Lager vs. Aktiva:</strong> Håll koll på vad som finns i förrådet kontra vad som faktiskt är utställt och används i kuporna.</li>
                 <li><strong>Kategorier & Placering:</strong> Organisera efter kupmaterial, ramar, skyddsutrustning m.m. samt märk ut var sakerna förvaras.</li>
-                <li><strong>Google Sheets-synk:</strong> Alla ändringar sparas direkt i molnet och fungerar även offline med synkning i kö.</li>
+                <li><strong>Molnsynk:</strong> Alla ändringar sparas direkt i molnet och fungerar även offline med synkning i kö.</li>
             </ul>
         `;
 
@@ -108,45 +108,19 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
         let nuvarandeInventarieData = [];
 
-        function hamtaInventarieData() {
-            if (!WEB_APP_URL) {
-                document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Ingen anslutningslänk hittad till Google Sheets.</td></tr>';
-                return;
-            }
-
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    let data = JSON.parse(cachedData);
-                    nuvarandeInventarieData = data.inventarie || [];
-                    fyllInventarieTabell(nuvarandeInventarieData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
-            }
-
-            if (navigator.onLine) {
-                fetch(WEB_APP_URL)
-                    .then(response => response.json())
-                    .then(data => {
-                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                        nuvarandeInventarieData = data.inventarie || [];
-                        fyllInventarieTabell(nuvarandeInventarieData);
-                    })
-                    .catch(error => {
-                        console.error("Kunde inte hämta inventarie:", error);
-                        if (!cachedData) {
-                            document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Kunde inte läsa data från molnet.</td></tr>';
-                        }
-                    });
+        async function hamtaInventarieData() {
+            let allData = await hamtaData();
+            if (allData) {
+                nuvarandeInventarieData = allData.inventarie || [];
+                fyllInventarieTabell(nuvarandeInventarieData);
+            } else {
+                document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Kunde inte läsa data från molnet.</td></tr>';
             }
         }
 
-        function sparaArtikel(event) {
+        async function sparaArtikel(event) {
             event.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
@@ -166,40 +140,13 @@
                 anteckning: document.getElementById('anteckning').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Artikeln har sparats lokalt och synkas automatiskt senare.");
+            let success = await sparaDataMedKoe(formData);
+            if (success) {
+                alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
                 aterstallFormular();
-                btn.disabled = false;
-                return;
+                hamtaInventarieData();
             }
-
-            fetch(WEB_APP_URL + "?sheet=Inventarie", {
-                method: 'POST',
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(formData)
-            })
-            .then(res => res.json())
-            .then(resultat => {
-                if (resultat && (resultat.status === "success" || resultat.result === "success")) {
-                    alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
-                    aterstallFormular();
-                    sessionStorage.removeItem("myBeeApp_globalData");
-                    sessionStorage.removeItem("myBeeApp_allData");
-                    hamtaInventarieData();
-                } else {
-                    throw new Error(resultat.message || "Okänt fel vid sparande");
-                }
-            })
-            .catch(err => {
-                console.warn("Kunde inte nå servern, sparar lokalt...", err);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen. Artikeln har sparats lokalt i kö.");
-                aterstallFormular();
-            })
-            .finally(() => {
-                btn.disabled = false;
-            });
+            btn.disabled = false;
         }
 
         function fyllInventarieTabell(artiklar) {
@@ -258,7 +205,7 @@
             document.getElementById('cancel-btn').style.display = "none";
         }
 
-        function taBortArtikel(index) {
+        async function taBortArtikel(index) {
             if (!confirm("Är du säker på att du vill ta bort/avyttra denna artikel?")) return;
 
             const a = nuvarandeInventarieData[index];
@@ -269,34 +216,11 @@
                 artikel: a.artikel
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Borttagningen har lagts i offline-kö.");
-                return;
-            }
-
-            fetch(WEB_APP_URL + "?sheet=Inventarie", {
-                method: 'POST',
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(formData)
-            })
-            .then(res => res.json())
-            .then(resultat => {
+            let success = await sparaDataMedKoe(formData);
+            if (success) {
                 alert("Artikel borttagen!");
-                sessionStorage.removeItem("myBeeApp_globalData");
-                sessionStorage.removeItem("myBeeApp_allData");
                 hamtaInventarieData();
-            })
-            .catch(err => {
-                console.error("Fel vid borttagning:", err);
-                alert("Kunde inte ta bort artikeln.");
-            });
-        }
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
+            }
         }
 
         hamtaInventarieData();

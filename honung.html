@@ -10,11 +10,11 @@
 
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Gemensamma skript -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Honung</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Honung</span></div>';
 
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
@@ -85,32 +85,11 @@
 
     <script>
         document.getElementById('datum').valueAsDate = new Date();
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         async function laddaBigardar() {
-            if (!WEB_APP_URL) return;
-
-            // Försök läsa från cache först för blixtsnabb laddning
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData");
-            if (cachedData) {
-                try {
-                    let data = JSON.parse(cachedData);
-                    if (data.bigardar) {
-                        fyllBigardarSelect(data.bigardar);
-                    }
-                } catch (e) {
-                    console.error("Kunde inte läsa cache för bigårdar", e);
-                }
-            }
-
-            if (navigator.onLine) {
-                try {
-                    let response = await fetch(`${WEB_APP_URL}?sheet=Bigardar`);
-                    let bigardar = await response.json();
-                    fyllBigardarSelect(bigardar);
-                } catch (e) {
-                    console.error("Kunde inte ladda bigårdar från molnet", e);
-                }
+            let allData = await hamtaData();
+            if (allData && allData.bigardar) {
+                fyllBigardarSelect(allData.bigardar);
             }
         }
 
@@ -123,8 +102,8 @@
             }
             bigardar.forEach(b => {
                 let option = document.createElement('option');
-                option.value = b.Namn || b.namn;
-                option.textContent = b.Namn || b.namn;
+                option.value = b.Namn || b.namn || b.BigardsNamn;
+                option.textContent = b.Namn || b.namn || b.BigardsNamn;
                 select.appendChild(option);
             });
         }
@@ -132,11 +111,6 @@
         document.getElementById('honung-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (!WEB_APP_URL) {
-                alert("Ingen anslutningslänk hittades.");
-                return;
-            }
-
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
@@ -156,42 +130,15 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Honungsskörden har sparats lokalt i kö och synkas automatiskt senare.");
+            let success = await sparaDataMedKoe(formData);
+            if (success) {
+                alert("Honungsskörden har sparats!");
                 window.location.href = "index.html";
-                return;
-            }
-
-            try {
-                let response = await fetch(`${WEB_APP_URL}?sheet=Honung`, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(formData)
-                });
-                
-                let result = await response.json();
-                
-                if (result && (result.status === "success" || result.result === "success")) {
-                    alert("Honungsskörden har sparats!");
-                    sessionStorage.removeItem("myBeeApp_globalData"); // Rensa cache så ny data hämtas
-                    window.location.href = "index.html";
-                } else {
-                    throw new Error(result.message || "Okänt fel");
-                }
-            } catch (error) {
-                console.warn("Kunde inte nå servern, sparar lokalt...", error);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen. Skörden har sparats lokalt i kö.");
-                window.location.href = "index.html";
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Spara skörd";
             }
         });
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-        }
 
         laddaBigardar();
     </script>

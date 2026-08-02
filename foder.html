@@ -9,21 +9,19 @@
 </head>
 <body>
 
-    <!-- Generera gemensam header med brödsmulor och info-knapp -->
+    <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
+    <script src="api.js"></script>
     <script>
-        // Info-knappen inbakad i brödsmulorna
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Fodring</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Fodring</span></div>';
 
-        // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
-                Här registrerar och följer du upp alla foderinsatser för dina bigårdar och samhällen, såsom sockerlag, foderkakor eller vinterinvintring.
+                Här registrerar och följer du upp alla foderinsatser för dina bigårdar och samhällen.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>Bigård & Kupa:</strong> Välj först vilken bigård kupan tillhör för att filtrera fram rätt samhälle.</li>
-                <li><strong>Fodertyp & Mängd:</strong> Ange exakt typ av foder (t.ex. sockerlag 60% eller Apifonda) samt åtgången i kg eller liter.</li>
-                <li><strong>Historik:</strong> Alla sparade foderinsatser sorteras automatiskt med nyaste först i listan nedan.</li>
+                <li><strong>Fodertyp & Mängd:</strong> Ange exakt typ av foder samt åtgången i kg eller liter.</li>
             </ul>
         `;
 
@@ -92,44 +90,14 @@
     </div>
 
     <script>
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
-
-        // Sätt dagens datum som standard
         document.getElementById('datum').valueAsDate = new Date();
 
-        function laddaFoderData() {
-            if (!WEB_APP_URL) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            let allData = null;
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
-
-            if (cachedData) {
-                try {
-                    allData = JSON.parse(cachedData);
-                    bearbetaOchVisaData(allData);
-                } catch (e) {
-                    console.error("Kunde inte läsa cache", e);
-                }
+        async function laddaFoderData() {
+            let allData = await hamtaData();
+            if (allData) {
+                bearbetaOchVisaData(allData);
             } else {
-                document.getElementById('foder-lista').innerHTML = "<p>Laddar data från molnet...</p>";
-            }
-
-            if (navigator.onLine) {
-                fetch(WEB_APP_URL)
-                    .then(response => response.json())
-                    .then(data => {
-                        sessionStorage.setItem("myBeeApp_globalData", JSON.stringify(data));
-                        bearbetaOchVisaData(data);
-                    })
-                    .catch(error => {
-                        console.error("Fel vid laddning:", error);
-                        if (!cachedData) {
-                            document.getElementById('foder-lista').innerHTML = "<p>Kunde inte hämta data från molnet.</p>";
-                        }
-                    });
+                document.getElementById('foder-lista').innerHTML = "<p>Kunde inte hämta data.</p>";
             }
         }
 
@@ -137,7 +105,6 @@
             fyllBigardarDropdown(data);
             visaFoderHistorik(data);
             
-            // Uppdatera även kup-dropdownen om en bigård redan är vald
             let valdBigardID = document.getElementById('valt-bigard-foder').value;
             if (valdBigardID) {
                 uppdateraKuporDropdown(valdBigardID, data);
@@ -208,7 +175,6 @@
                 return;
             }
 
-            // Sortera nyast först
             fodringLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
 
             fodringLoggar.forEach(f => {
@@ -230,7 +196,7 @@
             });
         }
 
-        document.getElementById('foder-form').addEventListener('submit', function(e) {
+        document.getElementById('foder-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('foder-btn');
             btn.disabled = true;
@@ -248,52 +214,12 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Fodring har sparats lokalt och synkas automatiskt senare.");
-                document.getElementById('foder-form').reset();
-                document.getElementById('datum').valueAsDate = new Date();
-                btn.disabled = false;
-                btn.textContent = "Spara fodring";
-                return;
-            }
-
-            fetch(WEB_APP_URL + "?sheet=Fodring", {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(formData)
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result && (result.status === "success" || result.result === "success")) {
-                    alert("Fodring har sparats!");
-                    document.getElementById('foder-form').reset();
-                    document.getElementById('datum').valueAsDate = new Date();
-                    sessionStorage.removeItem("myBeeApp_globalData");
-                    sessionStorage.removeItem("myBeeApp_allData");
-                    laddaFoderData();
-                } else {
-                    throw new Error(result.message || "Okänt fel vid sparande");
-                }
-            })
-            .catch(error => {
-                console.warn("Kunde inte nå servern, sparar lokalt...", error);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen. Fodringen har sparats lokalt i kö.");
-                document.getElementById('foder-form').reset();
-                document.getElementById('datum').valueAsDate = new Date();
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = "Spara fodring";
-            });
+            await skickaDataTillMolnet("Fodring", formData, "foder.html");
+            document.getElementById('foder-form').reset();
+            document.getElementById('datum').valueAsDate = new Date();
+            btn.disabled = false;
+            btn.textContent = "Spara fodring";
         });
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-        }
 
         laddaFoderData();
     </script>
