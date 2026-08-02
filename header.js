@@ -50,7 +50,15 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
     <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
         <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
         <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
-        <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
+        
+        <!-- Höger-container för synk-indikator och inställningar -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <!-- Synk-indikator (visas endast om det finns köad data) -->
+            <div id="sync-indicator" style="display: none; background: #e67e22; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #d35400;" title="Ändringar väntar på synk till molnet">
+                💾 <span id="sync-count">0</span>
+            </div>
+            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
+        </div>
     </header>
 
     <!-- Sidomeny (Sidebar) -->
@@ -93,6 +101,11 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
+
+    // Uppdatera synk-indikatorn direkt när headern har skapats
+    if (typeof uppdateraSynkIndikator === 'function') {
+        uppdateraSynkIndikator();
+    }
 }
 
 function toggleSidebar() {
