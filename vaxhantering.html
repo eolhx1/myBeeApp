@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Vaxhantering</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Ladda in din centrala api.js -->
+    <script src="api.js"></script>
 </head>
 
 <body>
@@ -86,15 +88,9 @@
 
     <script>
         document.getElementById('datum').valueAsDate = new Date();
-        const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         document.getElementById('vax-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            if (!WEB_APP_URL) {
-                alert("Ingen anslutningslänk hittades.");
-                return;
-            }
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
@@ -114,42 +110,9 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            if (!navigator.onLine) {
-                sparaTillOfflineKoe(formData);
-                alert("Ingen internettäckning! Vaxhändelsen har sparats lokalt i kö och synkas automatiskt senare.");
-                window.location.href = "index.html";
-                return;
-            }
-
-            try {
-                let response = await fetch(`${WEB_APP_URL}?sheet=Vax`, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(formData)
-                });
-                
-                let result = await response.json();
-                
-                if (result && (result.status === "success" || result.result === "success")) {
-                    alert("Vaxhändelsen har sparats!");
-                    sessionStorage.removeItem("myBeeApp_globalData"); // Rensa cache
-                    window.location.href = "index.html";
-                } else {
-                    throw new Error(result.message || "Okänt fel");
-                }
-            } catch (error) {
-                console.warn("Kunde inte nå servern, sparar lokalt...", error);
-                sparaTillOfflineKoe(formData);
-                alert("Tappade anslutningen. Vaxhändelsen har sparats lokalt i kö.");
-                window.location.href = "index.html";
-            }
+            // Använder din centrala funktion från api.js!
+            await skickaDataTillMolnet("Vax", formData, "index.html");
         });
-
-        function sparaTillOfflineKoe(newItem) {
-            let koe = JSON.parse(localStorage.getItem("myBeeApp_offlineKoe") || "[]");
-            koe.push(newItem);
-            localStorage.setItem("myBeeApp_offlineKoe", JSON.stringify(koe));
-        }
     </script>
 </body>
 </html>
