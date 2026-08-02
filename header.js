@@ -26,16 +26,21 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
 
     const aktuellSida = window.location.pathname.split("/").pop() || "index.html";
     let breadcrumbHTML = '';
+    let infoKnappHtml = infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>' : '';
 
-    // Endast brödsmulor på undersidor, inte på index.html
     if (aktuellSida !== "index.html" && aktuellSida !== "") {
-        let infoKnappHtml = infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>' : '';
-        
         breadcrumbHTML = `
             <div style="display: flex; align-items: center; gap: 0.4rem;">
                 <a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a>
                 <span> &gt; </span>
                 <span id="breadcrumb-text">${titelTekst.replace(/^[^\w\s]+\s*/, '')}</span>
+            </div>
+            ${infoKnappHtml}
+        `;
+    } else {
+        breadcrumbHTML = `
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>🏠 Hem</span>
             </div>
             ${infoKnappHtml}
         `;
