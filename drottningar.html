@@ -12,17 +12,12 @@
     <!-- Generera gemensam header med brödsmulor och info-knapp -->
     <script src="header.js"></script>
     <script>
-        let breadcrumbs = '<a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span>' +
-                          '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-        laddaHeader("👑 Drottningregister", breadcrumbs);
-    </script>
+        // Info-knappen inbakad i brödsmulorna
+        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
 
-    <!-- Info Modal -->
-    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)">
-        <div class="modal-content">
-            <button class="modal-close" onclick="stangInfoModal()">&times;</button>
-            <h3 style="margin-top: 0; color: #2c3e50;">Om Drottningregistret</h3>
-            <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+        // Informationstext till modalen som genereras av header.js
+        let infoInnehall = `
+            <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här håller du ordning på alla bigårdens drottningar, deras härstamning, avelsvärden och ålder.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
@@ -30,8 +25,10 @@
                 <li><strong>Ålder & Färg:</strong> Appen beräknar ålder automatiskt. Drottningar som är 2 år eller äldre markeras med röd varningsram som en påminnelse om planerat byte.</li>
                 <li><strong>Avelsvärden:</strong> Bedöm egenskaper som svärmtröghet, temperament, honungsprestanda och yngelsättning för avelsurval.</li>
             </ul>
-        </div>
-    </div>
+        `;
+
+        laddaHeader("👑 Drottningregister", breadcrumbs, "Om Drottningregistret", infoInnehall);
+    </script>
 
     <div class="container">
         <!-- Lägg till ny drottning -->
@@ -150,19 +147,6 @@
     </div>
 
     <script>
-        // Funktioner för Info-modalen
-        function oppnaInfoModal() {
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-        function stangInfoModal() {
-            document.getElementById('info-modal').style.display = 'none';
-        }
-        function stangInfoModalKlickUtanför(event) {
-            if (event.target.id === 'info-modal') {
-                stangInfoModal();
-            }
-        }
-
         const WEB_APP_URL = localStorage.getItem("myBeeApp_url");
 
         function laddaDrottningarData() {
