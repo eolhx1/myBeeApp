@@ -104,14 +104,22 @@
                 Typ: document.getElementById('typ').value,
                 AntalRamar: document.getElementById('antal-ramar').value,
                 ViktKg: document.getElementById('vikt-kg').value,
-                Status: document.getElementById('status').value,
+                Status: document.getElementById('status'].value,
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
+            // Notera: Om du använder skickaDataTillMolnet från api.js istället för sparaDataMedKoe 
+            // så hanteras modalen automatiskt, men vi kan anropa visaAppModal direkt här:
             let success = await sparaDataMedKoe(formData);
             if (success) {
-                alert("Vaxhändelsen har sparats!");
-                window.location.href = "index.html";
+                if (typeof visaAppModal === 'function') {
+                    visaAppModal("Klart!", "Vaxhändelsen har sparats!", 'alert', () => {
+                        window.location.href = "index.html";
+                    });
+                } else {
+                    alert("Vaxhändelsen har sparats!");
+                    window.location.href = "index.html";
+                }
             } else {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Spara vaxhändelse";
