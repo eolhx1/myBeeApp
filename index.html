@@ -17,9 +17,6 @@
     <script src="utils.js"></script>
 
     <script>
-        // Brödsmulor
-let breadcrumbs = '<span>🏠 Hem</span> <button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-
         // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -32,8 +29,8 @@ let breadcrumbs = '<span>🏠 Hem</span> <button class="info-btn" onclick="oppna
             </ul>
         `;
 
-        // Anropa laddaHeader med titel, brödsmulor, rubrik och info-innehåll
-        laddaHeader("🐝 Mina Bigårdar", breadcrumbs, "Om Mina Bigårdar", infoInnehall);
+        // Anropa laddaHeader med titel och info-innehåll (brödsmulor sköts nu helt automatiskt i header.js)
+        laddaHeader("🐝 Mina Bigårdar", "Om Mina Bigårdar", infoInnehall);
     </script>
 
     <div class="container">

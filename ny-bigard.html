@@ -18,8 +18,6 @@
         const editId = urlParams.get('id');
         const rubrikText = editId ? "🐝 Redigera bigård" : "🐝 Lägg till ny bigård";
 
-let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span id="breadcrumb-text">Ny bigård</span></div><button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>';
-
         // Informationstext till modalen som skapas automatiskt av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -32,7 +30,7 @@ let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"
             </ul>
         `;
 
-        laddaHeader(rubrikText, breadcrumbs, "Om Bigårdshantering", infoInnehall);
+        laddaHeader(rubrikText, "Om Bigårdshantering", infoInnehall);
     </script>
 
     <div class="container">
@@ -163,11 +161,15 @@ let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"
                 document.getElementById('lon').value = lonVal;
 
                 document.getElementById('anteckningar').value = found.Anteckningar || "";
-                document.getElementById('breadcrumb-text').textContent = found.Namn || "Redigera bigård";
+                
+                const breadcrumbText = document.getElementById('breadcrumb-text');
+                if (breadcrumbText) {
+                    breadcrumbText.textContent = found.Namn || "Redigera bigård";
+                }
             }
         }
 
-        // När formuläret skickas använder vi nu den centrala funktionen från api.js!
+        // När formuläret skickas använder vi den centrala funktionen från api.js
         document.getElementById('bigard-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -196,7 +198,6 @@ let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            // Anropa den centraliserade funktionen i api.js (sköter både online, offline-kö och felhantering)
             await skickaDataTillMolnet("Bigardar", formData, "index.html");
         });
 

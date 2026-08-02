@@ -24,7 +24,6 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
 
     const menyHtmlLankar = menylankar.map(lank => `<a href="${lank.url}" style="${lankStil}">${lank.text}</a>`).join('');
 
-    // Hämta aktuell fil för att avgöra om vi är på startsidan
     const aktuellSida = window.location.pathname.split("/").pop() || "index.html";
     let breadcrumbHTML = '';
 
@@ -35,7 +34,15 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
             <div style="display: flex; align-items: center; gap: 0.4rem;">
                 <a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a>
                 <span> &gt; </span>
-                <span>${titelTekst.replace(/^[^\w\s]+\s*/, '')}</span>
+                <span id="breadcrumb-text">${titelTekst.replace(/^[^\w\s]+\s*/, '')}</span>
+            </div>
+            ${infoKnappHtml}
+        `;
+    } else {
+        let infoKnappHtml = infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>' : '';
+        breadcrumbHTML = `
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>🏠 Hem</span>
             </div>
             ${infoKnappHtml}
         `;
