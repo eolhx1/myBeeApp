@@ -20,7 +20,8 @@ const ASSETS_TO_CACHE = [
   'skotsel.html',
   'header.js',
   'api.js',
-  'style.css'
+  'style.css',
+  'icon.png' 
 ];
 
 
