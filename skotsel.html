@@ -10,7 +10,8 @@
 <body>
 
     <!-- Generera gemensam header -->
-    <script src="header.js"></script>
+<script src="header.js"></script>
+<script src="utils.js"></script>
     <script>
         laddaHeader("📝 Skötselkort", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span id="bread-bigard">Bigård</span>');
     </script>
@@ -405,10 +406,10 @@
                 });
             }
 
-            fyllIBehfitligLoggOmFinns();
+            fyllIBefintligLoggOmFinns()
         }
 
-        function fyllIBehfitligLoggOmFinns() {
+        function fyllIBefintligLoggOmFinns() {
             const valtSamhallsID = document.getElementById("valt-samhalle").value;
             const valtDatum = document.getElementById("datum").value;
             const submitBtn = document.getElementById("submit-btn");
@@ -452,6 +453,12 @@
                         document.getElementById("skordSection").style.display = "block";
                         document.getElementById("skord-arrow").textContent = "▲";
                     }
+					
+document.getElementById("fodertyp").value = matchadLogg.Fodertyp || "";
+document.getElementById("fodermangd").value = matchadLogg.Fodermangd || "";
+
+document.getElementById("proteintyp").value = matchadLogg.Proteintyp || "";
+document.getElementById("proteinmangd").value = matchadLogg.Proteinmangd || "";
 
                     document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
                     document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
@@ -482,6 +489,11 @@
                     document.getElementById("kvalsternedfall").value = "";
                     document.getElementById("sjukdomskontroll").value = "";
                     document.getElementById("skattadMangd").value = "";
+document.getElementById("fodertyp").value = "";
+document.getElementById("fodermangd").value = "";
+
+document.getElementById("proteintyp").value = "";
+document.getElementById("proteinmangd").value = "";
 
                     document.getElementById("bihalsaSection").style.display = "none";
                     document.getElementById("bihalsa-arrow").textContent = "▼";
@@ -496,8 +508,8 @@
             }
         }
 
-        document.getElementById('valt-samhalle').addEventListener('change', fyllIBehfitligLoggOmFinns);
-        document.getElementById('datum').addEventListener('change', fyllIBehfitligLoggOmFinns);
+        document.getElementById('valt-samhalle').addEventListener('change', fyllIBefintligLoggOmFinns);
+        document.getElementById('datum').addEventListener('change', fyllIBefintligLoggOmFinns);
 
         function toggleLakemedelsJournal() {
             const section = document.getElementById("lakemedelsJournalSection");
@@ -554,7 +566,7 @@
             samhalleBtn.disabled = true;
             samhalleBtn.textContent = "Sparar samhälle...";
 
-            const autoSamhallsID = "SH" + Math.floor(1000 + Math.random() * 9000);
+            const autoSamhallsID = skapaID("SH");
             const formDataSamhalle = {
                 sheet: "Samhallen",
                 SamhallsID: autoSamhallsID,
@@ -631,7 +643,7 @@
                 }
             }
 
-            const skotselID = befintligtSkotselID || ("S" + Math.floor(1000 + Math.random() * 9000));
+            const skotselID = befintligtSkotselID || skapaID("S");
 
             const formData = {
                 sheet: "Skotsel",
@@ -653,8 +665,12 @@
                 Kvalsternedfall: document.getElementById("kvalsternedfall").value,
                 Sjukdomskontroll: document.getElementById("sjukdomskontroll").value,
                 SkattadMangd: document.getElementById("skattadMangd").value,
+				
                 Fodertyp: document.getElementById("fodertyp").value,
-                Fodermangd: document.getElementById("fodermangd").value
+                Fodermangd: document.getElementById("fodermangd").value,
+				
+Proteintyp: document.getElementById("proteintyp").value,
+Proteinmangd: document.getElementById("proteinmangd").value
             };
 
             if (!navigator.onLine) {

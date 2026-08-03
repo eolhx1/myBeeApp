@@ -8,3 +8,8 @@ function rensaAllLokalData() {
         window.location.href = "index.html";
     }
 }
+
+function skapaID(prefix) {
+    return prefix + Date.now();
+}
+

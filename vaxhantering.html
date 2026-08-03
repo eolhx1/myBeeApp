@@ -94,7 +94,10 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('vax-id').value || ("V" + Math.floor(1000 + Math.random() * 9000));
+const currentId =
+    document.getElementById('vax-id').value ||
+    ("V" + Date.now());
+            //const currentId = document.getElementById('vax-id').value || ("V" + Math.floor(1000 + Math.random() * 9000));
 
             const formData = {
                 sheet: "Vax",
@@ -104,7 +107,7 @@
                 Typ: document.getElementById('typ').value,
                 AntalRamar: document.getElementById('antal-ramar').value,
                 ViktKg: document.getElementById('vikt-kg').value,
-                Status: document.getElementById('status'].value,
+                Status: document.getElementById('status').value,
                 Anteckningar: document.getElementById('anteckningar').value
             };
 

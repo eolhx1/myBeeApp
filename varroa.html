@@ -110,7 +110,10 @@
                 }
             });
 
-            const IDag = new Date();
+//            const IDag = new Date();
+const idag = new Date();
+idag.setHours(0, 0, 0, 0);
+
 
             Object.values(samhalleStatus).forEach(s => {
                 let samhallsIdKey = s.SamhallsID || s.Samhälle || s.SamhällsID || "";
@@ -119,16 +122,25 @@
                 let samhallsNamn = samhalleNamnMap[samhallsIdKey] || s.SamhallsNamn || samhallsIdKey || '-';
                 let bigardsNamn = bigardNamnMap[bigardsIdKey] || s.BigardsNamn || s.Bigard || '-';
 
-                let karenstidSlut = s.Karenstid || s.KarenstidsDatum || "";
-                let harAktivKarenstid = false;
+let karenstidDagar = parseInt(s.Karenstid || 0);
+let karenstidSlut = "";
+let harAktivKarenstid = false;
 
-                if (karenstidSlut) {
-                    const slutDatum = new Date(karenstidSlut);
-                    if (slutDatum >= IDag) {
-                        harAktivKarenstid = true;
-                    }
-                }
+if (karenstidDagar > 0 && s.Datum) {
 
+    let behandlingsDatum = new Date(s.Datum);
+
+    let slutDatum = new Date(behandlingsDatum);
+    slutDatum.setDate(slutDatum.getDate() + karenstidDagar);
+	slutDatum.setHours(0, 0, 0, 0);
+
+//    karenstidSlut = slutDatum.toISOString().substring(0, 10);
+karenstidSlut = slutDatum.toLocaleDateString('sv-SE');
+
+if (slutDatum >= idag) {
+    harAktivKarenstid = true;
+}
+}
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td><strong>${bigardsNamn}</strong></td>
