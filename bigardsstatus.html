@@ -49,15 +49,30 @@
         </div>
     </div>
 
-    <script>
+        <script>
+        // Byt ut BARA init-funktionen mot detta:
         async function init() {
+            let cachedData = sessionStorage.getItem("myBeeApp_allData");
+            if (cachedData) {
+                try {
+                    let parsedData = JSON.parse(cachedData);
+                    fyllBigardarDropdown(parsedData);
+                    return;
+                } catch (e) {
+                    console.error("Kunde inte tolka cachad data", e);
+                }
+            }
+
             let allData = await hamtaData();
             if (allData) {
                 fyllBigardarDropdown(allData);
             } else {
+                document.getElementById('valt-bigard-status').innerHTML = '<option value="">Kunde inte ladda bigårdar</option>';
                 document.getElementById('samhallen-lista').innerHTML = "<p>Kunde inte ladda data.</p>";
             }
         }
+
+        // --- Låt resten av koden ligga kvar precis som den är nedanför ---
 
         function fyllBigardarDropdown(data) {
             let bigårdar = data.bigardar || [];
@@ -161,5 +176,6 @@
 
         init();
     </script>
+
 </body>
 </html>
