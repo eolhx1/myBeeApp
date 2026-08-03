@@ -99,21 +99,24 @@ const currentId =
     ("V" + Date.now());
             //const currentId = document.getElementById('vax-id').value || ("V" + Math.floor(1000 + Math.random() * 9000));
 
-            const formData = {
-                sheet: "Vax",
-//                action: "addVax",
-                VaxID: currentId,
-                Datum: document.getElementById('datum').value,
-                Typ: document.getElementById('typ').value,
-                AntalRamar: document.getElementById('antal-ramar').value,
-                ViktKg: document.getElementById('vikt-kg').value,
-                Status: document.getElementById('status').value,
-                Anteckningar: document.getElementById('anteckningar').value
-            };
+const formData = {
+    VaxID: currentId,
+    Datum: document.getElementById('datum').value,
+    Typ: document.getElementById('typ').value,
+    AntalRamar: document.getElementById('antal-ramar').value,
+    ViktKg: document.getElementById('vikt-kg').value,
+    Status: document.getElementById('status').value,
+    Anteckningar: document.getElementById('anteckningar').value
+};
 
             // Notera: Om du använder skickaDataTillMolnet från api.js istället för sparaDataMedKoe 
             // så hanteras modalen automatiskt, men vi kan anropa visaAppModal direkt här:
-            let success = await sparaDataMedKoe(formData);
+ //           let success = await sparaDataMedKoe(formData);
+ let success = await skickaDataTillMolnet(
+    "Vax",
+    formData,
+    "index.html"
+);
             if (success) {
                 if (typeof visaAppModal === 'function') {
                     visaAppModal("Klart!", "Vaxhändelsen har sparats!", 'alert', () => {
