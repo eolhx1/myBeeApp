@@ -100,6 +100,8 @@ async function skickaDataTillMolnet(sheetNamn, formData, efterFolgandeUrl = "ind
 }
 
 
+
+
 // ==========================================
 // 4. GRÄNSSNITT & SYNK-INDIKATOR
 // ==========================================
@@ -155,3 +157,33 @@ window.addEventListener('online', async () => {
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", uppdateraSynkIndikator);
+
+// ==========================================
+// 7. HÄMTA DATA FRÅN MOLNET
+// ==========================================
+
+async function hamtaData() {
+    const WEB_APP_URL = hamtaAppUrl();
+    if (!WEB_APP_URL) return null;
+
+    // Kolla om vi har cachad data i sessionen först
+    let cached = sessionStorage.getItem("myBeeApp_allData");
+    if (cached) {
+        try {
+            return JSON.parse(cached);
+        } catch(e) {}
+    }
+
+    try {
+        let response = await fetch(`${WEB_APP_URL}?action=getData`);
+        let data = await response.json();
+        if (data) {
+            sessionStorage.setItem("myBeeApp_allData", JSON.stringify(data));
+            return data;
+        }
+    } catch (error) {
+        console.error("Kunde inte hämta data från molnet:", error);
+    }
+    return null;
+}
+
