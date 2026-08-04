@@ -14,8 +14,6 @@
     <script src="api.js"></script>
 <script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span></div>';
-
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här håller du ordning på alla bigårdens drottningar, deras härstamning, avelsvärden och ålder.
@@ -27,7 +25,11 @@
             </ul>
         `;
 
-        laddaHeader("👑 Drottningregister", breadcrumbs, "Om Drottningregistret", infoInnehall);
+laddaHeader(
+    titel,
+    infoRubrik,
+    infoInnehall
+);
     </script>
 
     <div class="container">

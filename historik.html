@@ -13,9 +13,7 @@
     <script src="header.js"></script>
     <script src="api.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Historik</span></div>';
-
-        let infoInnehall = `
+         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Denna sida är till för att följa utvecklingen och händelsehistoriken för dina enskilda bisamhällen och kupor över tid.
             </p>
@@ -26,7 +24,11 @@
             </ul>
         `;
 
-        laddaHeader("📈 Historik & Trender", breadcrumbs, "Om Historik & Trender", infoInnehall);
+laddaHeader(
+    "📈 Historik & Trender",
+    "Om Historik & Trender",
+    infoInnehall
+);
     </script>
 
     <div class="container">

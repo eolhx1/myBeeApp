@@ -11,9 +11,26 @@
 
     <!-- Generera gemensam header -->
 <script src="header.js"></script>
+<script src="api.js"></script>
 <script src="utils.js"></script>
     <script>
-        laddaHeader("📝 Skötselkort", '<a href="index.html">🏠 Hem</a><span> &gt; </span><span id="bread-bigard">Bigård</span>');
+// Informationstext till modalen som genereras av header.js
+let infoInnehall = `
+	<p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
+		TODO: text här
+	</p>
+	<ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
+		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
+		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
+		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
+	</ul>
+`;
+	
+laddaHeader(
+    titel,
+    infoRubrik,
+    infoInnehall
+);
     </script>
 
     <!-- Dolt formulär för att lägga till samhälle -->

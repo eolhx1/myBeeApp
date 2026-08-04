@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Översikt</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
 
 </head>
@@ -14,9 +14,9 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
-    <script src="utils.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
 
     <script>
         // Informationstext till modalen som skapas automatiskt av header.js
@@ -32,7 +32,11 @@
         `;
 
         // Anropa laddaHeader med titel och info-innehåll (brödsmulor sköts nu helt automatiskt i header.js)
-        laddaHeader("🐝 Mina Bigårdar", "Om Mina Bigårdar", infoInnehall);
+laddaHeader(
+    titel,
+    infoRubrik,
+    infoInnehall
+);
     </script>
 
     <div class="container">
@@ -48,7 +52,11 @@
             <p>
                 Klistra in din Google Apps Script Web App URL nedan:
             </p>
-            <input type="text" id="url-input" placeholder="https://script.google.com/macros/s/.../exec">
+<input
+    type="text"
+    id="url-input"
+    autocomplete="off"
+    placeholder="https://script.google.com/macros/s/.../exec">
             <button onclick="sparaUrl()">Anslut</button>
         </div>
 

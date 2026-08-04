@@ -1,6 +1,6 @@
 // Filnamn: header.js
 
-function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
+function laddaHeader(titelText, infoRubrik = '', infoTextHtml = '') {
     const lankStil = "padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;";
 
     const menylankar = [
@@ -26,14 +26,18 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
 
     const aktuellSida = window.location.pathname.split("/").pop() || "index.html";
     let breadcrumbHTML = '';
-    let infoKnappHtml = infoRubrik ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>' : '';
+let infoKnappHtml =
+    (infoRubrik && infoTextHtml)
+        ? '<button class="info-btn" onclick="oppnaInfoModal()" title="Om sidan">i</button>'
+        : '';
 
+let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
     if (aktuellSida !== "index.html" && aktuellSida !== "") {
         breadcrumbHTML = `
             <div style="display: flex; align-items: center; gap: 0.4rem;">
                 <a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a>
                 <span> &gt; </span>
-                <span id="breadcrumb-text">${titelTekst.replace(/^[^\w\s]+\s*/, '')}</span>
+<span id="breadcrumb-text">${renTitel}</span>
             </div>
             ${infoKnappHtml}
         `;
@@ -49,7 +53,7 @@ function laddaHeader(titelTekst, infoRubrik = '', infoTextHtml = '') {
     const headerHTML = `
     <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
         <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
-        <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelTekst}</h1>
+        <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelText}</h1>
         
         <!-- Höger-container för synk-indikator och inställningar -->
         <div style="display: flex; align-items: center; gap: 0.5rem;">

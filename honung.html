@@ -15,8 +15,6 @@
 <script src="api.js"></script>
 <script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Honung</span></div>';
-
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -29,7 +27,11 @@
             </ul>
         `;
 
-        laddaHeader("🍯 Honungsskörd", breadcrumbs, "Om Honungsskörd", infoInnehall);
+laddaHeader(
+    "🍯 Honungsskörd",
+    "Om Honungsskörd",
+    infoInnehall
+);
     </script>
 
     <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
