@@ -2,6 +2,14 @@
 
 let map;
 
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+});
+
 function toggleMenu() {
     const menu = document.getElementById("dropdownMenu");
     menu.classList.toggle("show");
@@ -40,10 +48,13 @@ function initApp() {
 
         if (!map && typeof L !== 'undefined') {
             map = L.map('map').setView([62.0, 15.0], 4);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            L.tileLayer(
+				'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
+				{
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
-            }).addTo(map);
+            }
+			).addTo(map);
         }
 
         // Tvinga kartan att anpassa sig efter att den blivit synlig
