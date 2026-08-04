@@ -10,8 +10,9 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -30,7 +31,12 @@
             </ul>
         `;
 
-        laddaHeader(rubrikText, "Om Bigårdshantering", infoInnehall);
+laddaHeader(
+    rubrikText,
+    "Om Bigårdshantering",
+    infoInnehall
+);
+
     </script>
 
     <div class="container">
@@ -80,12 +86,23 @@
 
             <div class="form-group">
                 <label for="lat">Latitud (för karta):</label>
-                <input type="text" id="lat" name="Latitud" placeholder="T.ex. 59.3293">
+<input
+    type="text"
+    id="lat"
+    name="Latitud"
+    inputmode="decimal"
+    placeholder="T.ex. 59.3293">
             </div>
 
             <div class="form-group">
                 <label for="lon">Longitud (för karta):</label>
-                <input type="text" id="lon" name="Longitud" placeholder="T.ex. 18.0686">
+<input
+    type="text"
+    id="lon"
+    name="Longitud"
+    inputmode="decimal"
+    placeholder="T.ex. 18.0686">
+
             </div>
 
             <div class="form-group">
@@ -122,7 +139,7 @@
         async function laddaDataForRedigering(webAppUrl, id) {
             let found = null;
 
-            const cachedData = sessionStorage.getItem("myBeeApp_globalData");
+const cachedData = sessionStorage.getItem("myBeeApp_allData");
             if (cachedData) {
                 try {
                     let globalData = JSON.parse(cachedData);
@@ -177,7 +194,9 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('bigards-id').value || ("B" + Math.floor(1000 + Math.random() * 9000));
+const currentId =
+    document.getElementById('bigards-id').value ||
+    skapaID("BG");
 
             let latVal = document.getElementById('lat').value.trim();
             let lonVal = document.getElementById('lon').value.trim();
@@ -186,7 +205,6 @@
             if (lonVal && !lonVal.startsWith("'")) lonVal = "'" + lonVal;
 
             const formData = {
-                sheet: "Bigardar",
                 BigardsID: currentId,
                 Status: document.getElementById('status').value,
                 Namn: document.getElementById('namn').value,
@@ -198,7 +216,19 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            await skickaDataTillMolnet("Bigardar", formData, "index.html");
+let success = await skickaDataTillMolnet(
+    "Bigardar",
+    formData,
+    "index.html"
+);
+
+if (!success) {
+    submitBtn.disabled = false;
+    submitBtn.textContent =
+        editId
+            ? "Spara ändringar"
+            : "Spara bigård";
+}
         });
 
         initForm();
