@@ -12,6 +12,7 @@
     <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
     <script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
         let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Drottningar</span></div>';
 
@@ -51,7 +52,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label for="drottning-ar">Årgång (År):</label>
-                        <input type="number" id="drottning-ar" name="DrottningAr" value="2026">
+<input type="number" id="drottning-ar" name="DrottningAr">
                     </div>
                     <div class="form-group">
                         <label for="farg">Färgmarkering:</label>
@@ -146,6 +147,9 @@
     </div>
 
     <script>
+document.getElementById('drottning-ar').value =
+    new Date().getFullYear();	
+		
         async function laddaDrottningarData() {
             let allData = await hamtaData();
             if (allData) {
@@ -158,15 +162,28 @@
         function fyllDropdownOchLista(data) {
             let samhallen = data.samhallen || [];
             let drottningar = data.drottningar || [];
+let bigardar = data.bigardar || [];
 
             let select = document.getElementById('samhalls-koppling');
             select.innerHTML = '<option value="">-- Välj kupa (valfritt) --</option>';
-            samhallen.forEach(s => {
-                let opt = document.createElement('option');
-                opt.value = s.SamhallsID;
-                opt.textContent = `${s.Kupbenamning}`;
-                select.appendChild(opt);
-            });
+samhallen.forEach(s => {
+
+    let bigard = bigardar.find(
+        b => String(b.BigardsID) === String(s.BigardsID)
+    );
+
+    let bigardsNamn = bigard
+        ? bigard.Namn
+        : "Okänd bigård";
+
+    let opt = document.createElement('option');
+
+    opt.value = s.SamhallsID;
+    opt.textContent =
+        `${bigardsNamn} - ${s.Kupbenamning}`;
+
+    select.appendChild(opt);
+});
 
             let listaDiv = document.getElementById('drottning-lista');
             listaDiv.innerHTML = "";
@@ -176,11 +193,33 @@
                 return;
             }
 
-            const nuvarandeAr = 2026;
+const nuvarandeAr = new Date().getFullYear();
+
+drottningar.sort((a, b) =>
+    (parseInt(b.DrottningAr) || 0) -
+    (parseInt(a.DrottningAr) || 0)
+);
 
             drottningar.forEach(d => {
-                let kupaObj = samhallen.find(s => s.SamhallsID === d.SamhallsID);
-                let kupaNamn = kupaObj ? kupaObj.Kupbenamning : "Ej placerad i kupa";
+let kupaObj = samhallen.find(
+    s => String(s.SamhallsID) === String(d.SamhallsID)
+);
+
+let kupaNamn = kupaObj
+    ? kupaObj.Kupbenamning
+    : "Ej placerad i kupa";
+
+let bigardsNamn = "Okänd bigård";
+
+if (kupaObj) {
+    let bigardObj = bigardar.find(
+        b => String(b.BigardsID) === String(kupaObj.BigardsID)
+    );
+
+    if (bigardObj) {
+        bigardsNamn = bigardObj.Namn;
+    }
+}
 
                 let drottningAr = parseInt(d.DrottningAr) || nuvarandeAr;
                 let alder = nuvarandeAr - drottningAr;
@@ -201,7 +240,9 @@
                 item.style.borderLeftColor = kortBorderColor;
                 item.innerHTML = `
                     <p style="margin-top: 0;"><strong>👑 ${d.Namn || 'Namnlös'}</strong> (${d.Ras || 'Okänd ras'}) &nbsp;|&nbsp; Status: <em>${d.Status || 'Aktiv'}</em></p>
-                    <p>🏠 Kupa: <strong>${kupaNamn}</strong></p>
+<p>
+🏠 <strong>${bigardsNamn}</strong> → ${kupaNamn}
+</p>
                     <p>📅 Årgång: ${d.DrottningAr || '-'} (${arText}) | Färg: ${d.Farg || '-'}</p>
                     ${letVarningHTML}
                     <p style="font-size: 0.9rem; color: #555; margin: 0.3rem 0;">
@@ -220,9 +261,9 @@
             btn.disabled = true;
             btn.textContent = "Sparar drottning...";
 
-            const autoID = "DR" + Math.floor(1000 + Math.random() * 9000);
+            const autoID = skapaID("DR");
+			
             const formData = {
-                sheet: "Drottningar",
                 DrottningsID: autoID,
                 Namn: document.getElementById('namn').value,
                 SamhallsID: document.getElementById('samhalls-koppling').value,
@@ -239,7 +280,8 @@
 
             await skickaDataTillMolnet("Drottningar", formData, "drottningar.html");
             document.getElementById('drottning-form').reset();
-            document.getElementById('drottning-ar').value = "2026";
+document.getElementById('drottning-ar').value =
+    new Date().getFullYear();
             btn.disabled = false;
             btn.textContent = "Spara drottning";
         });
