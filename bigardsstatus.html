@@ -131,7 +131,9 @@
 
             minaSamhällen.forEach(samhälle => {
                 let minaLoggar = skotselLoggar.filter(l => String(l.SamhallsID) === String(samhälle.SamhallsID));
-                minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+minaLoggar.sort((a, b) =>
+    new Date(b.Datum || 0) - new Date(a.Datum || 0)
+);
                 let senasteLogg = minaLoggar.length > 0 ? minaLoggar[0] : null;
 
                 let drottningText = "Ingen aktiv drottning registrerad";
@@ -146,11 +148,32 @@
                 if (senasteLogg) {
                     let kortDatum = senasteLogg.Datum ? senasteLogg.Datum.substring(0, 10) : "";
                     let delar = [];
-                    if (senasteLogg.Drottningsett) delar.push(`👑 ${senasteLogg.Drottningsett}`);
-                    if (senasteLogg.Svarmlystnad) delar.push(`🐝 Svärmlystnad: ${senasteLogg.Svarmlystnad}`);
-                    if (senasteLogg.Temperament) delar.push(` Humör: ${senasteLogg.Temperament}`);
-                    if (senasteLogg.SkattadMangd) delar.push(`🍯 Skörd: ${senasteLogg.SkattadMangd}`);
-                    if (senasteLogg.Anteckningar) delar.push(`<em>"${senasteLogg.Anteckningar}"</em>`);
+if (senasteLogg.Drottningsett)
+    delar.push(`👑 ${senasteLogg.Drottningsett}`);
+
+if (senasteLogg.Svarmlystnad)
+    delar.push(`🐝 Svärmlystnad: ${senasteLogg.Svarmlystnad}`);
+
+if (senasteLogg.Temperament)
+    delar.push(`😊 Humör: ${senasteLogg.Temperament}`);
+
+if (senasteLogg.SkattadMangd)
+    delar.push(`🍯 Skörd: ${senasteLogg.SkattadMangd}`);
+
+if (senasteLogg.Fodertyp || senasteLogg.Fodermangd)
+    delar.push(`🥤 Foder: ${senasteLogg.Fodermangd || ''} ${senasteLogg.Fodertyp || ''}`);
+
+if (senasteLogg.Proteintyp || senasteLogg.Proteinmangd)
+    delar.push(`🌼 Protein: ${senasteLogg.Proteinmangd || ''} ${senasteLogg.Proteintyp || ''}`);
+	
+if (senasteLogg.Lakemedel)
+    delar.push(`💊 ${senasteLogg.Lakemedel}`);	
+
+if (senasteLogg.Anteckningar)
+    delar.push(`<em>"${senasteLogg.Anteckningar}"</em>`);
+
+
+
                     
                     händelseText = `<strong>${kortDatum}:</strong> ${delar.join(' | ') || 'Skötselbesök utfört'}`;
                 }
