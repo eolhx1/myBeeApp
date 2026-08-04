@@ -11,8 +11,9 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
         let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Honung</span></div>';
 
@@ -44,7 +45,7 @@
 
                 <div class="form-group">
                     <label for="bigard">Bigård:</label>
-                    <select id="bigard" name="Bigard">
+<select id="bigard" name="Bigard" required>
                         <!-- Fylls i dynamiskt från skriptet -->
                     </select>
                 </div>
@@ -100,12 +101,21 @@
                 select.innerHTML = '<option value="">Inga bigårdar hittades</option>';
                 return;
             }
-            bigardar.forEach(b => {
-                let option = document.createElement('option');
-                option.value = b.Namn || b.namn || b.BigardsNamn;
-                option.textContent = b.Namn || b.namn || b.BigardsNamn;
-                select.appendChild(option);
-            });
+bigardar.forEach(b => {
+
+    let bigardsNamn =
+        b.Namn ||
+        b.namn ||
+        b.BigardsNamn ||
+        "Namnlös bigård";
+
+    let option = document.createElement('option');
+
+    option.value = bigardsNamn;
+    option.textContent = bigardsNamn;
+
+    select.appendChild(option);
+});
         }
 
         document.getElementById('honung-form').addEventListener('submit', async function(e) {
@@ -115,24 +125,27 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('skorde-id').value || ("H" + Math.floor(1000 + Math.random() * 9000));
+const currentId =
+    document.getElementById('skorde-id').value ||
+    skapaID("HO");
 
-            const formData = {
-                sheet: "Honung",
-                action: "addHonung",
-                SkördeID: currentId,
-                Datum: document.getElementById('datum').value,
-                Bigard: document.getElementById('bigard').value,
-                AntalSkattlodar: document.getElementById('antal-lodar').value,
-                ViktKg: document.getElementById('vikt').value,
-                Vattenhalt: document.getElementById('vattenhalt').value,
-                BatchNummer: document.getElementById('batch').value,
-                Anteckningar: document.getElementById('anteckningar').value
-            };
+const formData = {
+    SkördeID: currentId,
+    Datum: document.getElementById('datum').value,
+    Bigard: document.getElementById('bigard').value,
+    AntalSkattlodar: document.getElementById('antal-lodar').value,
+    ViktKg: document.getElementById('vikt').value,
+    Vattenhalt: document.getElementById('vattenhalt').value,
+    BatchNummer: document.getElementById('batch').value,
+    Anteckningar: document.getElementById('anteckningar').value
+};
 
-            let success = await sparaDataMedKoe(formData);
+let success = await skickaDataTillMolnet(
+    "Honung",
+    formData,
+    "honung.html"
+);
             if (success) {
-                alert("Honungsskörden har sparats!");
                 window.location.href = "index.html";
             } else {
                 submitBtn.disabled = false;
