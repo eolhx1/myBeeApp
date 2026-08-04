@@ -10,8 +10,10 @@
 <body>
 
     <!-- Generera gemensam header och API -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
+
     <script>
         let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Fodring</span></div>';
 
@@ -132,7 +134,8 @@
 
         document.getElementById('valt-bigard-foder').addEventListener('change', function() {
             let valdtBigardsID = this.value;
-            let cachedData = sessionStorage.getItem("myBeeApp_globalData") || sessionStorage.getItem("myBeeApp_allData");
+let cachedData =
+    sessionStorage.getItem("myBeeApp_allData");
             if (!cachedData) return;
             let data = JSON.parse(cachedData);
             uppdateraKuporDropdown(valdtBigardsID, data);
@@ -149,7 +152,9 @@
             }
 
             let samhallen = data.samhallen || [];
-            let minaSamhällen = samhallen.filter(s => s.BigardsID === bigardID);
+let minaSamhällen = samhallen.filter(
+    s => String(s.BigardsID) === String(bigardID)
+);
             
             minaSamhällen.forEach(s => {
                 let opt = document.createElement('option');
@@ -175,11 +180,20 @@
                 return;
             }
 
-            fodringLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+fodringLoggar.sort((a, b) =>
+    new Date(b.Datum || 0) -
+    new Date(a.Datum || 0)
+);
+
 
             fodringLoggar.forEach(f => {
-                let kupa = samhallen.find(s => s.SamhallsID === f.SamhallsID);
-                let bigard = bigardar.find(b => b.BigardsID === f.BigardsID);
+let kupa = samhallen.find(
+    s => String(s.SamhallsID) === String(f.SamhallsID)
+);
+
+let bigard = bigardar.find(
+    b => String(b.BigardsID) === String(f.BigardsID)
+);
                 let kupaNamn = kupa ? kupa.Kupbenamning : "Okänd kupa";
                 let bigardNamn = bigard ? bigard.Namn : "Okänd bigård";
                 let kortDatum = f.Datum ? f.Datum.substring(0, 10) : "";
@@ -189,7 +203,7 @@
                 item.style.borderLeftColor = '#f39c12';
                 item.innerHTML = `
                     <p style="margin-top: 0;"><strong>📅 ${kortDatum}</strong> - ${bigardNamn} / <strong>${kupaNamn}</strong></p>
-                    <p>🍯 <strong>Typ:</strong> ${f.Fodertyp || 'Foder'} | <strong>Mängd:</strong> ${f.Mangd || '-'}</p>
+<p>🍯 ${f.Mangd || '-'} av ${f.Fodertyp || 'Foder'}</p>
                     ${f.Anteckningar ? `<p><em>Anteckning: ${f.Anteckningar}</em></p>` : ''}
                 `;
                 listaDiv.appendChild(item);
@@ -202,17 +216,16 @@
             btn.disabled = true;
             btn.textContent = "Sparar fodring...";
 
-            const autoID = "FD" + Math.floor(1000 + Math.random() * 9000);
-            const formData = {
-                sheet: "Fodring",
-                FoderID: autoID,
-                BigardsID: document.getElementById('valt-bigard-foder').value,
-                SamhallsID: document.getElementById('valt-samhalle-foder').value,
-                Datum: document.getElementById('datum').value,
-                Fodertyp: document.getElementById('fodertyp').value,
-                Mangd: document.getElementById('mangd').value,
-                Anteckningar: document.getElementById('anteckningar').value
-            };
+const autoID = skapaID("FD");
+const formData = {
+    FoderID: autoID,
+    BigardsID: document.getElementById('valt-bigard-foder').value,
+    SamhallsID: document.getElementById('valt-samhalle-foder').value,
+    Datum: document.getElementById('datum').value,
+    Fodertyp: document.getElementById('fodertyp').value,
+    Mangd: document.getElementById('mangd').value,
+    Anteckningar: document.getElementById('anteckningar').value
+};
 
             await skickaDataTillMolnet("Fodring", formData, "foder.html");
             document.getElementById('foder-form').reset();
