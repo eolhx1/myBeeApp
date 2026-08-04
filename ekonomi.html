@@ -11,8 +11,9 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
         let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Kassabok</span></div>';
 
@@ -132,8 +133,7 @@
             submitBtn.textContent = "Sparar...";
 
             const nyTransaktion = {
-                sheet: "Ekonomi",
-                TransaktionsID: "TR" + Math.floor(1000 + Math.random() * 9000),
+TransaktionsID: skapaID("TR"),
                 datum: document.getElementById('datum').value,
                 typ: document.getElementById('typ').value,
                 kategori: document.getElementById('kategori').value,
@@ -141,9 +141,12 @@
                 anteckning: document.getElementById('anteckning').value
             };
 
-            let success = await sparaDataMedKoe(nyTransaktion);
+let success = await skickaDataTillMolnet(
+    "Ekonomi",
+    nyTransaktion,
+    "ekonomi.html"
+);
             if (success) {
-                alert("Transaktionen sparad!");
                 document.getElementById('eco-form').reset();
                 document.getElementById('datum').valueAsDate = new Date();
                 hamtaKassabokData();
@@ -167,22 +170,38 @@
             let totalIn = 0;
             let totalUt = 0;
 
-            let sorterade = transaktioner.slice().sort((a, b) => new Date(b.datum) - new Date(a.datum));
+let sorterade = transaktioner.slice().sort(
+    (a, b) =>
+        new Date((b.datum || b.Datum || 0)) -
+        new Date((a.datum || a.Datum || 0))
+);
+sorterade.forEach(t => {
 
-            sorterade.forEach(t => {
-                const beloppNum = Number(t.belopp) || 0;
-                if (t.typ === 'Inkomst') totalIn += beloppNum;
-                else totalUt += beloppNum;
+    const typ = t.typ || t.Typ || "";
+    const kategori = t.kategori || t.Kategori || "";
+    const anteckning = t.anteckning || t.Anteckning || "";
+
+    const datum = t.datum || t.Datum || "";
+
+    const beloppNum = Number(
+        t.belopp || t.Belopp
+    ) || 0;                
+	
+if (typ === 'Inkomst')
+    totalIn += beloppNum;
+else
+    totalUt += beloppNum;
 
                 const tr = document.createElement('tr');
-                let kortDatum = t.datum ? t.datum.substring(0, 10) : "";
-                tr.innerHTML = `
-                    <td>${kortDatum}</td>
-                    <td class="${t.typ === 'Inkomst' ? 'text-income' : 'text-expense'}">${t.typ}</td>
-                    <td>${t.kategori}</td>
-                    <td>${beloppNum.toLocaleString()} kr</td>
-                    <td>${t.anteckning || ''}</td>
-                `;
+let kortDatum =
+    datum ? datum.substring(0, 10) : "";
+tr.innerHTML = `
+    <td>${kortDatum}</td>
+    <td class="${typ === 'Inkomst' ? 'text-income' : 'text-expense'}">${typ}</td>
+    <td>${kategori}</td>
+    <td>${beloppNum.toLocaleString()} kr</td>
+    <td>${anteckning}</td>
+`;
                 tbody.appendChild(tr);
             });
 
