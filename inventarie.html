@@ -11,11 +11,10 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Inventarie</span></div>';
-
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -28,7 +27,11 @@
             </ul>
         `;
 
-        laddaHeader("📦 Inventarielista", breadcrumbs, "Om Inventarielistan", infoInnehall);
+laddaHeader(
+    "📦 Inventarielista",
+    "Om Inventarielistan",
+    infoInnehall
+);
     </script>
 
     <div class="container" style="max-width: 900px; margin: 20px auto; padding: 0 15px;">
@@ -125,24 +128,26 @@
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
             
-            const rowIndex = document.getElementById('rowIndex').value;
-            const actionType = rowIndex !== "" ? 'updateInventarie' : 'addInventarie';
-            
-            const formData = {
-                sheet: "Inventarie",
-                action: actionType,
-                rowIndex: rowIndex,
+const rowIndex = document.getElementById('rowIndex').value;
+const actionType = rowIndex !== "" ? 'updateInventarie' : 'addInventarie';
+
+const formData = {
+    action: actionType,
+    rowIndex: rowIndex,
                 artikel: document.getElementById('artikel').value,
                 kategori: document.getElementById('kategori').value,
-                lager: parseInt(document.getElementById('lager').value) || 0,
-                aktiva: parseInt(document.getElementById('aktiva').value) || 0,
+lager: Number(document.getElementById('lager').value) || 0,
+aktiva: Number(document.getElementById('aktiva').value) || 0,
                 placering: document.getElementById('placering').value,
                 anteckning: document.getElementById('anteckning').value
             };
 
-            let success = await sparaDataMedKoe(formData);
+let success = await skickaDataTillMolnet(
+    "Inventarie",
+    formData,
+    "inventarie.html"
+);
             if (success) {
-                alert(rowIndex !== "" ? "Artikel uppdaterad!" : "Artikel sparad!");
                 aterstallFormular();
                 hamtaInventarieData();
             }
@@ -159,8 +164,8 @@
             }
 
             artiklar.forEach((a, index) => {
-                const lager = parseInt(a.lager) || 0;
-                const aktiva = parseInt(a.aktiva) || 0;
+const lager = Number(a.lager) || 0;
+const aktiva = Number(a.aktiva) || 0;
                 const totalt = lager + aktiva;
 
                 const tr = document.createElement('tr');
@@ -205,23 +210,35 @@
             document.getElementById('cancel-btn').style.display = "none";
         }
 
-        async function taBortArtikel(index) {
-            if (!confirm("Är du säker på att du vill ta bort/avyttra denna artikel?")) return;
+async function taBortArtikel(index) {
+
+    visaBekraftelse(
+        "Ta bort artikel",
+        "Är du säker på att du vill ta bort eller avyttra denna artikel?",
+        async (bekraftat) => {
+
+            if (!bekraftat) return;
 
             const a = nuvarandeInventarieData[index];
+
             const formData = {
-                sheet: "Inventarie",
                 action: 'deleteInventarie',
                 rowIndex: index,
                 artikel: a.artikel
             };
 
-            let success = await sparaDataMedKoe(formData);
+            let success = await skickaDataTillMolnet(
+                "Inventarie",
+                formData,
+                "inventarie.html"
+            );
+
             if (success) {
-                alert("Artikel borttagen!");
                 hamtaInventarieData();
             }
         }
+    );
+}
 
         hamtaInventarieData();
     </script>
