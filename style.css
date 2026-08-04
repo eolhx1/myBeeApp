@@ -283,7 +283,7 @@ textarea, .form-group textarea {
 
 /* --- Övrigt & Vyer --- */
 #map {
-    height: 250px;
+    height: 320px;
     width: 100%;
     border-radius: 8px;
     margin-bottom: 1.5rem;
