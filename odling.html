@@ -11,11 +11,10 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Odling</span></div>';
-
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -28,7 +27,11 @@
             </ul>
         `;
 
-        laddaHeader("👑 Drottningodling", breadcrumbs, "Om Drottningodling", infoInnehall);
+laddaHeader(
+    "👑 Drottningodling",
+    "Om Drottningodling",
+    infoInnehall
+);
     </script>
 
     <div class="container" style="max-width: 600px; margin: 20px auto; padding: 0 15px;">
@@ -121,15 +124,16 @@
             submitBtn.disabled = true;
             submitBtn.textContent = "Sparar...";
 
-            const currentId = document.getElementById('odlings-id').value || ("O" + Math.floor(1000 + Math.random() * 9000));
+const currentId =
+    document.getElementById('odlings-id').value ||
+    skapaID("OD");
 
             const formData = {
-                sheet: "Odling",
-                action: "addOdling",
+                action: "Odling",
                 OdlingsID: currentId,
                 DatumOmlarvning: document.getElementById('datum-omlarvning').value,
-                MorKoloni: document.getElementById('mor-koloni').value,
-                AntalStartade: document.getElementById('antal-startade').value,
+                MorKoloni: document.getElementById('mor-koloni').value,	
+AntalStartade: Number(document.getElementById('antal-startade').value) || 0,
                 KlackDatum: document.getElementById('klack-datum').value,
                 ParingsKupa: document.getElementById('parings-kupa').value,
                 Status: document.getElementById('status').value,
@@ -137,9 +141,12 @@
                 Anteckningar: document.getElementById('anteckningar').value
             };
 
-            let success = await sparaDataMedKoe(formData);
+let success = await skickaDataTillMolnet(
+    "Odling",
+    formData,
+    "odling.html"
+);
             if (success) {
-                alert("Odlingspartiet har sparats!");
                 window.location.href = "index.html";
             } else {
                 submitBtn.disabled = false;
