@@ -248,22 +248,41 @@
             let aktivKupa = allaSamhällen.find(s => String(s.SamhallsID) === String(valtSamhallsID));
             let minaLoggar = skotselLoggar.filter(s => String(s.SamhallsID) === String(valtSamhallsID));
 
-            minaLoggar.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+minaLoggar.sort((a, b) =>
+    new Date(b.Datum || 0) -
+    new Date(a.Datum || 0)
+);
 
-            let antalBesök = minaLoggar.length;
+const aktuelltAr = new Date().getFullYear();
+
+let antalBesök = minaLoggar.filter(logg => {
+    if (!logg.Datum) return false;
+
+    return new Date(logg.Datum).getFullYear() === aktuelltAr;
+}).length;
+
             document.getElementById('stat-besok').textContent = antalBesök;
             document.getElementById('stat-drottning').textContent = aktivKupa && aktivKupa.DrottningAr ? aktivKupa.DrottningAr : "-";
 
             let totalSkördKilo = 0;
-            minaLoggar.forEach(l => {
-                if (l.SkattadMangd) {
-                    let matchNummer = l.SkattadMangd.match(/\d+/);
-                    if (matchNummer) {
-                        totalSkördKilo += parseInt(matchNummer[0]);
-                    }
-                }
-            });
-            document.getElementById('stat-skord').textContent = totalSkördKilo > 0 ? `${totalSkördKilo} kg` : "0 kg";
+minaLoggar.forEach(l => {
+    if (l.SkattadMangd) {
+
+        let matchNummer =
+            l.SkattadMangd.match(/[\d.,]+/);
+
+        if (matchNummer) {
+
+            totalSkördKilo += parseFloat(
+                matchNummer[0].replace(",", ".")
+            );
+        }
+    }
+});
+document.getElementById('stat-skord').textContent =
+    totalSkördKilo > 0
+        ? `${totalSkördKilo.toLocaleString('sv-SE')} kg`
+        : "0 kg";
             document.getElementById('statistik-card').style.display = 'block';
 
             let tidslinjeDiv = document.getElementById('tidslinje-lista');
@@ -281,9 +300,18 @@
                 let tempText = logg.Temperament || "Ej angivet";
 
                 let extraInfoHTML = "";
-                if (logg.Lakemedel) {
-                    extraInfoHTML += `<p style="color: #d35400; margin: 0.3rem 0;">💊 <strong>Läkemedel:</strong> ${logg.Lakemedel} (${logg.Diagnos || 'Behandling'}) - Mängd: ${logg.Mangd || '-'}</p>`;
-                }
+if (logg.Lakemedel) {
+    extraInfoHTML += `
+        <p style="color: #d35400; margin: 0.3rem 0;">
+            💊 <strong>Läkemedel:</strong>
+            ${logg.Lakemedel}
+            (${logg.Diagnos || 'Behandling'})
+            - Mängd: ${logg.Mangd || '-'}
+            ${logg.Karenstid ? ` | Karenstid: ${logg.Karenstid}` : ''}
+        </p>
+    `;
+}
+
                 if (logg.Kvalsternedfall) {
                     extraInfoHTML += `<p style="margin: 0.3rem 0;">🔬 <strong>Varroanedfall:</strong> ${logg.Kvalsternedfall} st</p>`;
                 }
@@ -293,6 +321,24 @@
                 if (logg.SkattadMangd) {
                     extraInfoHTML += `<p style="color: #e67e22; margin: 0.3rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
                 }
+
+if (logg.Fodertyp || logg.Fodermangd) {
+    extraInfoHTML += `
+        <p style="margin: 0.3rem 0;">
+            🥤 <strong>Foder:</strong>
+            ${logg.Fodermangd || '-'} ${logg.Fodertyp || ''}
+        </p>
+    `;
+}
+
+if (logg.Proteintyp || logg.Proteinmangd) {
+    extraInfoHTML += `
+        <p style="margin: 0.3rem 0;">
+            🌼 <strong>Proteinfoder:</strong>
+            ${logg.Proteinmangd || '-'} ${logg.Proteintyp || ''}
+        </p>
+    `;
+}
 
                 let item = document.createElement('div');
                 item.className = 'log-item';
