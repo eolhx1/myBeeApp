@@ -11,11 +11,10 @@
 <body>
 
     <!-- Gemensamma skript -->
-    <script src="header.js"></script>
-    <script src="api.js"></script>
+<script src="header.js"></script>
+<script src="api.js"></script>
+<script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Kalender</span></div>';
-
         // Informationstext till modalen som genereras av header.js
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
@@ -28,7 +27,11 @@
             </ul>
         `;
 
-        laddaHeader("🌸 Drag- & Blomningskalender", breadcrumbs, "Om Drag- & Blomningskalendern", infoInnehall);
+laddaHeader(
+    "🌸 Drag- & Blomningskalender",
+    "Om Drag- & Blomningskalendern",
+    infoInnehall
+);
     </script>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
@@ -61,18 +64,52 @@
             let listaDiv = document.getElementById('blomnings-lista');
             listaDiv.innerHTML = "";
 
-            if (!blommor || blommor.length === 0) {
-                listaDiv.innerHTML = "<p style='color: #777;'>Inga växter inlagda i kalendern ännu.</p>";
-                return;
-            }
+if (!blommor || blommor.length === 0) {
+    listaDiv.innerHTML = "<p style='color: #777;'>Inga växter inlagda i kalendern ännu.</p>";
+    return;
+}
 
-            blommor.forEach(b => {
+blommor.sort((a, b) => {
+
+    const namnA =
+        a.VäxtNamn ||
+        a.VaxtNamn ||
+        '';
+
+    const namnB =
+        b.VäxtNamn ||
+        b.VaxtNamn ||
+        '';
+
+    return namnA.localeCompare(
+        namnB,
+        'sv'
+    );
+});
+
+blommor.forEach(b => {
                 let card = document.createElement('div');
                 card.className = 'bloom-card';
                 card.style.cssText = "border-bottom: 1px solid #eee; padding: 10px 0;";
-                card.innerHTML = `
-                    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">🌱 ${b.VäxtNamn || b.VaxtNamn || 'Växt'}</h4>
-                    <p style="margin: 0 0 5px 0; font-size: 0.9rem;"><strong>Normal blomning:</strong> ${b.NormalTid || 'Ej angivet'}</p>
+card.innerHTML = `
+    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">
+        🌱 ${
+            b.VäxtNamn ||
+            b.VaxtNamn ||
+            b.Växtnamn ||
+            b.Vaxtnamn ||
+            'Växt'
+        }
+    </h4>
+    <p style="margin: 0 0 5px 0; font-size: 0.9rem;">
+        <strong>Normal blomning:</strong>
+        ${b.NormalTid || b.Blomningstid || 'Ej angivet'}
+    </p>
+    <p style="margin: 0; font-size: 0.9rem; color: #555;">
+        <em>Anteckning / Historik:</em>
+        ${b.Anteckningar || 'Inga anteckningar sparade.'}
+    </p>
+`;
                     <p style="margin: 0; font-size: 0.9rem; color: #555;"><em>Anteckning / Historik:</em> ${b.Anteckningar || 'Inga anteckningar sparade.'}</p>
                 `;
                 listaDiv.appendChild(card);
