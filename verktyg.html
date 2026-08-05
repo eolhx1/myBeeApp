@@ -13,11 +13,10 @@
     <!-- Gemensamma skript -->
     <script src="header.js"></script>
     <script src="api.js"></script>
+	<script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Verktyg</span></div>';
-
         // Informationstext till modalen som genereras av header.js
-        let infoInnehall = `
+        const infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Här hittar du praktiska kalkylatorer och hjälpmedel för den dagliga skötseln i bigården.
             </p>
@@ -28,7 +27,11 @@
             </ul>
         `;
 
-        laddaHeader("🛠️ Biodlarverktyg", breadcrumbs, "Om Biodlarverktyg", infoInnehall);
+        laddaHeader(
+		"🛠️ Biodlarverktyg", 
+		"Om Biodlarverktyg", 
+		infoInnehall
+		);
     </script>
 
     <div class="container" style="max-width: 800px; margin: 20px auto; padding: 0 15px;">
@@ -59,7 +62,7 @@
             </div>
 
             <div class="instructions">
-                <strong>Instruktion:</strong> Värm upp vattnet (behöver inte koka, men bli ordentligt varmt för att underlätta upplösningen). Häll i sockret under omrörning tills allt är helt upplöst och klart. Låt svalna till rumstemperatur innan tildelning till kuporna.
+                <strong>Instruktion:</strong> Värm upp vattnet (behöver inte koka, men bli ordentligt varmt för att underlätta upplösningen). Häll i sockret under omrörning tills allt är helt upplöst och klart. Låt svalna till rumstemperatur innan tilldelning till kuporna.
             </div>
         </div>
 
@@ -211,88 +214,92 @@
             document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
             
-            if (flikNamn === 'socker') {
-                document.querySelector('[onclick="bytFlik(\'socker\')"]').classList.add('active');
-                document.getElementById('sec-socker').classList.add('active');
-            } else if (flikNamn === 'oxalsyra') {
-                document.querySelector('[onclick="bytFlik(\'oxalsyra\')"]').classList.add('active');
-                document.getElementById('sec-oxalsyra').classList.add('active');
-            } else if (flikNamn === 'myrsyra') {
-                document.querySelector('[onclick="bytFlik(\'myrsyra\')"]').classList.add('active');
-                document.getElementById('sec-myrsyra').classList.add('active');
-            } else if (flikNamn === 'ymp') {
-                document.querySelector('[onclick="bytFlik(\'ymp\')"]').classList.add('active');
-                document.getElementById('sec-ymp').classList.add('active');
-            } else if (flikNamn === 'honung') {
-                document.querySelector('[onclick="bytFlik(\'honung\')"]').classList.add('active');
-                document.getElementById('sec-honung').classList.add('active');
-            } else if (flikNamn === 'schema') {
-                document.querySelector('[onclick="bytFlik(\'schema\')"]').classList.add('active');
-                document.getElementById('sec-schema').classList.add('active');
-            }
+document.querySelector(
+    `[onclick="bytFlik('${flikNamn}')"]`
+).classList.add('active');
+
+document.getElementById(
+    `sec-${flikNamn}`
+).classList.add('active');
+
         }
 
         // Sätt dagens datum som standard på schemasidan
-        document.getElementById('ymp-datum').valueAsDate = new Date();
-        raknaSchema();
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ymp-datum').valueAsDate = new Date();
+    raknaSchema();
+});
 
         function raknaSockerlag() {
-            let kg = parseFloat(document.getElementById('socker-mangd').value);
-            let resDiv = document.getElementById('sockerlag-resultat');
+const kg = Number(
+    document.getElementById('socker-mangd').value
+);
+
+            const resDiv = document.getElementById('sockerlag-resultat');
             if (!kg || kg <= 0) {
                 resDiv.innerHTML = `💧 Vatten att blanda i: <strong>- kg (liter)</strong><br>🍯 Uppskattad färdig volym: <strong>~- liter</strong>`;
                 return;
             }
-            let vattenKg = kg * (2/3);
-            let totalVolymL = (kg * 0.63) + vattenKg; 
+            const vattenKg = kg * (2/3);
+            const totalVolymL = (kg * 0.63) + vattenKg; 
             resDiv.innerHTML = `💧 Vatten att blanda i: <strong>${vattenKg.toFixed(1)} kg (liter)</strong><br>` +
                                `🍯 Uppskattad färdig volym: <strong>~${totalVolymL.toFixed(1)} liter</strong>`;
         }
 
         function raknaOxalsyra() {
-            let liter = parseFloat(document.getElementById('oxalsyra-liter').value);
-            let resDiv = document.getElementById('oxalsyra-resultat');
+const liter = Number(
+    document.getElementById('oxalsyra-liter').value
+);
+            const resDiv = document.getElementById('oxalsyra-resultat');
             if (!liter || liter <= 0) {
                 resDiv.innerHTML = `⚖️ Oxalsyrepulver: <strong>- gram</strong><br>🍬 Strösocker: <strong>- gram</strong><br>💧 Vatten: <strong>- ml</strong>`;
                 return;
             }
-            let gramPulver = liter * 35;
-            let sockerGram = liter * 600; 
-            let vattenMl = liter * 1000;
+            const gramPulver = liter * 35;
+            const sockerGram = liter * 600; 
+            const vattenMl = liter * 1000;
             resDiv.innerHTML = `⚖️ Oxalsyrepulver: <strong>${gramPulver.toFixed(1)} gram</strong><br>` +
                                `🍬 Strösocker: <strong>${sockerGram} gram</strong><br>` +
                                `💧 Vatten: <strong>${vattenMl} ml</strong>`;
         }
 
         function raknaMyrsyra() {
-            let cStart = parseFloat(document.getElementById('myrsyra-start').value);
-            let cMal = parseFloat(document.getElementById('myrsyra-mal').value);
-            let vMal = parseFloat(document.getElementById('myrsyra-volym').value);
-            let resDiv = document.getElementById('myrsyra-resultat');
+const cStart = Number(
+    document.getElementById('myrsyra-start').value
+);
+const cMal = Number(
+    document.getElementById('myrsyra-mal').value
+);
+const vMal = Number(
+    document.getElementById('myrsyra-volym').value
+);
+            const resDiv = document.getElementById('myrsyra-resultat');
             
             if (!cStart || !cMal || !vMal || cStart <= cMal) {
                 resDiv.innerHTML = `🧪 Stark syra: <strong>- ml</strong><br>💧 Vatten: <strong>- ml</strong>`;
                 return;
             }
 
-            let syraVolym = (cMal * vMal) / cStart;
-            let vattenVolym = vMal - syraVolym;
+            const syraVolym = (cMal * vMal) / cStart;
+            const vattenVolym = vMal - syraVolym;
 
             resDiv.innerHTML = `🧪 Stark syra (${cStart}%): <strong>${syraVolym.toFixed(1)} ml</strong><br>` +
                                `💧 Vatten: <strong>${vattenVolym.toFixed(1)} ml</strong>`;
         }
 
         function raknaYmp() {
-            let totalKg = parseFloat(document.getElementById('honung-total-vikt').value);
-            let resDiv = document.getElementById('ymp-resultat');
+const totalKg = Number(
+    document.getElementById('honung-total-vikt').value
+);		
+            const resDiv = document.getElementById('ymp-resultat');
             if (!totalKg || totalKg <= 0) {
                 resDiv.innerHTML = `🥄 Total mängd levande ymp (2,5%): <strong>- kg</strong><br>&nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>- g</strong><br>&nbsp;&nbsp;&nbsp;• Varav nyslungad/smält honung (90%): <strong>- kg</strong>`;
                 return;
             }
             
-            let totalYmpKg = totalKg * 0.025;
-            let kristalliseradDel = totalYmpKg * 0.10;
-            let flytandeDel = totalYmpKg * 0.90;
+            const totalYmpKg = totalKg * 0.025;
+            const kristalliseradDel = totalYmpKg * 0.10;
+            const flytandeDel = totalYmpKg * 0.90;
             
             resDiv.innerHTML = `🥄 Total mängd levande ymp som behövs (2,5%): <strong>${totalYmpKg.toFixed(2)} kg</strong><br>` +
                                `&nbsp;&nbsp;&nbsp;• Varav finkristalliserad honung (10%): <strong>${(kristalliseradDel*1000).toFixed(0)} g</strong><br>` +
@@ -300,30 +307,34 @@
         }
 
         function raknaHonungsmangd() {
-            let faktor = parseFloat(document.getElementById('ramformat').value);
-            let antal = parseFloat(document.getElementById('antal-ramar').value);
-            let resDiv = document.getElementById('honung-skörd-resultat');
+const faktor = Number(
+    document.getElementById('ramformat').value
+);	
+const antal = Number(
+    document.getElementById('antal-ramar').value
+);	
+            const resDiv = document.getElementById('honung-skörd-resultat');
 
             if (!antal || antal <= 0) {
                 resDiv.innerHTML = `🍯 Beräknad honungsskörd: <strong>- kg</strong> (ca <strong>- liter</strong>)`;
                 return;
             }
 
-            let totalKg = antal * faktor;
-            let totalLiter = totalKg / 1.42;
+            const totalKg = antal * faktor;
+            const totalLiter = totalKg / 1.42;
 
             resDiv.innerHTML = `🍯 Beräknad honungsskörd: <strong>${totalKg.toFixed(1)} kg</strong> (ca <strong>${totalLiter.toFixed(1)} liter</strong>)`;
         }
 
         function raknaSchema() {
-            let valdtDatum = document.getElementById('ymp-datum').value;
-            let resDiv = document.getElementById('schema-resultat');
+            const valdtDatum = document.getElementById('ymp-datum').value;
+            const resDiv = document.getElementById('schema-resultat');
             if (!valdtDatum) return;
 
-            let d = new Date(valdtDatum);
+            const d = new Date(valdtDatum);
             
             function laggTillDagar(datumObj, dagar) {
-                let ny = new Date(datumObj);
+                const ny = new Date(datumObj);
                 ny.setDate(ny.getDate() + dagar);
                 return ny.toLocaleDateString('sv-SE', { weekday: 'short', month: 'short', day: 'numeric' });
             }
