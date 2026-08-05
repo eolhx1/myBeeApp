@@ -61,11 +61,7 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
             <div id="sync-indicator" style="display: none; background: #e67e22; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #d35400;" title="Ändringar väntar på synk till molnet">
                 💾 <span id="sync-count">0</span>
             </div>
-<button
-    class="modal-close"
-    onclick="toggleSettingsMenu()">
-    &times;
-</button>
+            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
         </div>
     </header>
 
@@ -80,7 +76,11 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
         <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
-                <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">❌</button>
+<button
+    class="modal-close"
+    onclick="toggleSettingsMenu()">
+    &times;
+</button>
             </div>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
