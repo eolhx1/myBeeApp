@@ -669,7 +669,7 @@ table.inventory-table th {
     background: #ffffff;
     padding: 1.25rem;
     border-radius: 16px;
-    width: calc(100% - 4rem);
+    width: calc(100% - 6rem);
     max-width: 420px;
     max-height: 80vh;
     overflow-y: auto;
