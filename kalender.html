@@ -87,36 +87,40 @@ blommor.sort((a, b) => {
     );
 });
 
-blommor.forEach(b => {
-                let card = document.createElement('div');
-                card.className = 'bloom-card';
-                card.style.cssText = "border-bottom: 1px solid #eee; padding: 10px 0;";
-card.innerHTML = `
-    <h4 style="margin: 0 0 5px 0; color: #2c3e50;">
-        🌱 ${
-            b.VäxtNamn ||
-            b.VaxtNamn ||
-            b.Växtnamn ||
-            b.Vaxtnamn ||
-            'Växt'
-        }
-    </h4>
-    <p style="margin: 0 0 5px 0; font-size: 0.9rem;">
-        <strong>Normal blomning:</strong>
-        ${b.NormalTid || b.Blomningstid || 'Ej angivet'}
-    </p>
-    <p style="margin: 0; font-size: 0.9rem; color: #555;">
-        <em>Anteckning / Historik:</em>
-        ${b.Anteckningar || 'Inga anteckningar sparade.'}
-    </p>
-`;
+			blommor.forEach(b => {
 
-listaDiv.appendChild(card);
+				let card = document.createElement('div');
 
-                    <p style="margin: 0; font-size: 0.9rem; color: #555;"><em>Anteckning / Historik:</em> ${b.Anteckningar || 'Inga anteckningar sparade.'}</p>
-                `;
-                listaDiv.appendChild(card);
-            });
+				card.className = 'bloom-card';
+
+				card.style.cssText =
+					"border-bottom: 1px solid #eee; padding: 10px 0;";
+
+				card.innerHTML = `
+					<h4 style="margin: 0 0 5px 0; color: #2c3e50;">
+						🌱 ${
+							b.VäxtNamn ||
+							b.VaxtNamn ||
+							b.Växtnamn ||
+							b.Vaxtnamn ||
+							'Växt'
+						}
+					</h4>
+
+					<p style="margin: 0 0 5px 0; font-size: 0.9rem;">
+						<strong>Normal blomning:</strong>
+						${b.NormalTid || b.Blomningstid || 'Ej angivet'}
+					</p>
+
+					<p style="margin: 0; font-size: 0.9rem; color: #555;">
+						<em>Anteckning / Historik:</em>
+						${b.Anteckningar || 'Inga anteckningar sparade.'}
+					</p>
+				`;
+
+				listaDiv.appendChild(card);
+
+			});
         }
 
         laddaKalenderData();
