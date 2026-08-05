@@ -206,15 +206,23 @@ function visaAppModal(titel, meddelande, typ = 'alert', bekräftelseCallback = n
         `;
     }
 
-    const modalHtml = `
-        <div id="app-custom-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 1rem;">
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333;">
- <h3>${infoRubrik}</h3>
-                <p style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 1rem 0;">${meddelande}</p>
-                ${knapparHtml}
-            </div>
+const modalHtml = `
+    <div id="app-custom-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 1rem;">
+
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333;">
+
+            <h3>${titel}</h3>
+
+            <p style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 1rem 0;">
+                ${meddelande}
+            </p>
+
+            ${knapparHtml}
+
         </div>
-    `;
+
+    </div>
+`;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
