@@ -6,28 +6,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyBeeApp - Snabbkoll</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Stil för klickbara snabbknappar */
+        .snabb-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        @supports (display: grid) {
+            @media (min-width: 480px) {
+                .snabb-grid {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+        }
+        .snabb-btn {
+            background-color: #f8f9f9;
+            border: 2px solid #e5e7e9;
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .snabb-btn:hover {
+            border-color: #34495e;
+            background-color: #f2f4f4;
+        }
+        .snabb-btn.active {
+            background-color: #eaf2f8;
+            border-color: #3498db;
+            color: #2980b9;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
     <!-- Generera gemensam header och API -->
     <script src="header.js"></script>
-<script src="./api.js"></script>
-
+    <script src="api.js"></script>
+	<script src="utils.js"></script>
     <script>
-        let breadcrumbs = '<div style="display: flex; align-items: center; gap: 0.4rem;"><a href="index.html" style="color: white; text-decoration: none;">🏠 Hem</a><span> &gt; </span><span>Snabbkoll</span></div>';
-
         let infoInnehall = `
             <p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
                 Använd snabbkollen för att göra en snabb och effektiv anteckning direkt vid kuporna utan att behöva fylla i onödiga detaljer.
             </p>
             <ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
                 <li><strong>1. Välj bigård & kupa:</strong> Markera vart besöket har skett.</li>
-                <li><strong>2. Checklista:</strong> Bocka av det viktigaste.</li>
+                <li><strong>2. Checklista:</strong> Klicka i det som stämmer med ikoner.</li>
                 <li><strong>3. Spara:</strong> Skickas direkt till molnet och sparas i historiken.</li>
             </ul>
         `;
 
-        laddaHeader("⚡ Snabbkoll", breadcrumbs, "Om Snabbkoll", infoInnehall);
+laddaHeader(
+    "⚡ Snabbkoll i bigård",
+    "Om Snabbkoll",
+    infoInnehall
+);
     </script>
 
     <div class="container">
@@ -49,47 +91,55 @@
                 </div>
             </div>
 
-            <!-- Snabb-alternativ -->
+            <!-- Snabb-alternativ med knappar -->
             <div class="card">
                 <h3>Snabbstatus</h3>
+                
+                <!-- Drottningstatus -->
                 <div class="form-group">
                     <label>Drottningstatus:</label>
-                    <select id="snabb-drottning" name="Drottningsett">
-                        <option value="">-- Välj --</option>
-                        <option value="Drottning sedd">Drottning sedd</option>
-                        <option value="Ägg ses">Ägg ses</option>
-                        <option value="Drottning ej sedd / Osäker">Drottning ej sedd / Osäker</option>
-                        <option value="Ny drottning tillsatt">Ny drottning tillsatt</option>
-                    </select>
+                    <input type="hidden" id="vald-drottning" name="Drottningsett">
+                    <div class="snabb-grid" data-group="drottning">
+                        <button type="button" class="snabb-btn" data-value="Drottning sedd">👑 Drottning sedd</button>
+                        <button type="button" class="snabb-btn" data-value="Ägg ses">🥚 Ägg ses</button>
+                        <button type="button" class="snabb-btn" data-value="Drottning ej sedd / Osäker">❓ Osäker / Ej sedd</button>
+                        <button type="button" class="snabb-btn" data-value="Ny drottning tillsatt">⭐ Ny tillsatt</button>
+                    </div>
                 </div>
+
+                <!-- Svärmlystnad -->
                 <div class="form-group">
                     <label>Svärmlystnad:</label>
-                    <select id="snabb-svarm" name="Svarmlystnad">
-                        <option value="">-- Välj --</option>
-                        <option value="Inga svärmceller">Inga svärmceller</option>
-                        <option value="Trekantsceller / Byggceller">Trekantsceller / Byggceller</option>
-                        <option value="Sträckta svärmceller">Sträckta svärmceller</option>
-                        <option value="Svärmad / Befintlig svärm">Svärmad / Befintlig svärm</option>
-                    </select>
+                    <input type="hidden" id="vald-svarm" name="Svarmlystnad">
+                    <div class="snabb-grid" data-group="svarm">
+                        <button type="button" class="snabb-btn" data-value="Inga svärmceller">✅ Inga svärmceller</button>
+                        <button type="button" class="snabb-btn" data-value="Trekantsceller / Byggceller">⚠️ Byggceller</button>
+                        <button type="button" class="snabb-btn" data-value="Sträckta svärmceller">🚨 Sträckta celler</button>
+                        <button type="button" class="snabb-btn" data-value="Svärmad / Befintlig svärm">🐝 Svärmad</button>
+                    </div>
                 </div>
+
+                <!-- Temperament -->
                 <div class="form-group">
                     <label>Temperament / Humör:</label>
-                    <select id="snabb-temp" name="Temperament">
-                        <option value="">-- Välj --</option>
-                        <option value="Lugna bin">Lugna bin</option>
-                        <option value="Normala / Följsamma">Normala / Följsamma</option>
-                        <option value="Stickiga / Aggressiva">Stickiga / Aggressiva</option>
-                    </select>
+                    <input type="hidden" id="vald-temp" name="Temperament">
+                    <div class="snabb-grid" data-group="temp">
+                        <button type="button" class="snabb-btn" data-value="Lugna bin">🕊️ Lugna bin</button>
+                        <button type="button" class="snabb-btn" data-value="Normala / Följsamma">😊 Normala / Följsamma</button>
+                        <button type="button" class="snabb-btn" data-value="Stickiga / Aggressiva">⚡ Stickiga / Aggressiva</button>
+                    </div>
                 </div>
+
+                <!-- Allmän status / Foder -->
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Allmän status / Foder:</label>
-                    <select id="snabb-status" name="AllmanStatus">
-                        <option value="">-- Välj --</option>
-                        <option value="Gott om mat">Gott om mat</option>
-                        <option value="Risk för foderbrist">Risk för foderbrist</option>
-                        <option value="Starkt samhälle">Starkt samhälle</option>
-                        <option value="Svagt samhälle">Svagt samhälle</option>
-                    </select>
+                    <input type="hidden" id="vald-status" name="AllmanStatus">
+                    <div class="snabb-grid" data-group="status">
+                        <button type="button" class="snabb-btn" data-value="Gott om mat">🍯 Gott om mat</button>
+                        <button type="button" class="snabb-btn" data-value="Risk för foderbrist">⚠️ Risk för foderbrist</button>
+                        <button type="button" class="snabb-btn" data-value="Starkt samhälle">💪 Starkt samhälle</button>
+                        <button type="button" class="snabb-btn" data-value="Svagt samhälle">📉 Svagt samhälle</button>
+                    </div>
                 </div>
             </div>
 
@@ -110,6 +160,28 @@
     </div>
 
     <script>
+        // Logik för att hantera klickbara knappar
+        document.querySelectorAll('.snabb-grid').forEach(grid => {
+            const buttons = grid.querySelectorAll('.snabb-btn');
+            const hiddenInputId = 'vald-' + grid.getAttribute('data-group');
+            const hiddenInput = document.getElementById(hiddenInputId);
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Om knappen redan är aktiv, avmarkera den
+                    if (btn.classList.contains('active')) {
+                        btn.classList.remove('active');
+                        hiddenInput.value = '';
+                    } else {
+                        // Annars ta bort active från övriga i gruppen och aktivera denna
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        hiddenInput.value = btn.getAttribute('data-value');
+                    }
+                });
+            });
+        });
+
         async function init() {
             let allData = await hamtaData();
             if (allData) {
@@ -129,6 +201,13 @@
                 bigardSelect.innerHTML = '<option value="">Inga bigårdar inlagda</option>';
                 return;
             }
+
+bigårdar.sort((a, b) =>
+    (a.Namn || "").localeCompare(
+        b.Namn || "",
+        "sv"
+    )
+);
 
             bigårdar.forEach(b => {
                 let opt = document.createElement('option');
@@ -151,8 +230,15 @@
 
             let allData = dataProvided;
             if (!allData) {
-                let cachedData = sessionStorage.getItem("myBeeApp_allData");
-                if (cachedData) allData = JSON.parse(cachedData);
+let cachedData = sessionStorage.getItem("myBeeApp_allData");
+
+if (cachedData) {
+    try {
+        allData = JSON.parse(cachedData);
+    } catch (e) {
+        console.error("Kunde inte läsa cache:", e);
+    }
+}
             }
 
             let samhalleSelect = document.getElementById('snabb-samhalle');
@@ -188,8 +274,7 @@
             let formData = new FormData(this);
             let data = Object.fromEntries(formData.entries());
 
-            data.sheet = "Skotsel";
-            data.SkotselID = "SK" + Math.floor(1000 + Math.random() * 9000);
+data.SkotselID = skapaID("SK");
             data.Datum = new Date().toISOString().split('T')[0];
 
             let extraAnteckningar = [];
@@ -198,7 +283,16 @@
             data.Anteckningar = extraAnteckningar.join(' - ');
             delete data.AllmanStatus;
 
-            await skickaDataTillMolnet("Skotsel", data, "historik.html");
+let success = await skickaDataTillMolnet(
+    "Skotsel",
+    data,
+    "historik.html"
+);
+
+if (!success) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Spara snabbkoll";
+}
         });
 
         init();
