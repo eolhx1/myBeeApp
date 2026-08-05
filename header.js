@@ -61,7 +61,11 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
             <div id="sync-indicator" style="display: none; background: #e67e22; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #d35400;" title="Ändringar väntar på synk till molnet">
                 💾 <span id="sync-count">0</span>
             </div>
-            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
+<button
+    class="modal-close"
+    onclick="toggleSettingsMenu()">
+    &times;
+</button>
         </div>
     </header>
 
