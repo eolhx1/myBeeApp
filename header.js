@@ -89,17 +89,29 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
         </div>
     </div>
 
-    <!-- Info-modal -->
-    ${infoRubrik ? `
-    <div id="info-modal" class="modal-overlay" onclick="stangInfoModalKlickUtanför(event)" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-        <div class="modal-content" style="background: white; padding: 25px; border-radius: 8px; max-width: 500px; width: 90%; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-            <button class="modal-close" onclick="stangInfoModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            <h3 style="margin-top: 0; color: #2c3e50;">${infoRubrik}</h3>
-            <div style="color: #555; font-size: 0.95rem; line-height: 1.5;">
-                ${infoTextHtml}
-            </div>
+<!-- Info-modal -->
+${infoRubrik ? `
+<div id="info-modal"
+     class="modal-overlay"
+     onclick="stangInfoModalKlickUtanför(event)"
+     style="display:none;">
+
+    <div class="modal-content">
+
+        <button class="modal-close"
+                onclick="stangInfoModal()">
+            &times;
+        </button>
+
+        <h3>${infoRubrik}</h3>
+
+        <div>
+            ${infoTextHtml}
         </div>
-    </div>` : ''}
+
+    </div>
+
+</div>` : ''}
 
     ${breadcrumbHTML ? `<div class="nav-bar">${breadcrumbHTML}</div>` : ''}
     `;

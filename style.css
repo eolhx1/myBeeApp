@@ -652,6 +652,19 @@ table.inventory-table th {
 }
 
 /* --- Modal (Gemensam stil för alla sidor) --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 3000;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
 .modal-content {
     background: #ffffff;
     padding: 1.25rem;
@@ -662,19 +675,24 @@ table.inventory-table th {
     overflow-y: auto;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     position: relative;
+    margin: auto;
 }
 
-.modal-content {
-    background: #ffffff;
-    padding: 1.25rem;
-    border-radius: 16px;
-    width: calc(100% - 3rem);
-    max-width: 450px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    position: relative;
+.modal-content h2,
+.modal-content h3 {
+    color: #d35400;
+    margin-top: 0;
 }
+
+.modal-content ul {
+    padding-left: 1.2rem;
+}
+
+.modal-content li {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
 
 .modal-close {
     position: absolute;
@@ -694,20 +712,6 @@ table.inventory-table th {
     cursor: pointer;
 }
 
-.modal-content h2,
-.modal-content h3 {
-    color: #d35400;
-    margin-top: 0;
-}
-
-.modal-content ul {
-    padding-left: 1.2rem;
-}
-
-.modal-content li {
-    margin-bottom: 0.75rem;
-    line-height: 1.5;
-}
 
 .modal-close:hover {
     background: #e9ecef;
