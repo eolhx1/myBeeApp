@@ -160,27 +160,6 @@ function bytUrlSide() {
     });
 }
 
-function rensaAllLokalData() {
-    visaBekraftelse(
-        "Rensa data",
-        "Vill du rensa all lokal data? Detta tar bort sparade inställningar och offline-kö.",
-        (bekraftat) => {
-            if (bekraftat) {
-                localStorage.clear();
-                sessionStorage.clear();
-
-                visaMeddelande(
-                    "Rensat",
-                    "All lokal data har rensats.",
-                    () => {
-                        window.location.href = "index.html";
-                    }
-                );
-            }
-        }
-    );
-}
-
 
 // ==========================================
 // CENTRAL MODAL-MOTOR (DRY-principen)

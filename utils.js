@@ -1,12 +1,30 @@
 // Filnamn: utils.js
 
 function rensaAllLokalData() {
-    if (confirm("Är du säker på att du vill rensa all lokalt sparad data? Detta tar bort din sparade länk och all cache.")) {
-        localStorage.clear();
-        sessionStorage.clear();
-        alert("All lokal data har rensats.");
-        window.location.href = "index.html";
-    }
+
+    visaBekraftelse(
+        "Rensa data",
+        "Vill du rensa all lokal data? Detta tar bort sparade inställningar, cache och offline-kö.",
+        (bekraftat) => {
+
+            if (bekraftat) {
+
+                localStorage.clear();
+                sessionStorage.clear();
+
+                visaMeddelande(
+                    "Rensat",
+                    "All lokal data har rensats.",
+                    () => {
+                        window.location.href = "index.html";
+                    }
+                );
+
+            }
+
+        }
+    );
+
 }
 
 function skapaID(prefix) {
