@@ -15,22 +15,49 @@
 <script src="utils.js"></script>
     <script>
 // Informationstext till modalen som genereras av header.js
+const titel = "🐝 Skötselkort";
+
+const infoRubrik = "Om skötselkortet";
+
 let infoInnehall = `
-	<p style="margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
-		TODO: text här
-	</p>
-	<ul style="color: #555; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.4;">
-		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
-		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
-		<li><strong>TODO: Rubrik:</strong> TODO: text här</li>
-	</ul>
+<p style="margin-top:0; color:#555; font-size:0.95rem; line-height:1.5;">
+Här registrerar du alla besök, observationer och åtgärder för en bigård och dess samhällen.
+</p>
+
+<ul style="color:#555; font-size:0.9rem; padding-left:1.2rem; line-height:1.4;">
+    <li>
+        <strong>Samhällen:</strong>
+        Lägg till kupor och håll reda på drottningens årgång.
+    </li>
+
+    <li>
+        <strong>Besökslogg:</strong>
+        Registrera drottningstatus, svärmlystnad, temperament och anteckningar.
+    </li>
+
+    <li>
+        <strong>Bihälsa:</strong>
+        Registrera varroanedfall, sjukdomskontroller och behandlingar.
+    </li>
+
+    <li>
+        <strong>Foder & skörd:</strong>
+        Dokumentera utfodring, proteintillskott och honungsskörd.
+    </li>
+
+    <li>
+        <strong>Historik:</strong>
+        Alla besök sparas och kan följas över tid.
+    </li>
+</ul>
 `;
-	
+
 laddaHeader(
     titel,
     infoRubrik,
     infoInnehall
 );
+
     </script>
 
     <!-- Dolt formulär för att lägga till samhälle -->
@@ -346,7 +373,9 @@ laddaHeader(
             let aktuell = bigårdar.find(b => b.BigardsID === bigardsId);
             if (aktuell) {
                 document.getElementById('bigard-titel').textContent = `Bigård: ${aktuell.Namn}`;
-                document.getElementById('bread-bigard').textContent = aktuell.Namn;
+if (document.getElementById('bread-bigard')) {
+    document.getElementById('bread-bigard').textContent = aktuell.Namn;
+}
             }
 
             let samhalleListaDiv = document.getElementById('samhalle-lista');
@@ -407,6 +436,24 @@ laddaHeader(
                     if (logg.SkattadMangd) {
                         extraInfoHTML += `<p style="color: #e67e22; margin: 0.2rem 0;">🍯 <strong>Skörd:</strong> ${logg.SkattadMangd}</p>`;
                     }
+					
+if (logg.Fodertyp || logg.Fodermangd) {
+    extraInfoHTML += `
+        <p style="color:#3498db; margin:0.2rem 0;">
+            🍯 <strong>Foder:</strong>
+            ${logg.Fodertyp || ''} ${logg.Fodermangd || ''}
+        </p>
+    `;
+}
+
+if (logg.Proteintyp || logg.Proteinmangd) {
+    extraInfoHTML += `
+        <p style="color:#27ae60; margin:0.2rem 0;">
+            🌼 <strong>Proteintillskott:</strong>
+            ${logg.Proteintyp || ''} ${logg.Proteinmangd || ''}
+        </p>
+    `;
+}
 
                     let kortDatum = logg.Datum ? logg.Datum.substring(0, 10): "";
 
@@ -465,17 +512,27 @@ laddaHeader(
                         document.getElementById("bihalsa-arrow").textContent = "▲";
                     }
 
-                    document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
-                    if (matchadLogg.SkattadMangd) {
-                        document.getElementById("skordSection").style.display = "block";
-                        document.getElementById("skord-arrow").textContent = "▲";
-                    }
+document.getElementById("skattadMangd").value = matchadLogg.SkattadMangd || "";
+
+if (matchadLogg.SkattadMangd) {
+    document.getElementById("skordSection").style.display = "block";
+    document.getElementById("skord-arrow").textContent = "▲";
+}
 					
 document.getElementById("fodertyp").value = matchadLogg.Fodertyp || "";
 document.getElementById("fodermangd").value = matchadLogg.Fodermangd || "";
 
 document.getElementById("proteintyp").value = matchadLogg.Proteintyp || "";
 document.getElementById("proteinmangd").value = matchadLogg.Proteinmangd || "";
+if (
+    matchadLogg.Fodertyp ||
+    matchadLogg.Fodermangd ||
+    matchadLogg.Proteintyp ||
+    matchadLogg.Proteinmangd
+) {
+    document.getElementById("foderSection").style.display = "block";
+    document.getElementById("foder-arrow").textContent = "▲";
+}
 
                     document.getElementById("lakemedel").value = matchadLogg.Lakemedel || "";
                     document.getElementById("diagnos").value = matchadLogg.Diagnos || "";
@@ -512,13 +569,18 @@ document.getElementById("fodermangd").value = "";
 document.getElementById("proteintyp").value = "";
 document.getElementById("proteinmangd").value = "";
 
-                    document.getElementById("bihalsaSection").style.display = "none";
-                    document.getElementById("bihalsa-arrow").textContent = "▼";
-                    document.getElementById("skordSection").style.display = "none";
-                    document.getElementById("skord-arrow").textContent = "▼";
-                    document.getElementById("lakemedelsJournalSection").style.display = "none";
-                    document.getElementById("journal-arrow").textContent = "▼";
-                }
+document.getElementById("bihalsaSection").style.display = "none";
+document.getElementById("bihalsa-arrow").textContent = "▼";
+
+document.getElementById("skordSection").style.display = "none";
+document.getElementById("skord-arrow").textContent = "▼";
+
+document.getElementById("foderSection").style.display = "none";
+document.getElementById("foder-arrow").textContent = "▼";
+
+document.getElementById("lakemedelsJournalSection").style.display = "none";
+document.getElementById("journal-arrow").textContent = "▼";
+}
 
             } catch (err) {
                 console.error("Kunde inte söka efter befintlig logg för autofyll", err);
