@@ -103,7 +103,7 @@ ${infoRubrik ? `
             &times;
         </button>
 
-        <h3>${infoRubrik}</h3>
+        <h3>${titel}</h3>
 
         <div>
             ${infoTextHtml}
@@ -161,15 +161,24 @@ function bytUrlSide() {
 }
 
 function rensaAllLokalData() {
-    visaBekraftelse("Rensa data", "Vill du rensa all lokal data? Detta tar bort sparade inställningar och offline-kö.", (bekraftat) => {
-        if (bekraftat) {
-            localStorage.clear();
-            sessionStorage.clear();
-            visaMeddelande("Rensat", "All lokal data har rensats.", () => {
-                window.location.href = "index.html";
-            });
+    visaBekraftelse(
+        "Rensa data",
+        "Vill du rensa all lokal data? Detta tar bort sparade inställningar och offline-kö.",
+        (bekraftat) => {
+            if (bekraftat) {
+                localStorage.clear();
+                sessionStorage.clear();
+
+                visaMeddelande(
+                    "Rensat",
+                    "All lokal data har rensats.",
+                    () => {
+                        window.location.href = "index.html";
+                    }
+                );
+            }
         }
-    });
+    );
 }
 
 
