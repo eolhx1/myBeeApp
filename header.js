@@ -189,8 +189,14 @@ const modalHtml = `
 <div id="app-custom-modal"
      class="modal-overlay"
      style="display:flex;">
-
+	 
 <div class="modal-content">
+
+<button
+    class="modal-close"
+    id="modal-close-btn">
+    &times;
+</button>
 
             <h3>${titel}</h3>
 
@@ -206,6 +212,21 @@ const modalHtml = `
 `;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+	let closeBtn = document.getElementById('modal-close-btn');
+
+if (closeBtn) {
+
+    closeBtn.onclick = function() {
+
+        document.getElementById('app-custom-modal').remove();
+
+        if (bekräftelseCallback) {
+            bekräftelseCallback(false);
+        }
+
+    };
+
+}
 
     document.getElementById('modal-bekräfta-btn').onclick = function() {
         document.getElementById('app-custom-modal').remove();
