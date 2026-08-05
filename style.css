@@ -282,6 +282,34 @@ textarea, .form-group textarea {
     text-decoration: underline;
 }
 
+/* --- Web App-länk --- */
+#setup-screen {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+
+#setup-screen h2 {
+    color: #d35400;
+    margin-top: 0;
+}
+
+#setup-screen input {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+#setup-screen {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
 /* --- Övrigt & Vyer --- */
 #map {
     height: 320px;
@@ -291,18 +319,7 @@ textarea, .form-group textarea {
     overflow: hidden;
 }
 
-#setup-screen {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-top: 1rem;
-    text-align: center;
-}
 
-#setup-screen h2 {
-    color: #d35400;
-    margin-top: 0;
 }
 
 #offline-banner {

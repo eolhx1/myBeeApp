@@ -58,16 +58,20 @@ laddaHeader(
 
         <!-- Setup om URL saknas -->
         <div id="setup-screen" style="display: none;">
-            <h2>Anslut din app</h2>
-            <p>
-                Klistra in din Google Apps Script Web App URL nedan:
-            </p>
+<h2>🔗 Anslut din app</h2>
+<p>
+Ange URL till din Google Apps Script-tjänst.
+</p>
 <input
     type="text"
     id="url-input"
     autocomplete="off"
     placeholder="https://script.google.com/macros/s/.../exec">
-            <button onclick="sparaUrl()">Anslut</button>
+<button
+    onclick="sparaUrl()"
+    class="btn">
+    🚀 Anslut
+</button>
         </div>
 
         <!-- Huvudinnehåll -->
