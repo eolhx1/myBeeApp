@@ -186,9 +186,11 @@ function visaAppModal(titel, meddelande, typ = 'alert', bekräftelseCallback = n
     }
 
 const modalHtml = `
-    <div id="app-custom-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 1rem;">
+<div id="app-custom-modal"
+     class="modal-overlay"
+     style="display:flex;">
 
-        <div style="background: white; padding: 1.5rem; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333;">
+<div class="modal-content">
 
             <h3>${titel}</h3>
 
