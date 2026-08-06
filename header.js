@@ -89,8 +89,22 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
                     <span>🌙 Mörkt läge (kommer)</span>
                     <input type="checkbox" disabled title="Kommer snart" style="cursor: not-allowed;">
                 </div>
-                <button onclick="bytUrlSide()" style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Byt anslutningslänk</button>
-                <button onclick="rensaAllLokalData()" style="background: #c0392b; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">🗑️ Rensa all lokal data</button>
+
+                <button onclick="bytUrlSide()" 
+				style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+				Byt anslutningslänk
+				</button>
+
+<button onclick="visaUrlSide()"
+        style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+    Visa anslutningslänk
+</button>
+
+                <button onclick="rensaAllLokalData()" 
+				style="background: #c0392b; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+				🗑️ Rensa all lokal data
+				</button>
+
             </div>
         </div>
     </div>
@@ -166,6 +180,10 @@ function bytUrlSide() {
     });
 }
 
+<button onclick="visaUrlSide()"
+        style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+    Visa anslutningslänk
+</button>
 
 // ==========================================
 // CENTRAL MODAL-MOTOR (DRY-principen)
