@@ -51,19 +51,58 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
     }
 
     const headerHTML = `
-    <header style="display: flex; justify-content: space-between; align-items: center; background-color: #f39c12; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1000;">
-        <button class="menu-btn" onclick="toggleSidebar()" style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;" aria-label="Meny">☰</button>
-        <h1 id="page-header-title" style="margin: 0; font-size: 1.2rem; text-align: center;">${titelText}</h1>
-        
-        <!-- Höger-container för synk-indikator och inställningar -->
+<header>
+
+    <div class="header-top">
+
+        <button
+            class="menu-btn"
+            onclick="toggleSidebar()"
+            style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;"
+            aria-label="Meny">
+            ☰
+        </button>
+
+        <h1
+            id="page-header-title"
+            style="margin: 0; font-size: 1.2rem; text-align: center;">
+            ${titelText}
+        </h1>
+
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <!-- Synk-indikator (visas endast om det finns köad data) -->
-            <div id="sync-indicator" style="display: none; background: #e67e22; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #d35400;" title="Ändringar väntar på synk till molnet">
+
+            <div
+                id="sync-indicator"
+                style="display: none; background: #e67e22; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #d35400;"
+                title="Ändringar väntar på synk till molnet">
+
                 💾 <span id="sync-count">0</span>
+
             </div>
-            <button onclick="toggleSettingsMenu()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer;" title="Inställningar" aria-label="Inställningar">⚙️</button>
+
+            <button
+                onclick="toggleSettingsMenu()"
+                style="background: none; border: none; font-size: 1.3rem; cursor: pointer;"
+                title="Inställningar"
+                aria-label="Inställningar">
+
+                ⚙️
+
+            </button>
+
         </div>
-    </header>
+
+    </div>
+
+    ${breadcrumbHTML ? `
+    <div class="nav-bar">
+        ${breadcrumbHTML}
+    </div>
+    ` : ''}
+
+</header>
+
+    <!-- Sidomeny (Sidebar) -->
 
     <!-- Sidomeny (Sidebar) -->
     <div id="mySidebar" class="sidebar" style="height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #2c3e50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 5px rgba(0,0,0,0.5);">
@@ -133,7 +172,7 @@ ${infoRubrik ? `
 
 </div>` : ''}
 
-    ${breadcrumbHTML ? `<div class="nav-bar">${breadcrumbHTML}</div>` : ''}
+ 
     `;
 
     document.body.insertAdjacentHTML('afterbegin', headerHTML);
