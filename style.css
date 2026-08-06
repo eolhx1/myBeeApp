@@ -711,6 +711,7 @@ table.inventory-table th {
 display: flex;
 align-items: center;
 justify-content: center;
+line-height: 1;
 	
     position: fixed;
     right: 20px;
