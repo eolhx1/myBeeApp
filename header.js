@@ -185,21 +185,32 @@ function visaUrlSide() {
     let url = localStorage.getItem("myBeeApp_url");
 
     if (!url) {
-
         visaMeddelande(
             "Anslutningslänk",
             "Ingen anslutningslänk är sparad."
         );
-
         return;
     }
 
-    navigator.clipboard.writeText(url);
+    let modalHtml = `
+    <div style="word-break: break-all; margin-bottom: 15px;">
+        ${url}
+    </div>
+
+    <button
+        onclick="
+    navigator.clipboard.writeText('${url}');
+    this.innerHTML='✅ Kopierad';
+"
+        style="background:#7f8c8d;color:white;border:none;
+               padding:8px 12px;border-radius:4px;cursor:pointer;">
+        📋 Kopiera
+    </button>
+    `;
 
     visaMeddelande(
         "Anslutningslänk",
-        `Länken har kopierats till urklipp.<br><br>
-        <div style="word-break: break-all;">${url}</div>`
+        modalHtml
     );
 }
 
@@ -243,9 +254,9 @@ const modalHtml = `
 
             <h3>${titel}</h3>
 
-            <p style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 1rem 0;">
-                ${meddelande}
-            </p>
+<div style="color: #555; font-size: 0.95rem; line-height: 1.5; margin: 1rem 0;">
+    ${meddelande}
+</div>
 
             ${knapparHtml}
 
