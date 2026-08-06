@@ -94,11 +94,11 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
 				style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
 				Byt anslutningslänk
 				</button>
-
+				
 <button onclick="visaUrlSide()"
-        style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+    style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
     Visa anslutningslänk
-</button>
+</button>		
 
                 <button onclick="rensaAllLokalData()" 
 				style="background: #c0392b; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
@@ -180,10 +180,29 @@ function bytUrlSide() {
     });
 }
 
-<button onclick="visaUrlSide()"
-        style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
-    Visa anslutningslänk
-</button>
+function visaUrlSide() {
+
+    let url = localStorage.getItem("myBeeApp_url");
+
+    if (!url) {
+
+        visaMeddelande(
+            "Anslutningslänk",
+            "Ingen anslutningslänk är sparad."
+        );
+
+        return;
+    }
+
+    navigator.clipboard.writeText(url);
+
+    visaMeddelande(
+        "Anslutningslänk",
+        `Länken har kopierats till urklipp.<br><br>
+        <div style="word-break: break-all;">${url}</div>`
+    );
+}
+
 
 // ==========================================
 // CENTRAL MODAL-MOTOR (DRY-principen)
