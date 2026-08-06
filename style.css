@@ -252,23 +252,6 @@ textarea, .form-group textarea {
     text-decoration: none;
 }
 
-.nav-bar {
-	margin-bottom: 15px;
-    background-color: #e67e22;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.nav-bar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.nav-bar a:hover {
-    text-decoration: underline;
-}
 
 .back-link {
     display: block;
@@ -606,9 +589,14 @@ table.inventory-table th {
     color: white;
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    position: sticky;
+    top: 0;
+    z-index: 999;
 }
 
 /* Ser till att brödsmulstexten alltid ligger samlad till vänster */
@@ -715,4 +703,36 @@ table.inventory-table th {
 
 .modal-close:hover {
     background: #e9ecef;
+}
+
+/* --- GENERISK SNABBKNAPP --- */
+.fab-button {
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    width: 60px;
+    height: 60px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #27ae60;
+    color: white;
+
+    font-size: 1.8rem;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+    z-index: 1500;
+
+    transition: 0.2s;
+}
+
+.fab-button:hover {
+    background: #219653;
 }

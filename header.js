@@ -256,3 +256,30 @@ function visaMeddelande(titel, text, stangCallback = null) {
 function visaBekraftelse(titel, text, callback) {
     visaAppModal(titel, text, 'confirm', callback);
 }
+
+// ==========================================
+// GENERISK SNABBKNAPP
+// ==========================================
+function laddaSnabbKnapp(ikon, klickFunktion) {
+
+    let gammalKnapp =
+        document.getElementById("fab-button");
+
+    if (gammalKnapp) {
+        gammalKnapp.remove();
+    }
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        `
+        <button
+            id="fab-button"
+            class="fab-button"
+            onclick="${klickFunktion}">
+            ${ikon}
+        </button>
+        `
+    );
+
+}
+
