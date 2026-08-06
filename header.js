@@ -109,7 +109,7 @@ ${infoRubrik ? `
             &times;
         </button>
 
-        <h3>${titel}</h3>
+        <h3>${infoRubrik}</h3>
 
         <div>
             ${infoTextHtml}
