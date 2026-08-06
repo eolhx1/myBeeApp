@@ -708,6 +708,9 @@ table.inventory-table th {
 /* --- GENERISK SNABBKNAPP --- */
 .fab-button {
 	font-size: 1.4rem;
+display: flex;
+align-items: center;
+justify-content: center;
 	
     position: fixed;
     right: 20px;
