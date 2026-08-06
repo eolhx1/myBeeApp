@@ -16,7 +16,7 @@ header {
     align-items: center;
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 9999;
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -598,8 +598,6 @@ table.inventory-table th {
     top: 64px;
     left: 0;
     right: 0;
-
-    z-index: 1001;
 }
 
 /* Ser till att brödsmulstexten alltid ligger samlad till vänster */
