@@ -594,9 +594,12 @@ table.inventory-table th {
     justify-content: space-between;
     align-items: center;
 
-    position: sticky;
-    top: 80px;
-    z-index: 999;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+
+    z-index: 1001;
 }
 
 /* Ser till att brödsmulstexten alltid ligger samlad till vänster */
