@@ -707,13 +707,14 @@ table.inventory-table th {
 
 /* --- GENERISK SNABBKNAPP --- */
 .fab-button {
+	font-size: 1.4rem;
+	
     position: fixed;
-
     right: 20px;
     bottom: 20px;
 
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
 
     border: none;
     border-radius: 50%;
@@ -727,10 +728,7 @@ table.inventory-table th {
     cursor: pointer;
 
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-
     z-index: 1500;
-
-    transition: 0.2s;
 }
 
 .fab-button:hover {
