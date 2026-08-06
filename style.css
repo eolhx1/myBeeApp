@@ -10,7 +10,7 @@ body {
 header {
     background-color: #f39c12;
     color: white;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -21,9 +21,10 @@ header {
     font-weight: bold;
 }
 
-header h1, #page-header-title {
+header h1, 
+#page-header-title {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     text-align: center;
 }
@@ -587,17 +588,12 @@ table.inventory-table th {
 .nav-bar {
     background-color: #e67e22;
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 1rem;
     font-size: 0.9rem;
 
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
 }
 
 /* Ser till att brödsmulstexten alltid ligger samlad till vänster */
