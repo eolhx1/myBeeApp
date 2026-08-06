@@ -595,7 +595,7 @@ table.inventory-table th {
     align-items: center;
 
     position: sticky;
-    top: 64px;
+    top: 80px;
     z-index: 999;
 }
 
