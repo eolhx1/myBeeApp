@@ -184,8 +184,24 @@ ${infoRubrik ? `
 }
 
 function toggleSidebar() {
-    const sidebar = document.getElementById("mySidebar");
-    sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+
+    const sidebar =
+        document.getElementById("mySidebar");
+
+    const oppen =
+        sidebar.style.width === "250px";
+
+    if (oppen) {
+
+        sidebar.style.width = "0";
+        document.body.style.overflow = "";
+
+    } else {
+
+        sidebar.style.width = "250px";
+        document.body.style.overflow = "hidden";
+
+    }
 }
 
 function toggleSettingsMenu() {
