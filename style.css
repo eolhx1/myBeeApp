@@ -741,4 +741,5 @@ padding-bottom: 6px;
 .leaflet-bottom,
 .leaflet-control {
     z-index: 100 !important;
+
 }
