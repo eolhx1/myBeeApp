@@ -239,6 +239,9 @@ textarea, .form-group textarea {
 
     color: white;
 
+    padding-top: 12px;
+    padding-bottom: 50px;
+
     box-shadow: 5px 0 15px rgba(0,0,0,0.5);
 
     -webkit-overflow-scrolling: touch;
@@ -260,16 +263,18 @@ textarea, .form-group textarea {
 
 .sidebar .close-btn {
     position: sticky;
-    top: 10px;
-    float: right;
+    top: 0;
 
-    margin-right: 20px;
+    display: block;
+    text-align: right;
+
+    padding: 12px 20px 12px 0;
 
     font-size: 36px;
     color: white;
     text-decoration: none;
 
-    z-index: 1;
+    z-index: 10;
 }
 
 
