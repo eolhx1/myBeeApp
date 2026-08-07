@@ -261,20 +261,13 @@ textarea, .form-group textarea {
     color: #f39c12;
 }
 
-.sidebar .close-btn {
+.sidebar-close-btn {
     position: sticky;
-    top: 0;
+    top: 10px;
 
-    display: block;
-    text-align: right;
+    float: right;
 
-    padding: 12px 20px 12px 0;
-
-    font-size: 36px;
-    color: white;
-    text-decoration: none;
-
-    z-index: 10;
+    z-index: 20;
 }
 
 
@@ -661,30 +654,40 @@ table.inventory-table th {
 }
 
 /* --- Modal (Gemensam stil för alla sidor) --- */
+#settingsModal {
+    display: none;
+}
+
 .modal-overlay {
+    display: none;
+
     position: fixed;
     inset: 0;
+
     background: rgba(0,0,0,0.5);
-    z-index: 3000;
+
+    z-index: 30001;
 
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
 
-    padding: 1rem;
-    box-sizing: border-box;
+    padding-top: 80px;
 }
 
 .modal-content {
     background: #ffffff;
     padding: 1.25rem;
     border-radius: 16px;
+	
     width: calc(100% - 6rem);
     max-width: 420px;
     max-height: 80vh;
+	
     overflow-y: auto;
+	
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+	
     position: relative;
-    margin: auto;
 }
 
 .modal-content h2,
@@ -768,3 +771,6 @@ padding-bottom: 6px;
  /* ---   z-index: 800 !important;--- */
 
 }
+
+/* ---   --- */
+

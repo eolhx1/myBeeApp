@@ -117,8 +117,8 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
     </div>
 
     <!-- Inställningsmodal -->
-    <div id="settingsModal" style="display: none; position: fixed; z-index: 3000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-<div style="background: white; padding: 1.5rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #333; position: relative;">
+<div id="settingsModal" class="modal-overlay">
+<div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
  <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
 
