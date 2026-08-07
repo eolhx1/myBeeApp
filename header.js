@@ -1,7 +1,6 @@
 // Filnamn: header.js
 
 function laddaHeader(titelText, infoRubrik = '', infoTextHtml = '') {
-    const lankStil = "padding: 8px 8px 8px 32px; text-decoration: none; font-size: 1.1rem; color: #ecf0f1; display: block; transition: 0.2s;";
 
     const menylankar = [
         { url: "index.html", text: "🏠 Hem / Karta" },
@@ -22,7 +21,9 @@ function laddaHeader(titelText, infoRubrik = '', infoTextHtml = '') {
         { url: "ny-bigard.html", text: "➕ Lägg till bigård" }
     ];
 
-    const menyHtmlLankar = menylankar.map(lank => `<a href="${lank.url}" style="${lankStil}">${lank.text}</a>`).join('');
+const menyHtmlLankar = menylankar.map(lank =>
+    <a href="${lank.url}">${lank.text}</a>`
+).join('');
 
     const aktuellSida = window.location.pathname.split("/").pop() || "index.html";
     let breadcrumbHTML = '';
