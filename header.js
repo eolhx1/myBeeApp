@@ -22,7 +22,7 @@ function laddaHeader(titelText, infoRubrik = '', infoTextHtml = '') {
     ];
 
 const menyHtmlLankar = menylankar.map(lank =>
-    '' + lank.url + '' + lank.text + '</a>'
+    '<' + 'a href="' + lank.url + '">' + lank.text + '</a>'
 ).join('');
 
     const aktuellSida = window.location.pathname.split("/").pop() || "index.html";
