@@ -105,7 +105,7 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
     <!-- Sidomeny (Sidebar) -->
 
     <!-- Sidomeny (Sidebar) -->
-    <div id="mySidebar" class="sidebar" style="height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #2c3e50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 5px rgba(0,0,0,0.5);">
+<div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="close-btn" onclick="toggleSidebar()" style="position: absolute; top: 15px; right: 25px; font-size: 36px; color: white; text-decoration: none;">&times;</a>
         ${menyHtmlLankar}
     </div>
