@@ -690,6 +690,26 @@ table.inventory-table th {
     position: relative;
 }
 
+.modal-header {
+    position: sticky;
+    top: 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: white;
+
+    padding-bottom: 10px;
+
+    z-index: 10;
+}
+
+.modal-body {
+    padding-top: 10px;
+}
+``
+
 .modal-content h2,
 .modal-content h3 {
     color: #d35400;
@@ -707,9 +727,7 @@ table.inventory-table th {
 
 
 .modal-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    position: static;
 
     width: 36px;
     height: 36px;
@@ -722,6 +740,8 @@ table.inventory-table th {
 
     font-size: 1.3rem;
     cursor: pointer;
+
+    flex-shrink: 0;
 }
 
 

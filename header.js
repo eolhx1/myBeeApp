@@ -118,6 +118,7 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
 
     <!-- Inställningsmodal -->
 <div id="settingsModal" class="modal-overlay">
+
 <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
  <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
@@ -161,20 +162,25 @@ ${infoRubrik ? `
      onclick="stangInfoModalKlickUtanför(event)"
      style="display:none;">
 
-    <div class="modal-content">
+<div class="modal-content">
+
+    <div class="modal-header">
+
+        <h3>${infoRubrik}</h3>
 
         <button class="modal-close"
                 onclick="stangInfoModal()">
             &times;
         </button>
 
-        <h3>${infoRubrik}</h3>
-
-        <div>
-            ${infoTextHtml}
-        </div>
-
     </div>
+
+    <div class="modal-body">
+        ${infoTextHtml}
+    </div>
+
+</div>
+
 
 </div>` : ''}
 
