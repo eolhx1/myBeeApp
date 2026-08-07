@@ -116,40 +116,48 @@ let renTitel = titelText.replace(/^[^\w\s]+\s*/, '');
 	   ${menyHtmlLankar}
     </div>
 
+
+
     <!-- Inställningsmodal -->
 <div id="settingsModal" class="modal-overlay">
 
-<div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
- <h3 style="margin: 0; color: #2c3e50;">⚙️ Inställningar</h3>
+    <div class="modal-content">
 
-<button
-    class="modal-close"
-    onclick="toggleSettingsMenu()"
-    style="position:absolute; top:12px; right:12px;">
-    &times;
-</button>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="modal-header">
+
+            <h3>⚙️ Inställningar</h3>
+
+            <button
+                class="modal-close"
+                onclick="toggleSettingsMenu()">
+                &times;
+            </button>
+
+        </div>
+
+        <div class="modal-body">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
                     <span>🌙 Mörkt läge (kommer)</span>
                     <input type="checkbox" disabled title="Kommer snart" style="cursor: not-allowed;">
                 </div>
 
-                <button onclick="bytUrlSide()" 
-				style="background: #e74c3c; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
-				Byt anslutningslänk
-				</button>
+<button
+    class="modal-btn modal-btn-warning"
+    onclick="bytUrlSide()">
+    Byt anslutningslänk
+</button>
 				
-<button onclick="visaUrlSide()"
-    style="background: #3498db; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+<button
+    class="modal-btn modal-btn-primary"
+    onclick="visaUrlSide()">
     Visa anslutningslänk
-</button>		
+</button>	
 
-                <button onclick="rensaAllLokalData()" 
-				style="background: #c0392b; color: white; border: none; padding: 0.7rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
-				🗑️ Rensa all lokal data
-				</button>
+<button
+    class="modal-btn modal-btn-danger"
+    onclick="rensaAllLokalData()">
+    🗑️ Rensa all lokal data
+</button>
 
             </div>
         </div>
